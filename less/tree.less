@@ -1,0 +1,48 @@
+//main: main.less
+
+// whole tree
+ul.jqtree-tree{
+  margin-top:0px;
+}
+
+// color scheme
+.tree_normal{
+  background:none;
+  span.jqtree-title{
+    color:black !important;
+    font-size:12px;
+  }
+}
+.tree_selected{
+  background:none;
+  background-color:#757575;//#616161;
+
+  span.jqtree-title{
+    color:white !important;
+    text-shadow:none;
+  }
+}
+.tree_hover{
+  background:none;
+  background-color:#e0e0e0;
+
+  span.jqtree-title{
+    color:black !important;
+  }
+}
+
+// element normal
+.jqtree-element.jqtree_common{
+  .tree_normal();
+}
+
+// element selected
+ul.jqtree-tree li.jqtree-selected > .jqtree-element,
+ul.jqtree-tree li.jqtree-selected > .jqtree-element:hover{
+  .tree_selected();
+}
+
+// element hover
+ul.jqtree-tree .jqtree-element:hover{
+  .tree_hover();
+}

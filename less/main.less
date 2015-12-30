@@ -1,0 +1,141 @@
+// out: ../main.css
+
+@import "classes";
+@import "scrollbar";
+@import "tree";
+
+*{
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  font-smooth: never;
+  -webkit-font-smoothing : none;
+}
+
+html, body{
+  padding:0px;
+  margin:0px;
+  border: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+html{
+  box-sizing:border-box;
+}
+
+#main_window{
+  z-index:0;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  box-sizing:border-box;
+  padding:5px;
+  position:relative;
+
+  //set which cards are transparent and vice-versa
+  >#toolbox{
+    .card();
+  }
+  >#menu_bar,{
+    .card-nohover();
+  }
+  >#library,#layers{
+    .card-transparent();
+  }
+
+  #menu_bar{
+    box-sizing:border-box;
+    height:30px;
+
+    >#window_buttons{
+      float:right;
+      font-size:0;
+      border-right:1px solid #e0e0e0;
+
+      >div{
+        width:21px;
+        height:21px;
+        display:inline-block;
+        text-align:center;
+        border:1px solid #e0e0e0;
+        border-right:none;
+        margin:4px;
+
+        &#btn_close,&#btn_maximize,&#btn_minimize{
+          background-repeat: no-repeat;
+          background-size: 10px 10px;
+          background-position: center center;
+          image-rendering: -moz-crisp-edges;
+        }
+
+        &#btn_close{
+          background-color:#d50000;
+          //background-image:url("images/close.png");
+        }
+        &#btn_maximize{
+          background-color:#ffab00;
+          //background-image:url("images/maximize.png");
+        }
+        &#btn_minimize{
+          background-color:#00c853;
+          //background-image:url("images/minimize.png");
+        }
+
+        >i{
+          font-size:16px !important;
+          margin-top:4px !important;
+        }
+      }
+    }
+  }
+
+  #library{
+    width: 175px;
+    margin: 10px 0px;
+    top: 28px;
+    bottom: -5px;
+    left: 5px;
+    position: absolute;
+  }
+
+  #layers{
+    position:absolute;
+    right:5px;
+    bottom:5px;
+    height:150px;
+    width:150px;
+  }
+
+  #toolbox{
+    position:absolute;
+    bottom:5px;
+    height:28px;
+    width:auto;
+    left:185px;
+    overflow:hidden;
+
+    >div{
+      height: 26px;
+      width: 26px;
+      border: 1px solid #e0e0e0;
+      color: black;
+      display:inline-block;
+      text-align:center;
+
+      .fa{
+        font-size:16px;
+        margin-top:5px;
+      }
+    }
+  }
+
+  #canvas{
+    position:absolute;
+    z-index:-10;
+    top:0px;
+    left:0px;
+    right:0px;
+    bottom:0px;
+    background-color:#e0e0e0;
+  }
+}

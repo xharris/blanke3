@@ -1,0 +1,237 @@
+.win-drag {
+  -webkit-app-region: drag;
+}
+.win-nodrag {
+  -webkit-app-region: no-drag;
+}
+.card-nohover {
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+.card {
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.2s ease-in-out;
+}
+.card:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+.card-transparent {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.2s ease-in-out;
+}
+.card-transparent:hover {
+  background-color: white;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background-color: #e0e0e0;
+  display: hidden;
+}
+/* the new scrollbar will have a flat appearance with the set background color */
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  display: hidden;
+}
+/* this will style the thumb, ignoring the track */
+::-webkit-scrollbar-button {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+/* optionally, you can style the top and the bottom buttons (left and right for horizontal bars) */
+::-webkit-scrollbar-corner {
+  background-color: black;
+  display: none;
+}
+/* if both the vertical and the horizontal bars appear, then perhaps the right bottom corner also needs to be styled */
+ul.jqtree-tree {
+  margin-top: 0px;
+}
+.tree_normal {
+  background: none;
+}
+.tree_normal span.jqtree-title {
+  color: black !important;
+  font-size: 12px;
+}
+.tree_selected {
+  background: none;
+  background-color: #757575;
+}
+.tree_selected span.jqtree-title {
+  color: white !important;
+  text-shadow: none;
+}
+.tree_hover {
+  background: none;
+  background-color: #e0e0e0;
+}
+.tree_hover span.jqtree-title {
+  color: black !important;
+}
+.jqtree-element.jqtree_common {
+  background: none;
+}
+.jqtree-element.jqtree_common span.jqtree-title {
+  color: black !important;
+  font-size: 12px;
+}
+ul.jqtree-tree li.jqtree-selected > .jqtree-element,
+ul.jqtree-tree li.jqtree-selected > .jqtree-element:hover {
+  background: none;
+  background-color: #757575;
+}
+ul.jqtree-tree li.jqtree-selected > .jqtree-element span.jqtree-title,
+ul.jqtree-tree li.jqtree-selected > .jqtree-element:hover span.jqtree-title {
+  color: white !important;
+  text-shadow: none;
+}
+ul.jqtree-tree .jqtree-element:hover {
+  background: none;
+  background-color: #e0e0e0;
+}
+ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
+  color: black !important;
+}
+* {
+  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  font-smooth: never;
+  -webkit-font-smoothing: none;
+}
+html,
+body {
+  padding: 0px;
+  margin: 0px;
+  border: none;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+html {
+  box-sizing: border-box;
+}
+#main_window {
+  z-index: 0;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 5px;
+  position: relative;
+}
+#main_window > #toolbox {
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.2s ease-in-out;
+}
+#main_window > #toolbox:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+#main_window > #menu_bar {
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+}
+#main_window > #library,
+#main_window #layers {
+  background-color: rgba(255, 255, 255, 0.6);
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  transition: all 0.2s ease-in-out;
+}
+#main_window > #library:hover,
+#main_window #layers:hover {
+  background-color: white;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+}
+#main_window #menu_bar {
+  box-sizing: border-box;
+  height: 30px;
+}
+#main_window #menu_bar > #window_buttons {
+  float: right;
+  font-size: 0;
+  border-right: 1px solid #e0e0e0;
+}
+#main_window #menu_bar > #window_buttons > div {
+  width: 21px;
+  height: 21px;
+  display: inline-block;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  border-right: none;
+  margin: 4px;
+}
+#main_window #menu_bar > #window_buttons > div#btn_close,
+#main_window #menu_bar > #window_buttons > div#btn_maximize,
+#main_window #menu_bar > #window_buttons > div#btn_minimize {
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  background-position: center center;
+  image-rendering: -moz-crisp-edges;
+}
+#main_window #menu_bar > #window_buttons > div#btn_close {
+  background-color: #d50000;
+}
+#main_window #menu_bar > #window_buttons > div#btn_maximize {
+  background-color: #ffab00;
+}
+#main_window #menu_bar > #window_buttons > div#btn_minimize {
+  background-color: #00c853;
+}
+#main_window #menu_bar > #window_buttons > div > i {
+  font-size: 16px !important;
+  margin-top: 4px !important;
+}
+#main_window #library {
+  width: 175px;
+  margin: 10px 0px;
+  top: 28px;
+  bottom: -5px;
+  left: 5px;
+  position: absolute;
+}
+#main_window #layers {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  height: 150px;
+  width: 150px;
+}
+#main_window #toolbox {
+  position: absolute;
+  bottom: 5px;
+  height: 28px;
+  width: auto;
+  left: 185px;
+  overflow: hidden;
+}
+#main_window #toolbox > div {
+  height: 26px;
+  width: 26px;
+  border: 1px solid #e0e0e0;
+  color: black;
+  display: inline-block;
+  text-align: center;
+}
+#main_window #toolbox > div .fa {
+  font-size: 16px;
+  margin-top: 5px;
+}
+#main_window #canvas {
+  position: absolute;
+  z-index: -10;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: #e0e0e0;
+}

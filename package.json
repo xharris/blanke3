@@ -1,0 +1,13 @@
+{
+  "name": "Comic Tool",
+  "main": "index.html",
+  "window":{
+  	"title":"Comic Tool",
+  	"toolbar": false,
+    "width":1024,
+    "height":640,
+  	"min_width": 800,
+  	"min_height": 600,
+  	"frame": false
+  }
+}

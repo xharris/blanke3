@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+    <!-- jQuery -->
+    <script src="includes/jquery/jquery-1.11.3.min.js"></script>
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="includes/font-awesome/css/font-awesome.min.css"/>
+
+    <!-- PhaserJS -->
+    <script src="includes/phaser/phaser.min.js"></script>
+
+    <!-- jqTree -->
+    <script src="includes/jqTree/tree.jquery.js"></script>
+    <link rel="stylesheet" href="includes/jqTree/jqtree.css"/>
+
+  	<link rel="stylesheet" href="main.css"/>
+    <script src="js/main.js"></script>
+    <script src="js/canvas.js"></script>
+
+  </head>
+  <body>
+    <div id="main_window">
+      <!-- title bar -->
+    	<div id="menu_bar" class="win-drag">
+        <div id="window_buttons" class="win-nodrag">
+
+          <div id="btn_minimize" onclick="win.minimize()"></div>
+
+          <div id="btn_maximize" onclick="winResize()"> </div>
+
+          <div id="btn_close" onclick="winClose()"></div>
+
+        </div>
+      </div>
+
+      <div id="library"></div>
+      <script>
+        var data = [
+          {
+              label: 'node1', id: 1,
+              children: [
+                  { label: 'child1', id: 2 },
+                  { label: 'child2', id: 3 }
+              ]
+          },
+          {
+              label: 'node2', id: 4,
+              children: [
+                  { label: 'child3', id: 5 }
+              ]
+          }
+        ];
+
+        var $tree = $('#library');
+        $tree.tree({
+          data:data,
+          dragAndDrop: true,
+          autoOpen: 0
+        });
+
+        //save to json
+        //$('#tree1').tree('toJson');
+      </script>
+
+      <div id="layers"></div>
+
+      <div id="toolbox">
+        <div id="tool_pointer">
+          <i class="fa fa-mouse-pointer"></i>
+        </div>
+      </div>
+
+      <div id="canvas"></div>
+
+    </div>
+  </body>
+</html>
