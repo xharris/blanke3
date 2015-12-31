@@ -16,5 +16,5 @@ function winResize(){
 }
 
 function winClose(){
-  win.close(); 
+  win.close();
 }

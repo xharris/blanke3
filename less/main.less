@@ -3,6 +3,7 @@
 @import "classes";
 @import "scrollbar";
 @import "tree";
+@import "modal_object";
 
 *{
   font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
@@ -31,6 +32,11 @@ html{
   box-sizing:border-box;
   padding:5px;
   position:relative;
+  border:1px solid #9e9e9e;
+
+  >*:not(.canvas-container){
+    z-index:10;
+  }
 
   //set which cards are transparent and vice-versa
   >#toolbox{
@@ -130,12 +136,12 @@ html{
   }
 
   #canvas{
-    position:absolute;
-    z-index:-10;
+    position:absolute !important;
     top:0px;
     left:0px;
     right:0px;
     bottom:0px;
     background-color:#e0e0e0;
+    z-index:-10;
   }
 }

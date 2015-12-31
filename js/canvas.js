@@ -7,10 +7,13 @@ var g_origin = {
   x:187,
   y:41
 }
-var game_width = 900;
-var game_height = 480;
+var game_width = 800;
+var game_height = 600;
 var grid_width = 32;
 var grid_height = 32;
+
+var game_margin = 0;
+var game_border_weight = 2;
 
 var zoomFactor = 1;
 
@@ -26,13 +29,14 @@ function create() {
 
     // set zoom control
     game.input.mouse.mouseWheelCallback = mouseWheel;
+    game.input.mouse.mouseDownCallback = mouseDown;
+    game.input.mouse.mouseUpCallback = mouseUp;
+    game.input.mouse.mouseMoveCallback = mouseMove;
 
     var shadow_offset = 5;
-    var game_border_weight = 5;
-    var game_margin = 300;
 
     // draw stage shadow
-    graphics.beginFill(0x616161);
+    graphics.beginFill(0x757575);
     graphics.drawRect(game_margin+shadow_offset, game_margin+shadow_offset, game_width+shadow_offset, game_height+shadow_offset);
     // draw stage bounds
     graphics.beginFill(0xFFFFFF);
@@ -51,19 +55,56 @@ function create() {
     }
 
     window.graphics = graphics;
-    bound_width = screen.width;
-    bound_height = screen.height;
-    //if(game_width >)
-    game.world.setBounds(0,0,screen.width+game_width,screen.height+game_height);
 
-    // move camera so game square is in view
-    game.camera.x = game_margin-g_origin.x;
-    game.camera.y = game_margin-g_origin.y;
+    game.camera.x = (game.width * -0.5);
+    game.camera.y = (game.height * -0.5);
+
+    setBounds();
+
+    // so zoom focuses towards center
+    var win = $(window);
+    game.camera.x = (win.width() * -0.5);
+    game.camera.y = (win.height() * -0.5);
+
+    game.input.mouse.capture = true;
+
+    // align top left of game square
+    setCamPosition(-450,-280);
 }
+
+$(window).resize(function(){
+  var win = $(window);
+  game.camera.x = (win.width() * -0.5);
+  game.camera.y = (win.height() * -0.5);
+});
 
 function setBounds(){
-  game.world.setBounds(0,0,(screen.width+game_width)*zoomFactor,(screen.height+game_height)*zoomFactor);
+  //var maxZoom = 2;
+  //game.world.setBounds(0,0,(screen.width+game_width)*maxZoom,(screen.height+game_height)*maxZoom);
+  /*
+  var bound_width = game_width+screen.width;
+  var bound_height = game_height+screen.height;
+
+  if(game_width > screen.width)
+    bound_width = game_width+game_margin;
+  if(game_height > screen.height)
+    bound_height = game_height+game_margin;
+  */
+
+  game.world.setBounds(-1000, -1000, 2000, 2000);
 }
+
+var camera = {
+  x:0,
+  y:0
+}
+function setCamPosition(x,y){
+  camera.x = x;
+  camera.y = y;
+  game.world.pivot.setTo(-camera.x/zoomFactor,-camera.y/zoomFactor)
+}
+
+
 
 function mouseWheel(event){
   if(zoomFactor > 2 || zoomFactor < 0.5){
@@ -78,21 +119,50 @@ function mouseWheel(event){
     zoomFactor -= 0.1;
   }
   // set zoom tween
-  var zoom_tween = game.add.tween(game.camera.scale).to({x:zoomFactor,y:zoomFactor}, 200, Phaser.Easing.Sinusoidal.InOut);
-  //var pos_tween = game.add.tween(game.world.position).to({x:-(zoomFactor*game_width),y:-(zoomFactor*game_height)}, 200, Phaser.Easing.Sinusoidal.InOut);
+  var zoom_tween = game.add.tween(game.world.scale).to({x:zoomFactor,y:zoomFactor}, 200, Phaser.Easing.Sinusoidal.InOut);
   zoom_tween.start();
-  //pos_tween.start();
-  zoom_tween.onComplete.add(setBounds,this);
+
+  zoom_tween.onComplete.add(zoomFinish,this);
+}
+
+var cam_drag = false;
+var cam_drag_start = {
+  x:0,
+  y:0
+}
+function mouseDown(event){
+  // middle button
+  if(event.which == 2){
+    cam_drag = true;
+    cam_drag_start.x = (game.input.mousePointer.x)-(camera.x);
+    cam_drag_start.y = (game.input.mousePointer.y)-(camera.y);
+  }
+}
+
+function mouseUp(event){
+ // middle button
+ if(event.which == 2){
+   cam_drag = false;
+ }
+}
+
+function mouseMove(event){
+  if(cam_drag){
+    setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
+  }
 }
 
 function update() {
   // move camera with mouse
+
   //console.log(game.input.activePointer.middleButton.isDown);
+
+  /*
   if (game.input.activePointer.isDown == Phaser.Mouse.MIDDLE_BUTTON) {
   	if (game.origDragPoint) {
   		// move the camera by the amount the mouse has moved since last update
-  		game.camera.x += game.origDragPoint.x - game.input.activePointer.position.x;
-  		game.camera.y += game.origDragPoint.y - game.input.activePointer.position.y;
+  		game.world.pivot.x += (game.origDragPoint.x/zoomFactor) - (game.input.activePointer.position.x/zoomFactor);
+  		game.world.pivot.y += (game.origDragPoint.y/zoomFactor) - (game.input.activePointer.position.y/zoomFactor);
   	}
   	// set new drag origin to current position
   	game.origDragPoint = game.input.activePointer.position.clone();
@@ -100,6 +170,7 @@ function update() {
   else {
   	game.origDragPoint = null;
   }
+  */
 }
 
 function render() {

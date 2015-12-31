@@ -1,0 +1,29 @@
+//main: main.less
+
+#main_window>#modals{
+  background:none;
+
+  >*{
+    .card-nohover();
+    padding: 10px;
+    box-sizing: border-box;
+  }
+
+  #modal_object{
+    width: 400px;
+    height: 400px;
+    margin: 10px 0px;
+    top: 28px;
+    left: 185px;
+    position: absolute;
+
+    >#btn_code{
+      .card-nohover();
+
+      background-color:#dcedc8;
+      border:none;
+      height: 34px;
+      width: 90px;
+    }
+  }
+}
