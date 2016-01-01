@@ -1,19 +1,13 @@
 var data = [
-  {
-    label: 'OBJECTS'
-  },
+  {label: 'OBJECTS'},
 
-  {
-    label: 'TILES'
-  },
+  {label: 'TILES'},
 
-  {
-    label: 'REGIONS'
-  },
+  {label: 'REGIONS'},
 
-  {
-    label: 'STATES'
-  }
+  {label: 'SOUNDS'},
+
+  {label: 'STATES'}
 
 ];
 
@@ -41,7 +35,7 @@ win.on('loaded', function() {
           else{
             var child = ev_node.children[ev_node.children.length-1];
             var node_id = Math.round(Math.random()*1000000)
-            
+
             tree.tree(
                 'appendNode',
                 {

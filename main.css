@@ -122,7 +122,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   position: absolute;
   margin: 10px 0px;
   width: 400px;
-  height: 400px;
+  height: 420px;
   top: 28px;
   left: 0px;
   opacity: 0;
@@ -175,6 +175,23 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 #main_window > #modals #modal_object > #buttons > #btn_close:hover {
   background-color: #212121;
   border: 1px solid #212121;
+}
+#main_window > #modals #modal_object > #titles {
+  width: 100%;
+  display: inline-block;
+}
+#main_window > #modals #modal_object > #titles > p {
+  width: 180px;
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 12px;
+  margin: 0;
+}
+#main_window > #modals #modal_object > #titles > p#title1 {
+  float: right;
+}
+#main_window > #modals #modal_object > #titles > p#title2 {
+  float: left;
 }
 #main_window > #modals #modal_object > #sprites,
 #main_window > #modals #modal_object #properties {
@@ -290,14 +307,14 @@ html {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 #main_window > #library,
-#main_window #layers {
+#main_window #extra_box {
   background-color: rgba(255, 255, 255, 0.6);
   border-radius: 2px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   transition: all 0.2s ease-in-out;
 }
 #main_window > #library:hover,
-#main_window #layers:hover {
+#main_window #extra_box:hover {
   background-color: white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
@@ -348,7 +365,7 @@ html {
   left: 5px;
   position: absolute;
 }
-#main_window #layers {
+#main_window #extra_box {
   position: absolute;
   right: 5px;
   bottom: 5px;

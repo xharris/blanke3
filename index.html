@@ -20,7 +20,6 @@
     <script src="js/modals/modal_object.js"></script>
     <script src="js/canvas.js"></script>
     <script src="js/tree.js"></script>
-    <script src="js/toolbox.js"></script>
 
   </head>
   <body>
@@ -42,12 +41,18 @@
 
       <div id="modals">
         <div id="modal_object">
+
           <div id="buttons">
             <button id="btn_code"><i class="fa fa-code"></i></button>
             <button id="btn_delete"><i class="fa fa-trash-o"></i></button>
 
             <button id="btn_close" onclick="closeObjectModal()"><i class="fa fa-times"></i></button>
             <button id="btn_save"><i class="fa fa-floppy-o"></i></button>
+          </div>
+
+          <div id="titles">
+            <p id="title1">properties</p>
+            <p id="title2">sprites</p>
           </div>
 
           <div id="sprites">
@@ -72,7 +77,8 @@
               </div>
             </div>
 
-            <button id="btn_add_sprite"><i class="fa fa-plus"></i></button>
+            <button id="btn_add_sprite" onclick="addSprite()"><i class="fa fa-plus"></i></button>
+            <input style="display:none;" id="fileDialog" type="file" />
 
           </div>
           <div id="properties">
@@ -91,7 +97,7 @@
         </div>
       </div>
 
-      <div id="layers"></div>
+      <div id="extra_box"></div>
 
       <div id="canvas"></div>
 

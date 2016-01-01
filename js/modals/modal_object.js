@@ -18,6 +18,10 @@ function closeObjectModal(){
   }
 }
 
+function addSprite(){
+  chooseFile('#fileDialog');
+}
+
 function editCode(){
 
 }

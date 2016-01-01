@@ -5,6 +5,14 @@ win.showDevTools();
 
 var isMaximized = false;
 
+var lobjects = {
+	"objects":{},
+	"tiles":{},
+	"regions":{},
+	"sounds":{},
+	"states":{}
+}
+
 function winResize(){
 	if(isMaximized){
     isMaximized = false;
@@ -18,3 +26,12 @@ function winResize(){
 function winClose(){
   win.close();
 }
+
+function chooseFile(name) {
+    var chooser = document.querySelector(name);
+    chooser.addEventListener("change", function(evt) {
+      console.log(this.value);
+    }, false);
+
+    chooser.click();
+  }
