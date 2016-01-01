@@ -20,6 +20,7 @@
     <script src="js/modals/modal_object.js"></script>
     <script src="js/canvas.js"></script>
     <script src="js/tree.js"></script>
+    <script src="js/toolbox.js"></script>
 
   </head>
   <body>
@@ -37,21 +38,60 @@
         </div>
       </div>
 
-      <div id="library"></div>
+      <div id="library" class="no-select"></div>
 
       <div id="modals">
         <div id="modal_object">
-          <button id="btn_code" onclick="editCode()">CODE</button>
+          <div id="buttons">
+            <button id="btn_code"><i class="fa fa-code"></i></button>
+            <button id="btn_delete"><i class="fa fa-trash-o"></i></button>
+
+            <button id="btn_close" onclick="closeObjectModal()"><i class="fa fa-times"></i></button>
+            <button id="btn_save"><i class="fa fa-floppy-o"></i></button>
+          </div>
+
+          <div id="sprites">
+
+            <div class="sprite">
+              <button id="btn_close"><i class="fa fa-times"></i></button>
+              <img id="preview"/>
+              <div id="values">
+                player_stand.png<br>
+                18 x 35<br>
+                1 frame
+              </div>
+            </div>
+
+            <div class="sprite">
+              <button id="btn_close"><i class="fa fa-times"></i></button>
+              <img id="preview"/>
+              <div id="values">
+                player_walk.png<br>
+                18 x 35<br>
+                2 frames
+              </div>
+            </div>
+
+            <button id="btn_add_sprite"><i class="fa fa-plus"></i></button>
+
+          </div>
+          <div id="properties">
+            <table>
+              <tr>
+                <td>Name</td>
+                <td><input id="in_name" type="text" value="object0"/></td>
+              </tr>
+              <tr>
+                <td>Depth</td>
+                <td><input id="in_name" type="number" value="0"/></td>
+              </tr>
+            </table>
+          </div>
+
         </div>
       </div>
 
       <div id="layers"></div>
-
-      <div id="toolbox">
-        <div id="tool_pointer">
-          <i class="fa fa-mouse-pointer"></i>
-        </div>
-      </div>
 
       <div id="canvas"></div>
 

@@ -5,8 +5,13 @@
 @import "tree";
 @import "modal_object";
 
+@font-face {
+    font-family: "Roboto";
+    src: url("includes/roboto/Roboto-Regular.ttf") format("truetype");
+}
+
 *{
-  font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
+  font-family: 'Roboto', sans-serif;
   font-smooth: never;
   -webkit-font-smoothing : none;
 }
@@ -110,29 +115,6 @@ html{
     bottom:5px;
     height:150px;
     width:150px;
-  }
-
-  #toolbox{
-    position:absolute;
-    bottom:5px;
-    height:28px;
-    width:auto;
-    left:185px;
-    overflow:hidden;
-
-    >div{
-      height: 26px;
-      width: 26px;
-      border: 1px solid #e0e0e0;
-      color: black;
-      display:inline-block;
-      text-align:center;
-
-      .fa{
-        font-size:16px;
-        margin-top:5px;
-      }
-    }
   }
 
   #canvas{
