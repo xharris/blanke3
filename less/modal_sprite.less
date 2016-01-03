@@ -1,0 +1,69 @@
+//main: main.less
+
+#modal_sprite{
+  position: absolute;
+  margin: 10px 0px;
+  width: 400px;
+  height: 420px;
+  top: 28px;
+  left: 185px;
+  opacity:0;
+  z-index:-18;
+
+  &.active{
+    z-index:10;
+    opacity:1;
+  }
+
+  >#buttons{
+    height:34px;
+    margin-bottom:10px;
+    .no-select();
+
+    >button{
+      .btn-circle();
+      float:right;
+
+     &#btn_save:hover{
+       background-color:#0091ea;
+       border-color:#0091ea;
+     }
+     &#btn_close:hover{
+       background-color:#212121;
+       border-color:#212121;
+     }
+    }
+  }
+
+  >#preview,#properties{
+    border:1px solid #e0e0e0;
+    width: 180px;
+    height: 335px;
+  }
+  >#preview{
+    float: right;
+  }
+  >#properties{
+    float: left;
+    margin-right:16px;
+
+    >table{
+      width: 100%;
+      font-size: 13px;
+      padding: 5px;
+
+      tr > td:first-of-type{
+        font-weight:600;
+        height:20px;
+      }
+
+      input{
+        width: 100%;
+        box-sizing: border-box;
+        text-align: right;
+        outline: none;
+        border: none;
+      }
+    }
+  }
+}

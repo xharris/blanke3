@@ -4,6 +4,7 @@
 @import "scrollbar";
 @import "tree";
 @import "modal_object";
+@import "modal_sprite";
 
 @font-face {
     font-family: "Roboto";
@@ -107,6 +108,16 @@ html{
     bottom: -5px;
     left: 5px;
     position: absolute;
+  }
+
+  #modals{
+    background:none;
+
+    >*{
+      .card-nohover();
+      padding: 10px;
+      box-sizing: border-box;
+    }
   }
 
   #extra_box{

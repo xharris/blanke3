@@ -27,10 +27,10 @@ function winClose(){
   win.close();
 }
 
-function chooseFile(name) {
+function chooseFile(name,callback) {
     var chooser = document.querySelector(name);
     chooser.addEventListener("change", function(evt) {
-      console.log(this.value);
+      callback(this.value);
     }, false);
 
     chooser.click();

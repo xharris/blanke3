@@ -45,6 +45,15 @@ win.on('loaded', function() {
                 ev_node
             );
             tree.tree('openNode', ev_node);
+            // add it to the library
+            var data;
+            if(name == "OBJECTS"){
+              data = {
+                id: node_id,
+                sprites:{}
+              }
+            }
+            addLobj(name.toLowerCase(),'object0',data);
           }
       }
   );

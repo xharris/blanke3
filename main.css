@@ -36,6 +36,21 @@
   background-color: white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
+.btn-circle {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  height: 34px;
+  width: 34px;
+  border-radius: 100%;
+  font-size: 18px;
+  margin: 0px 8px;
+  transition: all 0.2s ease-in-out;
+}
+.btn-circle:hover {
+  color: white;
+  cursor: pointer;
+}
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -108,17 +123,7 @@ ul.jqtree-tree .jqtree-element:hover {
 ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   color: black !important;
 }
-#main_window > #modals {
-  background: none;
-}
-#main_window > #modals > * {
-  background-color: white;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  padding: 10px;
-  box-sizing: border-box;
-}
-#main_window > #modals #modal_object {
+#modal_object {
   position: absolute;
   margin: 10px 0px;
   width: 400px;
@@ -126,13 +131,15 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   top: 28px;
   left: 0px;
   opacity: 0;
+  z-index: -20;
   transition: all 0.2s ease-in-out;
 }
-#main_window > #modals #modal_object.active {
+#modal_object.active {
+  z-index: 10;
   opacity: 1;
   left: 185px;
 }
-#main_window > #modals #modal_object > #buttons {
+#modal_object > #buttons {
   margin-bottom: 10px;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -141,7 +148,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   -ms-user-select: none;
   user-select: none;
 }
-#main_window > #modals #modal_object > #buttons > button {
+#modal_object > #buttons > button {
   background-color: white;
   color: black;
   border: 1px solid black;
@@ -152,64 +159,67 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   margin: 0px 8px;
   transition: all 0.2s ease-in-out;
 }
-#main_window > #modals #modal_object > #buttons > button:hover {
+#modal_object > #buttons > button:hover {
   color: white;
   cursor: pointer;
 }
-#main_window > #modals #modal_object > #buttons > #btn_code:hover {
+#modal_object > #buttons > #btn_code:hover {
   background-color: #00c853;
   border: 1px solid #00c853;
 }
-#main_window > #modals #modal_object > #buttons > #btn_delete:hover {
+#modal_object > #buttons > #btn_delete:hover {
   background-color: #d50000;
   border: 1px solid #d50000;
 }
-#main_window > #modals #modal_object > #buttons > #btn_save,
-#main_window > #modals #modal_object > #buttons #btn_close {
+#modal_object > #buttons > #btn_save,
+#modal_object > #buttons #btn_close {
   float: right;
 }
-#main_window > #modals #modal_object > #buttons > #btn_save:hover {
+#modal_object > #buttons > #btn_save:hover {
   background-color: #0091ea;
   border: 1px solid #0091ea;
 }
-#main_window > #modals #modal_object > #buttons > #btn_close:hover {
+#modal_object > #buttons > #btn_close:hover {
   background-color: #212121;
   border: 1px solid #212121;
 }
-#main_window > #modals #modal_object > #titles {
+#modal_object > #titles {
   width: 100%;
   display: inline-block;
 }
-#main_window > #modals #modal_object > #titles > p {
+#modal_object > #titles > p {
   width: 180px;
   font-size: 13px;
   font-weight: 900;
   line-height: 12px;
   margin: 0;
 }
-#main_window > #modals #modal_object > #titles > p#title1 {
-  float: right;
-}
-#main_window > #modals #modal_object > #titles > p#title2 {
+#modal_object > #titles > p#title1 {
   float: left;
 }
-#main_window > #modals #modal_object > #sprites,
-#main_window > #modals #modal_object #properties {
+#modal_object > #titles > p#title2 {
+  float: right;
+}
+#modal_object > #sprites,
+#modal_object #properties {
   border: 1px solid #e0e0e0;
   width: 180px;
   height: 335px;
-  float: right;
 }
-#main_window > #modals #modal_object > #sprites > .sprite {
+#modal_object > #sprites {
+  float: right;
+  overflow-y: auto;
+}
+#modal_object > #sprites > .sprite {
   position: relative;
   width: 100%;
   height: 50px;
   border-bottom: 1px solid #e0e0e0;
 }
-#main_window > #modals #modal_object > #sprites > .sprite > * {
+#modal_object > #sprites > .sprite > * {
   display: inline-block;
 }
-#main_window > #modals #modal_object > #sprites > .sprite > #btn_close {
+#modal_object > #sprites > .sprite > #btn_close {
   background-color: white;
   border: none;
   font-size: 12px;
@@ -218,20 +228,20 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   right: 2px;
   width: 18px;
 }
-#main_window > #modals #modal_object > #sprites > .sprite > img {
+#modal_object > #sprites > .sprite > a > img {
   border: 1px dashed #bdbdbd;
   margin: 5px;
   width: 40px;
   height: 40px;
 }
-#main_window > #modals #modal_object > #sprites > .sprite > #values {
+#modal_object > #sprites > .sprite > #values {
   vertical-align: top;
   margin-top: 5px;
   font-size: 12px;
   max-width: 100px;
   overflow: hidden;
 }
-#main_window > #modals #modal_object > #sprites > #btn_add_sprite {
+#modal_object > #sprites > #btn_add_sprite {
   width: 100%;
   height: 48px;
   color: white;
@@ -239,19 +249,97 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   border: none;
   font-size: 24px;
 }
-#main_window > #modals #modal_object > #properties {
+#modal_object > #properties {
+  float: left;
   margin-right: 16px;
 }
-#main_window > #modals #modal_object > #properties > table {
+#modal_object > #properties > table {
   width: 100%;
   font-size: 13px;
   padding: 5px;
 }
-#main_window > #modals #modal_object > #properties > table tr > td:first-of-type {
+#modal_object > #properties > table tr > td:first-of-type {
   font-weight: 600;
   height: 20px;
 }
-#main_window > #modals #modal_object > #properties > table input {
+#modal_object > #properties > table input {
+  width: 100%;
+  box-sizing: border-box;
+  text-align: right;
+  outline: none;
+  border: none;
+}
+#modal_sprite {
+  position: absolute;
+  margin: 10px 0px;
+  width: 400px;
+  height: 420px;
+  top: 28px;
+  left: 185px;
+  opacity: 0;
+  z-index: -18;
+}
+#modal_sprite.active {
+  z-index: 10;
+  opacity: 1;
+}
+#modal_sprite > #buttons {
+  height: 34px;
+  margin-bottom: 10px;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+#modal_sprite > #buttons > button {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  height: 34px;
+  width: 34px;
+  border-radius: 100%;
+  font-size: 18px;
+  margin: 0px 8px;
+  transition: all 0.2s ease-in-out;
+  float: right;
+}
+#modal_sprite > #buttons > button:hover {
+  color: white;
+  cursor: pointer;
+}
+#modal_sprite > #buttons > button#btn_save:hover {
+  background-color: #0091ea;
+  border-color: #0091ea;
+}
+#modal_sprite > #buttons > button#btn_close:hover {
+  background-color: #212121;
+  border-color: #212121;
+}
+#modal_sprite > #preview,
+#modal_sprite #properties {
+  border: 1px solid #e0e0e0;
+  width: 180px;
+  height: 335px;
+}
+#modal_sprite > #preview {
+  float: right;
+}
+#modal_sprite > #properties {
+  float: left;
+  margin-right: 16px;
+}
+#modal_sprite > #properties > table {
+  width: 100%;
+  font-size: 13px;
+  padding: 5px;
+}
+#modal_sprite > #properties > table tr > td:first-of-type {
+  font-weight: 600;
+  height: 20px;
+}
+#modal_sprite > #properties > table input {
   width: 100%;
   box-sizing: border-box;
   text-align: right;
@@ -364,6 +452,16 @@ html {
   bottom: -5px;
   left: 5px;
   position: absolute;
+}
+#main_window #modals {
+  background: none;
+}
+#main_window #modals > * {
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  padding: 10px;
+  box-sizing: border-box;
 }
 #main_window #extra_box {
   position: absolute;
