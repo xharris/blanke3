@@ -7,6 +7,38 @@ var opened_spr;
 //
 // OBJECT MODAL
 //
+$(function(){
+  $("#in_obj_name").blur(objectModalValueChange);
+  $("#in_obj_depth").blur(objectModalValueChange);
+})
+
+function objectModalValueChange(e){
+  var key = e.currentTarget.id.substring(7)
+  var value = e.currentTarget.value;
+
+  // get old values
+  var oldname = getLobjNameByID(opened_obj['id']);
+  var oldvals = $.extend(true,{},opened_obj);
+
+  // set values to object
+  if(key != "name"){
+    opened_obj[key] = value;
+  }
+
+  // if the key is name, then change key
+  if(key == "name"){
+    // add newly named object
+    lobjects.objects[value] = oldvals;
+    opened_obj = lobjects.objects[value];
+    // delete the old object
+    delete lobjects.objects[oldname];
+    // change object name in tree
+    //
+    // ....
+    //
+  }
+}
+
 function showObjectModal(name){
   if(!obj_modal_open){
     obj_modal_open = true;
@@ -16,6 +48,11 @@ function showObjectModal(name){
     // load in obj properties
 
     // load in sprites
+    for(spr in opened_obj.sprites){
+      addSpriteDiv(spr);
+    }
+
+    // add event listener to inputs
 
     // show modal
     $("#modal_object").toggleClass("active");
@@ -29,13 +66,22 @@ function closeObjectModal(){
   }
 }
 
+
+
 //
 // SPRITE MODAL
 //
+
+var spr_modal_oldname;
+// obj[dectionary]
+// spr_name[string]
 function showSpriteModal(obj,spr_name){
   if(!spr_modal_open){
     spr_modal_open = true;
     $("#modal_sprite").toggleClass("active");
+
+    // save sprites name. when changes are saved, the old values are still there and must be deleted.
+    spr_modal_oldname = spr_name;
 
     // is the picture saved in project path?
     var spr_path = obj.sprites[spr_name].path;
@@ -45,7 +91,6 @@ function showSpriteModal(obj,spr_name){
 
     // update form values
     $("#in_spr_name").val(spr_name);
-    $("#in_spr_path").val(spr_path);
     $("#in_spr_width").val(obj.sprites[spr_name].width);
     $("#in_spr_height").val(obj.sprites[spr_name].height);
   }
@@ -62,12 +107,11 @@ function saveSpriteModal(){
   // get the path based on project path
   var new_path = $("#in_spr_name").val(); // (wrong)
 
-  // get name of sprite
+  // get name of saved sprite
   var name = $("#in_spr_name").val();
 
   // get modal values
   var info = {
-    path: new_path,
     width: $("#in_spr_width").val(),
     height: $("#in_spr_height").val(),
     frames: 3
@@ -76,8 +120,15 @@ function saveSpriteModal(){
   // assign to lobject
   opened_obj.sprites[$("#in_spr_name").val()] = info;
 
+  // remove old values
+  //var old_name_index = opened_obj.sprites.indexOf(spr_modal_oldname);
+  if(spr_modal_oldname in opened_obj.sprites){
+    //console.log(old_name_index);
+    delete opened_obj.sprites[spr_modal_oldname]
+  }
+
   // add to modal_object
-  addSpriteDiv(info)
+  addSpriteDiv(name,info)
 
   // close the modal_sprite (yes, this is a save&close button)
   closeSpriteModal();
@@ -116,16 +167,17 @@ function addSprite(file,obj){
   return name;
 }
 
-function addSpriteDiv(info){
+function addSpriteDiv(name){
+  var info = opened_obj.sprites[name]
 
   $('#btn_add_sprite').before('\
     <div class="sprite">\
       <button id="btn_close"><i class="fa fa-times"></i></button>\
-      <a href="#">\
+      <a onclick="editSprite("'+opened_obj+','+name+'")">\
         <img id="preview"/>\
       </a>\
       <div id="values">\
-        '+info.path+'<br>\
+        '+name+'<br>\
         '+info.width+' x '+info.height+'<br>\
         '+info.frames+' frames\
       </div>\
