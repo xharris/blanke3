@@ -27,15 +27,18 @@ function objectModalValueChange(e){
 
   // if the key is name, then change key
   if(key == "name"){
+    // check if name already exists
+    // ...
+
     // add newly named object
     lobjects.objects[value] = oldvals;
     opened_obj = lobjects.objects[value];
     // delete the old object
     delete lobjects.objects[oldname];
     // change object name in tree
-    //
-    // ....
-    //
+    var tree_node = tree.tree('getNodeById',opened_obj['id'])
+    tree.tree('updateNode',tree_node,value)
+    console.log(tree_node);
   }
 }
 
@@ -46,6 +49,16 @@ function showObjectModal(name){
     opened_obj = getLobjByName(name);
 
     // load in obj properties
+    $("#in_obj_name").val(name);
+    $("#in_obj_depth").val(opened_obj['depth']);
+    $("#in_obj_id").val(opened_obj['id']);
+
+    // clear sprites box
+    var btn_add = $("#btn_add_sprite").clone();
+    var file_dialog = $("#spriteFileDialog").clone();
+    $("#sprites").empty();
+    $("#sprites").append(btn_add);
+    $("#sprites").append(file_dialog);
 
     // load in sprites
     for(spr in opened_obj.sprites){

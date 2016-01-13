@@ -36,10 +36,13 @@ win.on('loaded', function() {
             var child = ev_node.children[ev_node.children.length-1];
             var node_id = Math.round(Math.random()*1000000)
 
+            // get name of new object
+            var obj_name = name.toLowerCase().substring(0,name.length-1)+Object.keys(lobjects[name.toLowerCase()]).length;
+
             tree.tree(
                 'appendNode',
                 {
-                    label: 'object0',
+                    label: obj_name,
                     id: node_id
                 },
                 ev_node
@@ -50,10 +53,12 @@ win.on('loaded', function() {
             if(name == "OBJECTS"){
               data = {
                 id: node_id,
+                depth: 0,
                 sprites:{}
               }
             }
-            addLobj(name.toLowerCase(),'object0',data);
+
+            addLobj(name.toLowerCase(),obj_name,data);
           }
       }
   );
