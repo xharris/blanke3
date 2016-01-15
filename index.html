@@ -4,6 +4,7 @@
 
     <!-- jQuery -->
     <script src="includes/jquery/jquery-1.11.3.min.js"></script>
+    <script src="includes/jquery/jquery.keyframes.min.js"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="includes/font-awesome/css/font-awesome.min.css"/>
@@ -95,6 +96,14 @@
                 <td><input id="in_spr_name" type="text"/></td>
               </tr>
               <tr>
+                <td>Width</td>
+                <td><input id="in_spr_width" type="number" value="0" disabled/></td>
+              </tr>
+              <tr>
+                <td>Height</td>
+                <td><input id="in_spr_height" type="number" value="0" disabled/></td>
+              </tr>
+              <tr>
                 <td>Rows</td>
                 <td><input id="in_spr_rows" type="number" value="1"/></td>
               </tr>
@@ -103,17 +112,17 @@
                 <td><input id="in_spr_columns" type="number" value="1"/></td>
               </tr>
               <tr>
-                <td>Width</td>
-                <td><input id="in_spr_width" type="number" value="0" disabled/></td>
+                <td>Frames</td>
+                <td><input id="in_spr_frames" type="number" value="1"/></td>
               </tr>
               <tr>
-                <td>Height</td>
-                <td><input id="in_spr_height" type="number" value="0" disabled/></td>
+                <td>Speed</td>
+                <td><input id="in_spr_speed" type="number" value="1"/></td>
               </tr>
             </table>
           </div>
 
-          <div id="preview"></div>
+          <div class="preview"></div>
 
         </div>
 

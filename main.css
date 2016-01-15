@@ -228,11 +228,19 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   right: 2px;
   width: 18px;
 }
-#modal_object > #sprites > .sprite > a > img {
+#modal_object > #sprites > .sprite > a {
+  cursor: pointer;
+}
+#modal_object > #sprites > .sprite > a > .preview {
+  background-repeat: no-repeat !important;
+  background-size: cover !important;
   border: 1px dashed #bdbdbd;
   margin: 5px;
   width: 40px;
   height: 40px;
+}
+#modal_object > #sprites > .sprite > a .player_walk_png .preview {
+  animation: player_walk_png 1s steps(2) infinite;
 }
 #modal_object > #sprites > .sprite > #values {
   vertical-align: top;
@@ -271,16 +279,16 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 }
 #modal_sprite {
   position: absolute;
-  margin: 10px 0px;
-  width: 400px;
-  height: 420px;
+  margin-top: 10px;
   top: 28px;
   left: 185px;
+  right: 5px;
+  bottom: 5px;
   opacity: 0;
   z-index: -18;
 }
 #modal_sprite.active {
-  z-index: 10;
+  z-index: 12;
   opacity: 1;
 }
 #modal_sprite > #buttons {
@@ -317,18 +325,20 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   background-color: #212121;
   border-color: #212121;
 }
-#modal_sprite > #preview,
+#modal_sprite > .preview,
 #modal_sprite .properties {
   border: 1px solid #e0e0e0;
-  width: 180px;
-  height: 335px;
+  position: absolute;
+  top: 60px;
 }
-#modal_sprite > #preview {
-  float: right;
+#modal_sprite > .preview {
+  right: 10px;
+  left: 260px;
+  bottom: 10px;
+  background-repeat: no-repeat !important;
 }
 #modal_sprite > .properties {
-  float: left;
-  margin-right: 16px;
+  width: 240px;
 }
 #modal_sprite > .properties > table {
   width: 100%;
@@ -352,8 +362,6 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 }
 * {
   font-family: 'Roboto', sans-serif;
-  font-smooth: never;
-  -webkit-font-smoothing: none;
 }
 html,
 body {

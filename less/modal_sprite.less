@@ -2,16 +2,16 @@
 
 #modal_sprite{
   position: absolute;
-  margin: 10px 0px;
-  width: 400px;
-  height: 420px;
+  margin-top:10px;
   top: 28px;
   left: 185px;
+  right: 5px;
+  bottom:5px;
   opacity:0;
   z-index:-18;
 
   &.active{
-    z-index:10;
+    z-index:12;
     opacity:1;
   }
 
@@ -35,17 +35,19 @@
     }
   }
 
-  >#preview,.properties{
+  >.preview,.properties{
     border:1px solid #e0e0e0;
-    width: 180px;
-    height: 335px;
+    position: absolute;
+    top:60px;
   }
-  >#preview{
-    float: right;
+  >.preview{
+    right:10px;
+    left:260px;
+    bottom: 10px;
+    background-repeat:no-repeat !important;
   }
   >.properties{
-    float: left;
-    margin-right:16px;
+    width:240px;
 
     >table{
       width: 100%;

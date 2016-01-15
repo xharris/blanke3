@@ -38,7 +38,6 @@ function objectModalValueChange(e){
     // change object name in tree
     var tree_node = tree.tree('getNodeById',opened_obj['id'])
     tree.tree('updateNode',tree_node,value)
-    console.log(tree_node);
   }
 }
 
@@ -54,16 +53,7 @@ function showObjectModal(name){
     $("#in_obj_id").val(opened_obj['id']);
 
     // clear sprites box
-    var btn_add = $("#btn_add_sprite").clone();
-    var file_dialog = $("#spriteFileDialog").clone();
-    $("#sprites").empty();
-    $("#sprites").append(btn_add);
-    $("#sprites").append(file_dialog);
-
-    // load in sprites
-    for(spr in opened_obj.sprites){
-      addSpriteDiv(spr);
-    }
+    updateSpriteDivs(opened_obj);
 
     // add event listener to inputs
 
@@ -79,6 +69,18 @@ function closeObjectModal(){
   }
 }
 
+function updateSpriteDivs(obj){
+  var btn_add = $("#btn_add_sprite").clone();
+  var file_dialog = $("#spriteFileDialog").clone();
+  $("#sprites").empty();
+  $("#sprites").append(btn_add);
+  $("#sprites").append(file_dialog);
+
+  // load in sprites
+  for(spr in obj.sprites){
+    addSpriteDiv(spr);
+  }
+}
 
 
 //
@@ -104,8 +106,30 @@ function showSpriteModal(obj,spr_name){
 
     // update form values
     $("#in_spr_name").val(spr_name);
-    $("#in_spr_width").val(obj.sprites[spr_name].width);
-    $("#in_spr_height").val(obj.sprites[spr_name].height);
+
+    // first time seeing this sprite. get its dimensions
+    if(obj.sprites[spr_name].width == 0 && obj.sprites[spr_name].height == 0){
+      var img = new Image();
+      img.src = spr_path;
+      img.onload = function(){
+        obj.sprites[spr_name].width = img.width;
+        obj.sprites[spr_name].height = img.height;
+        $("#in_spr_width").val(obj.sprites[spr_name].width);
+        $("#in_spr_height").val(obj.sprites[spr_name].height);
+      }
+    }
+
+    // set the sprite form values
+    var values = ['width','height','rows','columns','frames','speed'];
+    for(val in values){
+      val = values[val];
+      $("#in_spr_"+val).val(obj.sprites[spr_name][val]);
+    }
+
+    // add sprite preview stuff
+    $("#modal_sprite .preview").css({
+      "background":"url('"+encodeURI(spr_path)+"')"
+    });
   }
 }
 
@@ -118,30 +142,31 @@ function closeSpriteModal(){
 
 function saveSpriteModal(){
   // get the path based on project path
-  var new_path = $("#in_spr_name").val(); // (wrong)
+  var new_path = $("#in_spr_name").val(); // (wrong) --> pj_path+$().val()
 
   // get name of saved sprite
   var name = $("#in_spr_name").val();
 
   // get modal values
-  var info = {
-    width: $("#in_spr_width").val(),
-    height: $("#in_spr_height").val(),
-    frames: 3
+  var info = opened_obj.sprites[spr_modal_oldname];
+  // get the values for the sprite
+  var values = ['width','height','rows','columns','frames','speed'];
+  for(val in values){
+    val = values[val];
+    info[val] = $("#in_spr_"+val).val();
   }
 
   // assign to lobject
-  opened_obj.sprites[$("#in_spr_name").val()] = info;
+  opened_obj.sprites[name] = info;
 
   // remove old values
   //var old_name_index = opened_obj.sprites.indexOf(spr_modal_oldname);
-  if(spr_modal_oldname in opened_obj.sprites){
-    //console.log(old_name_index);
+  if((spr_modal_oldname in opened_obj.sprites) && spr_modal_oldname != name){
     delete opened_obj.sprites[spr_modal_oldname]
   }
 
-  // add to modal_object
-  addSpriteDiv(name,info)
+  // update sprite div
+  updateSpriteDivs(opened_obj);
 
   // close the modal_sprite (yes, this is a save&close button)
   closeSpriteModal();
@@ -159,43 +184,51 @@ function chooseSprite(){
 
 // add sprite to object's sprite array
 function addSprite(file,obj){
-  var img = new Image();
-  var spr_width,spr_height;
-  img.onload = function(){
-      spr_width = this.width;
-      spr_height = this.height;
-  };
-  img.src = file;
-
   // add sprite to the object's array
   var name = file.split(/(\\|\/)/g).pop();
+
+  // default values
   var info = {
     path: file,
-    width: spr_width,
-    height: spr_height,
-    frames: 1
+    width: 0,
+    height: 0,
+    rows: 1,
+    columns: 1,
+    frames: 1,
+    speed: 1
   }
   obj.sprites[name] = info;
+  opened_obj = obj
 
   return name;
 }
 
-function addSpriteDiv(name){
-  var info = opened_obj.sprites[name]
+function addSpriteDiv(spr_name){
+  var info = opened_obj.sprites[spr_name]
+  var name_noperiod = spr_name.replace('.','_');
 
+  // add the div
   $('#btn_add_sprite').before('\
     <div class="sprite">\
       <button id="btn_close"><i class="fa fa-times"></i></button>\
-      <a onclick="editSprite("'+opened_obj+','+name+'")">\
-        <img id="preview"/>\
+      <a onclick="editSprite(\''+getLobjNameByID(opened_obj.id)+'\',\''+spr_name+'\')">\
+        <div class="'+name_noperiod+' preview"\
+          style="background-image:url(\''+encodeURI(info.path)+'\')"\
+        ></div>\
       </a>\
       <div id="values">\
-        '+name+'<br>\
+        '+spr_name+'<br>\
         '+info.width+' x '+info.height+'<br>\
         '+info.frames+' frames\
       </div>\
     </div>\
   ');
+
+
+}
+
+function editSprite(obj_name,spr_name){
+  showSpriteModal(lobjects.objects[obj_name],spr_name)
 }
 
 function editCode(){
