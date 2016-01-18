@@ -239,9 +239,6 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   width: 40px;
   height: 40px;
 }
-#modal_object > #sprites > .sprite > a .player_walk_png .preview {
-  animation: player_walk_png 1s steps(2) infinite;
-}
 #modal_object > #sprites > .sprite > #values {
   vertical-align: top;
   margin-top: 5px;
@@ -375,6 +372,221 @@ html {
   box-sizing: border-box;
   border: 1px solid #9e9e9e;
 }
+.menu_bar {
+  box-sizing: border-box;
+  height: 30px;
+}
+.menu_bar > #window_buttons {
+  float: right;
+  font-size: 0;
+}
+.menu_bar > #window_buttons > div {
+  width: 21px;
+  height: 21px;
+  display: inline-block;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  border-right: none;
+  margin: 4px;
+}
+.menu_bar > #window_buttons > div#btn_close,
+.menu_bar > #window_buttons > div#btn_maximize,
+.menu_bar > #window_buttons > div#btn_minimize {
+  background-repeat: no-repeat;
+  background-size: 10px 10px;
+  background-position: center center;
+  image-rendering: -moz-crisp-edges;
+}
+.menu_bar > #window_buttons > div#btn_close {
+  background-color: #d50000;
+}
+.menu_bar > #window_buttons > div#btn_maximize {
+  background-color: #ffab00;
+}
+.menu_bar > #window_buttons > div#btn_minimize {
+  background-color: #00c853;
+}
+.menu_bar > #window_buttons > div > i {
+  font-size: 16px !important;
+  margin-top: 4px !important;
+}
+#intro_window {
+  z-index: 30;
+  background-color: transparent;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 5px;
+  position: relative;
+  display: block;
+}
+#intro_window.hidden {
+  display: none;
+}
+#intro_window > *:not(.menu_bar) {
+  -webkit-app-region: no-drag;
+  box-sizing: border-box;
+}
+#intro_window > .splash {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  border: 1px solid #bdbdbd;
+  padding: 10px;
+  margin-top: 10px;
+  width: 100%;
+  height: 200px;
+}
+#intro_window > .actions {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  position: absolute;
+  top: 255px;
+  bottom: 10px;
+  left: 10px;
+  width: 215px;
+}
+#intro_window > .actions > div {
+  font-size: 14px;
+  border: 1px solid black;
+  margin: 10px;
+  margin-right: 0px;
+  border-right: none;
+  border-radius: 2px;
+  padding: 8px;
+  cursor: pointer;
+}
+#intro_window > .recent_projects {
+  position: absolute;
+  left: 220px;
+  top: 255px;
+  right: 10px;
+  bottom: 10px;
+  background-color: white;
+  border: 1px solid #bdbdbd;
+}
+#intro_window > .recent_projects table {
+  width: 100%;
+}
+#intro_window > .recent_projects th {
+  height: 30px;
+  background-repeat: no-repeat;
+  color: black;
+  text-decoration: underline;
+  text-align: left;
+  padding-left: 5px !important;
+}
+#intro_window > .recent_projects td {
+  text-indent: 5px;
+  color: #444;
+  border-bottom: 1px solid #bbb;
+  border-left: 1px solid #bbb;
+}
+#intro_window > .recent_projects td:first-of-type {
+  border-left: none;
+}
+#intro_window > .recent_projects td.name {
+  cursor: pointer;
+}
+#intro_window > .recent_projects td.left {
+  border-left: 1px solid #2e638e;
+}
+#intro_window > .recent_projects td.right {
+  border-right: 1px solid #2e638e;
+}
+#intro_window > .recent_projects td.bottom {
+  border-bottom: 1px solid #2e638e;
+}
+#intro_window > .recent_projects .grip {
+  width: 20px;
+  height: 30px;
+  margin-top: -3px;
+  margin-left: -5px;
+  position: relative;
+  z-index: 88;
+  cursor: e-resize;
+}
+#intro_window > .recent_projects .grip:hover {
+  background-position-x: -20px;
+}
+#intro_window > .recent_projects .dragging .grip {
+  background-position-x: -40px;
+}
+#intro_window > .recent_projects .dotted {
+  background-image: url('../img/dotted.png');
+  background-repeat: repeat-y;
+}
+#intro_window > .project_setup {
+  position: absolute;
+  left: 220px;
+  top: 255px;
+  right: 10px;
+  bottom: 10px;
+  background-color: white;
+  border: 1px solid #bdbdbd;
+  display: block;
+}
+#intro_window > .project_setup.hidden {
+  display: none;
+}
+#intro_window > .project_setup > div {
+  padding: 10px;
+  margin-left: 20px;
+}
+#intro_window > .project_setup > div > span {
+  font-size: 12px;
+  margin-right: 15px;
+  text-transform: uppercase;
+}
+#intro_window > .project_setup > div > input:not(#setup_path) {
+  border: none;
+  border-bottom: 1px solid black;
+}
+#intro_window > .project_setup > div > input {
+  font-size: 16px;
+}
+#intro_window > .project_setup > div > input:focus {
+  outline: none;
+}
+#intro_window > .project_setup > div > .pj_path {
+  display: inline-block;
+  position: relative;
+}
+#intro_window > .project_setup > div > .pj_path > #setup_path {
+  color: transparent;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  border-bottom: 1px solid black;
+  width: 100%;
+}
+#intro_window > .project_setup > div > .pj_path > #setup_path::-webkit-file-upload-button {
+  visibility: hidden;
+}
+#intro_window > .project_setup > div > .pj_path > #setup_path::before {
+  opacity: 0;
+}
+#intro_window > .project_setup > div > .pj_path > #setup_path:focus {
+  outline: none;
+}
+#intro_window > .project_setup > .btn_submit {
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 1px;
+  height: 30px;
+  font-size: 14px;
+  position: absolute;
+  bottom: 15px;
+  left: 30px;
+  width: 80px;
+}
 #main_window {
   z-index: 0;
   background-color: transparent;
@@ -396,7 +608,7 @@ html {
 #main_window > #toolbox:hover {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
-#main_window > #menu_bar {
+#main_window > .menu_bar {
   background-color: white;
   border-radius: 2px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
@@ -412,45 +624,6 @@ html {
 #main_window #extra_box:hover {
   background-color: white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-}
-#main_window #menu_bar {
-  box-sizing: border-box;
-  height: 30px;
-}
-#main_window #menu_bar > #window_buttons {
-  float: right;
-  font-size: 0;
-  border-right: 1px solid #e0e0e0;
-}
-#main_window #menu_bar > #window_buttons > div {
-  width: 21px;
-  height: 21px;
-  display: inline-block;
-  text-align: center;
-  border: 1px solid #e0e0e0;
-  border-right: none;
-  margin: 4px;
-}
-#main_window #menu_bar > #window_buttons > div#btn_close,
-#main_window #menu_bar > #window_buttons > div#btn_maximize,
-#main_window #menu_bar > #window_buttons > div#btn_minimize {
-  background-repeat: no-repeat;
-  background-size: 10px 10px;
-  background-position: center center;
-  image-rendering: -moz-crisp-edges;
-}
-#main_window #menu_bar > #window_buttons > div#btn_close {
-  background-color: #d50000;
-}
-#main_window #menu_bar > #window_buttons > div#btn_maximize {
-  background-color: #ffab00;
-}
-#main_window #menu_bar > #window_buttons > div#btn_minimize {
-  background-color: #00c853;
-}
-#main_window #menu_bar > #window_buttons > div > i {
-  font-size: 16px !important;
-  margin-top: 4px !important;
 }
 #main_window #library {
   width: 175px;

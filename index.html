@@ -4,7 +4,7 @@
 
     <!-- jQuery -->
     <script src="includes/jquery/jquery-1.11.3.min.js"></script>
-    <script src="includes/jquery/jquery.keyframes.min.js"></script>
+    <script src="includes/jquery/colResizable-1.5.min.js"></script>
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="includes/font-awesome/css/font-awesome.min.css"/>
@@ -25,9 +25,60 @@
 
   </head>
   <body>
+    <div id="intro_window" class="win-drag">
+      <div class="menu_bar win-drag">
+        <div id="window_buttons" class="win-nodrag">
+
+          <div id="btn_minimize" onclick="win.minimize()"></div>
+
+          <div id="btn_maximize" onclick="winResize()"> </div>
+
+          <div id="btn_close" onclick="winClose()"></div>
+
+        </div>
+      </div>
+
+      <div class="splash">
+        blanke
+      </div>
+
+      <div class="actions">
+        <div class="btn_new" onclick="startProjectSetup()">NEW PROJECT</div>
+        <div class="btn_open" onclick="btn_openProject()">OPEN PROJECT</div>
+
+<input style="display:none;" id="pj_open_dialog" type="file" />
+      </div>
+
+      <div class="recent_projects">
+        <table>
+          <tr>
+            <th>Name</th>
+            <th>Location</th>
+            <th>Last Opened</th>
+          </tr>
+
+        </table>
+      </div>
+      <div class="project_setup hidden">
+        <div>
+          <span>Name</span>
+          <input id="setup_name" value="my_project"/>
+        </div>
+        <div>
+          <span>Save Path</span>
+          <div class="pj_path">
+            <span>the path</span>
+            <input id="setup_path" type="file" nwdirectory/>
+          </div>
+        </div>
+
+        <button class="btn_submit" onclick="submitProjectSetup()">START</button>
+      </div>
+    </div>
+
     <div id="main_window">
       <!-- title bar -->
-    	<div id="menu_bar" class="win-drag">
+    	<div class="menu_bar win-drag">
         <div id="window_buttons" class="win-nodrag">
 
           <div id="btn_minimize" onclick="win.minimize()"></div>

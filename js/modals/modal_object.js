@@ -66,6 +66,7 @@ function closeObjectModal(){
   if(obj_modal_open){
     obj_modal_open = false;
     $("#modal_object").toggleClass("active");
+    saveProject();
   }
 }
 
@@ -107,16 +108,23 @@ function showSpriteModal(obj,spr_name){
     // update form values
     $("#in_spr_name").val(spr_name);
 
+    nwFILE.watchFile(spr_path, function(curr, prev){
+      console.log('the current mtime is: '+curr.mtime);
+      console.log('the previous mtime was: '+prev.mtime);
+    });
+
     // first time seeing this sprite. get its dimensions
     if(obj.sprites[spr_name].width == 0 && obj.sprites[spr_name].height == 0){
       var img = new Image();
-      img.src = spr_path;
-      img.onload = function(){
-        obj.sprites[spr_name].width = img.width;
-        obj.sprites[spr_name].height = img.height;
+      img.src = decodeURI(spr_path);
+      img.onload = function() {
+        console.log('loaded');
+        obj.sprites[spr_name].width = this.width;
+        obj.sprites[spr_name].height = this.height;
         $("#in_spr_width").val(obj.sprites[spr_name].width);
         $("#in_spr_height").val(obj.sprites[spr_name].height);
       }
+      img.src = decodeURI(spr_path);
     }
 
     // set the sprite form values
@@ -170,15 +178,21 @@ function saveSpriteModal(){
 
   // close the modal_sprite (yes, this is a save&close button)
   closeSpriteModal();
+  saveProject();
 }
 
 // show file dialog for choosing a image file
 function chooseSprite(){
   chooseFile('#spriteFileDialog',function(file){
-    var name = addSprite(file,opened_obj);
 
-    // show modal_sprite
-    showSpriteModal(opened_obj,name);
+    // add sprite to project folder
+    importResource('images',file,function(new_path){
+        var name = addSprite(new_path,opened_obj);
+
+        // show modal_sprite
+        showSpriteModal(opened_obj,name);
+    });
+
   });
 }
 
@@ -198,7 +212,7 @@ function addSprite(file,obj){
     speed: 1
   }
   obj.sprites[name] = info;
-  opened_obj = obj
+  opened_obj = obj;
 
   return name;
 }

@@ -1,5 +1,7 @@
 function addLobj(category,name,info){
   lobjects[category][name] = info;
+
+  saveProject();
 }
 
 function getLobjByName(name){

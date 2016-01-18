@@ -130,7 +130,21 @@ var cam_drag_start = {
   x:0,
   y:0
 }
+
+var placer_show_obj = false;
+var placer_sprite;
 function mouseDown(event){
+  // left button
+  if(event.which == 1){
+    if(tree_getCategorySelected() == 'OBJECTS' && tree_getSelected() != 'OBJECTS'){
+      var selected_obj = lobjects.objects[tree_getSelected()];
+      // enable placer to show object being placed
+      placer_show_obj = selected_obj;
+      // add image to phaser
+      // ...
+    }
+  }
+
   // middle button
   if(event.which == 2){
     cam_drag = true;
@@ -140,13 +154,32 @@ function mouseDown(event){
 }
 
 function mouseUp(event){
- // middle button
- if(event.which == 2){
-   cam_drag = false;
- }
+  // left button
+  if(event.which == 1){
+    if(tree_getCategorySelected() == 'OBJECTS' && tree_getSelected() != 'OBJECTS'){
+      var selected_obj = lobjects.objects[tree_getSelected()];
+      // disable placer sprite
+      placer_show_obj = false;
+      // place the object
+      // ...
+      // add it to state entity array
+      // ...
+    }
+  }
+
+  // middle button
+  if(event.which == 2){
+    cam_drag = false;
+  }
 }
 
 function mouseMove(event){
+  // placer is placing an object
+  if(placer_show_obj){
+    // draw object on grid at mouse
+    // ...
+  }
+
   if(cam_drag){
     setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
   }

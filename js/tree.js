@@ -63,8 +63,48 @@ win.on('loaded', function() {
       }
   );
 
+  tree.bind(
+    'tree.click',
+    function(event) {
+
+
+    }
+  );
 });
 
+
+// is a category or child selected
+function tree_getCategorySelected(){
+  var selected = tree.tree('getSelectedNode');
+
+  // is something selected
+  if(selected){
+    var name = selected.name;
+
+    // it's a category
+    if(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES"){
+      return name;
+    }
+    // it's a child, find what category it's in
+    else{
+      // will need getLevel later
+      return selected.parent.name;
+    }
+  }else{
+    return false;
+  }
+}
+
+function tree_getSelected(){
+  var selected = tree.tree('getSelectedNode');
+
+  if(selected){
+    name = selected.name;
+    return name;
+  }else{
+    return false;
+  }
+}
 
         //save to json
         //$('#tree1').tree('toJson');
