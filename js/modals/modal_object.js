@@ -94,7 +94,6 @@ var spr_modal_oldname;
 function showSpriteModal(obj,spr_name){
   if(!spr_modal_open){
     spr_modal_open = true;
-    $("#modal_sprite").toggleClass("active");
 
     // save sprites name. when changes are saved, the old values are still there and must be deleted.
     spr_modal_oldname = spr_name;
@@ -108,23 +107,28 @@ function showSpriteModal(obj,spr_name){
     // update form values
     $("#in_spr_name").val(spr_name);
 
-    nwFILE.watchFile(spr_path, function(curr, prev){
-      console.log('the current mtime is: '+curr.mtime);
-      console.log('the previous mtime was: '+prev.mtime);
-    });
-
     // first time seeing this sprite. get its dimensions
     if(obj.sprites[spr_name].width == 0 && obj.sprites[spr_name].height == 0){
-      var img = new Image();
-      img.src = decodeURI(spr_path);
-      img.onload = function() {
-        console.log('loaded');
-        obj.sprites[spr_name].width = this.width;
-        obj.sprites[spr_name].height = this.height;
-        $("#in_spr_width").val(obj.sprites[spr_name].width);
-        $("#in_spr_height").val(obj.sprites[spr_name].height);
-      }
-      img.src = decodeURI(spr_path);
+
+      nwFILE.watchFile(decodeURI(spr_path), function(curr, prev){
+        var loader = new Phaser.Loader(game);
+        loader.image(spr_name,decodeURI(spr_path));
+        var onLoaded = function(){
+          var image = game.cache.getImage(spr_name)
+
+          // set object's image properties
+          obj.sprites[spr_name].width = image.width;
+          obj.sprites[spr_name].height = image.height;
+          $("#in_spr_width").val(obj.sprites[spr_name].width);
+          $("#in_spr_height").val(obj.sprites[spr_name].height);
+
+          // show the modal
+          $("#modal_sprite").toggleClass("active");
+        }
+        loader.onLoadComplete.addOnce(onLoaded);
+        loader.start();
+
+      });
     }
 
     // set the sprite form values

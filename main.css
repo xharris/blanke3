@@ -220,6 +220,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   display: inline-block;
 }
 #modal_object > #sprites > .sprite > #btn_close {
+  cursor: pointer;
   background-color: white;
   border: none;
   font-size: 12px;

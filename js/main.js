@@ -2,7 +2,6 @@ var nwGUI = require('nw.gui');
 var nwPROC = require('process');
 var nwPATH = require('path');
 var nwFILE = require('fs');
-//var nwIMG = require('imagemagick');
 
 var win = nwGUI.Window.get();
 
@@ -220,9 +219,13 @@ function saveProject(){
 function importResource(category,location,callback){
 	var folder_path = nwPATH.resolve(project_path,category);
 
-	if(!nwFILE.exists(folder_path)){
-		nwFILE.mkdir(folder_path);
-	}
+	// make the resource folder if it doesn't exist
+	nwFILE.stat(folder_path,function(err,stats){
+		if(err){
+			nwFILE.mkdir(folder_path);
+		}
+	})
+
 	var f_dest = nwPATH.resolve(folder_path,nwPATH.basename(location));
 	if(!nwFILE.exists(f_dest)){
 		nwFILE.createReadStream(location).pipe(nwFILE.createWriteStream(f_dest));
