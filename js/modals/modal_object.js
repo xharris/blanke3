@@ -99,7 +99,7 @@ function showSpriteModal(obj,spr_name){
     spr_modal_oldname = spr_name;
 
     // is the picture saved in project path?
-    var spr_path = obj.sprites[spr_name].path;
+    var spr_path = decodeURI(obj.sprites[spr_name].path);
     //if(not in the project){
     // move to project path
     //}
@@ -109,26 +109,43 @@ function showSpriteModal(obj,spr_name){
 
     // first time seeing this sprite. get its dimensions
     if(obj.sprites[spr_name].width == 0 && obj.sprites[spr_name].height == 0){
+      console.log(spr_path)
 
-      nwFILE.watchFile(decodeURI(spr_path), function(curr, prev){
-        var loader = new Phaser.Loader(game);
-        loader.image(spr_name,decodeURI(spr_path));
-        var onLoaded = function(){
-          var image = game.cache.getImage(spr_name)
+      console.log(obj.sprites[spr_name].width)
+      if(!nwFILE.exists(spr_path)){
+        console.log('get the file!')
+        nwFILE.watchFile(spr_path, function(curr, prev){
+          var loader = new Phaser.Loader(game);
+          loader.image(spr_name,spr_path);
+          var onLoaded = function(){
+            var image = game.cache.getImage(spr_name)
 
-          // set object's image properties
-          obj.sprites[spr_name].width = image.width;
-          obj.sprites[spr_name].height = image.height;
-          $("#in_spr_width").val(obj.sprites[spr_name].width);
-          $("#in_spr_height").val(obj.sprites[spr_name].height);
+            // set object's image properties
+            obj.sprites[spr_name].width = image.width;
+            obj.sprites[spr_name].height = image.height;
+            $("#in_spr_width").val(obj.sprites[spr_name].width);
+            $("#in_spr_height").val(obj.sprites[spr_name].height);
 
-          // show the modal
-          $("#modal_sprite").toggleClass("active");
-        }
-        loader.onLoadComplete.addOnce(onLoaded);
-        loader.start();
+            // set new path
+            obj.sprites[spr_name].path = nwPATH.resolve('images',spr_name);
 
-      });
+            // show the modal
+            $("#modal_sprite").toggleClass("active");
+          }
+          loader.onLoadComplete.addOnce(onLoaded);
+          loader.start();
+
+        });
+      }else{
+        console.log('file exists!')
+        $("#in_spr_width").val(obj.sprites[spr_name].width);
+        $("#in_spr_height").val(obj.sprites[spr_name].height);
+
+        // show the modal
+        $("#modal_sprite").toggleClass("active");
+      }
+    }else{
+      console.log('dont do any of that')
     }
 
     // set the sprite form values

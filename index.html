@@ -25,9 +25,13 @@
     <script src="js/tree.js"></script>
 
   </head>
+  <title>Blanke IDE</title>
   <body>
     <div id="intro_window" class="win-drag">
+
       <div class="menu_bar win-drag">
+        <div class="window_title">Blanke IDE</div>
+
         <div id="window_buttons" class="win-nodrag">
 
           <div id="btn_minimize" onclick="win.minimize()"></div>
@@ -79,7 +83,9 @@
 
     <div id="main_window">
       <!-- title bar -->
-    	<div class="menu_bar win-drag">
+      <div class="menu_bar win-drag">
+        <div class="window_title">Blanke IDE</div>
+
         <div id="window_buttons" class="win-nodrag">
 
           <div id="btn_minimize" onclick="win.minimize()"></div>
@@ -104,7 +110,7 @@
             <!--button id="btn_save"><i class="fa fa-floppy-o"></i></button-->
           </div>
 
-          <div id="titles">
+          <div id="titles" class="no-select">
             <p id="title1">properties</p>
             <p id="title2">sprites</p>
           </div>

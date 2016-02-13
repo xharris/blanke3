@@ -1,3 +1,5 @@
+var IDE_NAME = "BlankE"
+
 var nwGUI = require('nw.gui');
 var nwPROC = require('process');
 var nwPATH = require('path');
@@ -8,6 +10,7 @@ var win = nwGUI.Window.get();
 win.showDevTools();
 
 var isMaximized = false;
+var menu_icon = "bars";
 
 var lobjects = {
 	"objects":{},
@@ -43,6 +46,20 @@ function winClose(){
   win.close();
 }
 
+function winSetTitle(new_title){
+	$(".window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
+	document.title = new_title;
+}
+
+function winToggleMenu(){
+	
+}
+
+function winSetMenuIcon(new_icon){
+	menu_icon = new_icon;
+	winSetTitle(document.title);
+}
+
 function writeFile(location,text){
 	nwFILE.writeFile(location, text, function(err) {
 		if(err) {return console.log('error saving game: '+err);}
@@ -61,11 +78,12 @@ function chooseFile(name,callback) {
 $(function(){
 
 	//startProjectSetup();
+	winSetTitle(IDE_NAME);
 
 	// update text on folder select
 	$("#setup_path").change(function(evt) {
 		$(".pj_path > span").html($(this).val());
-  });
+  	});
 
 	// get the config.json
 	var config_path = nwPATH.resolve(nwPROC.cwd(),'includes','config.json');
@@ -192,6 +210,9 @@ function openProject(path){
 
 			// close intro window
 			$("#intro_window").toggleClass("hidden");
+
+			// change window title
+			winSetTitle(nwPATH.basename(project_name)+' :: '+IDE_NAME);
 		}
 		else{
 			console.log(err)
@@ -210,13 +231,17 @@ function saveProject(){
 	lobjects['tree'] = tree.tree('toJson');
 
 	// serialize lobjects
-	var save_data = JSON.stringify(lobjects)
+	var save_data = JSON.stringify(lobjects);
 
 	// create project save file
 	writeFile(file_path,save_data);
+
+	// change window title
+	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 }
 
 function importResource(category,location,callback){
+	location = decodeURI(location);
 	var folder_path = nwPATH.resolve(project_path,category);
 
 	// make the resource folder if it doesn't exist
