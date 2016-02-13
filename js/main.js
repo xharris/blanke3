@@ -47,12 +47,13 @@ function winClose(){
 }
 
 function winSetTitle(new_title){
-	$(".window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
+	$("#intro_window > .menu_bar > .window_title").html("<div class='filler'></div>"+new_title);
+	$("#main_window > .menu_bar > .window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
 	document.title = new_title;
 }
 
 function winToggleMenu(){
-	
+	$(".window_menu").toggleClass("active");
 }
 
 function winSetMenuIcon(new_icon){
@@ -113,6 +114,11 @@ $(function(){
 	}
 
 });
+
+function showIntroWindow() {
+	$("#intro_window").toggleClass("hidden");
+	winToggleMenu();
+}
 
 function startProjectSetup() {
 	// set save path value
@@ -212,7 +218,7 @@ function openProject(path){
 			$("#intro_window").toggleClass("hidden");
 
 			// change window title
-			winSetTitle(nwPATH.basename(project_name)+' :: '+IDE_NAME);
+			winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 		}
 		else{
 			console.log(err)

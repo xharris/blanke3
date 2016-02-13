@@ -383,6 +383,7 @@ html {
   box-sizing: border-box;
   height: 30px;
   position: relative;
+  overflow: hidden;
 }
 .menu_bar > .window_title {
   font-size: 14px;
@@ -402,6 +403,39 @@ html {
   text-align: center;
   display: inline-block;
   -webkit-app-region: no-drag;
+}
+.menu_bar > .window_title > .filler {
+  width: 32px;
+  display: inline-block;
+}
+.menu_bar > .window_menu {
+  background-color: white;
+  border-radius: 2px;
+  position: absolute;
+  top: -30px;
+  left: 30px;
+  right: 95px;
+  height: 30px;
+  transition: top ease-in-out 0.2s;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.menu_bar > .window_menu.active {
+  top: 0px;
+}
+.menu_bar > .window_menu > div {
+  cursor: pointer;
+  display: inline-block;
+  width: 32px;
+  text-align: center;
+  -webkit-app-region: no-drag;
+}
+.menu_bar > .window_menu > div > .fa {
+  line-height: 30px;
 }
 .menu_bar > #window_buttons {
   float: right;
@@ -454,6 +488,7 @@ html {
 #intro_window.hidden {
   opacity: 0;
   z-index: 0;
+  pointer-events: none;
 }
 #intro_window > *:not(.menu_bar) {
   -webkit-app-region: no-drag;

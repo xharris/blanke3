@@ -43,23 +43,28 @@ function objectModalValueChange(e){
 
 function showObjectModal(name){
   if(!obj_modal_open){
-    obj_modal_open = true;
-    // get the object from library
-    opened_obj = getLobjByName(name);
+        obj_modal_open = true;
+        // get the object from library
+        opened_obj = getLobjByName(name);
 
-    // load in obj properties
-    $("#in_obj_name").val(name);
-    $("#in_obj_depth").val(opened_obj['depth']);
-    $("#in_obj_id").val(opened_obj['id']);
+        // load in obj properties
+        $("#in_obj_name").val(name);
+        $("#in_obj_depth").val(opened_obj['depth']);
+        $("#in_obj_id").val(opened_obj['id']);
 
-    // clear sprites box
-    updateSpriteDivs(opened_obj);
+        // clear sprites box
+        updateSpriteDivs(opened_obj);
 
-    // add event listener to inputs
+        // add event listener to inputs
 
-    // show modal
-    $("#modal_object").toggleClass("active");
-  }
+        // show modal
+        $("#modal_object").toggleClass("active");
+    } else {
+        // another obj was clicked while the modal was still open. show the new obj.
+        obj_modal_open = false;
+        $("#modal_object").toggleClass("active");
+        showObjectModal(name);
+    }
 }
 
 function closeObjectModal(){

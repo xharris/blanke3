@@ -32,6 +32,7 @@ html{
   box-sizing:border-box;
   height:30px;
   position:relative;
+  overflow:hidden;
 
   >.window_title{
     font-size:14px;
@@ -49,6 +50,40 @@ html{
 
         .win-nodrag();
     }
+    >.filler{
+        width:32px;
+        display:inline-block;
+    }
+  }
+  >.window_menu{
+      background-color:white;
+      border-radius:2px;
+      position:absolute;
+      top:-30px;
+      left:30px;
+      right:95px;
+      height:30px;
+
+      transition: top ease-in-out 0.2s;
+
+      .no-select();
+
+      &.active{
+          top:0px;
+      }
+
+      >div{
+          cursor:pointer;
+          display:inline-block;
+          width:32px;
+          text-align:center;
+
+          .win-nodrag();
+
+          >.fa{
+              line-height:30px;
+          }
+      }
   }
 
   >#window_buttons{
@@ -111,6 +146,7 @@ html{
   &.hidden{
     opacity:0;
     z-index:0;
+    pointer-events:none;
   }
 
   >*:not(.menu_bar){
