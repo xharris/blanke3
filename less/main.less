@@ -30,9 +30,33 @@ html{
 
 .menu_bar{
   box-sizing:border-box;
+  background-color:white;
   height:30px;
   position:relative;
   overflow:hidden;
+  z-index:100;
+  margin:5px;
+
+  .card-nohover();
+  .no-select();
+
+  transition: all ease-in-out 0.4s;
+
+  >.window_menu{
+      top:0px;
+  }
+
+  &.intro_active{
+      box-shadow:none;
+      margin:0px;
+
+      >.window_menu{
+          top:-30px;
+      }
+      >.window_title > .icon_container{
+          opacity:0;
+      }
+  }
 
   >.window_title{
     font-size:14px;
@@ -47,6 +71,9 @@ html{
         width:32px;
         text-align:center;
         display:inline-block;
+        opacity:1;
+
+        transition: opacity ease-in-out 0.4s;
 
         .win-nodrag();
     }
@@ -133,11 +160,13 @@ html{
 #intro_window{
   z-index:30;
   background-color: white;
-  width: 100%;
-  height: 100%;
   box-sizing:border-box;
   padding:5px;
-  position:relative;
+  position:fixed;
+  top:30px;
+  bottom:1px;
+  left:1px;
+  right:1px;
   opacity:1;
   //display:block;
 
@@ -149,7 +178,7 @@ html{
     pointer-events:none;
   }
 
-  >*:not(.menu_bar){
+  >*{
     .win-nodrag();
 
     box-sizing:border-box;
@@ -159,6 +188,7 @@ html{
     .no-select();
 
     border:1px solid #bdbdbd;
+    background-color:gray;
     padding:10px;
     margin-top:10px;
     width:100%;
@@ -354,9 +384,7 @@ html{
   >#toolbox{
     .card();
   }
-  >.menu_bar{
-    .card-nohover();
-  }
+
   >#library,#extra_box{
     .card-transparent();
   }

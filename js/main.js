@@ -1,9 +1,10 @@
-var IDE_NAME = "BlankE"
+var IDE_NAME = "BlankE";
 
 var nwGUI = require('nw.gui');
 var nwPROC = require('process');
 var nwPATH = require('path');
-var nwFILE = require('fs');
+var nwFILE = require('fs-extra');
+var nwIMG = require('image-size');
 
 var win = nwGUI.Window.get();
 
@@ -31,11 +32,11 @@ $(function(){
 
 function winResize(){
 	if(isMaximized){
-    isMaximized = false;
-  	win.unmaximize();
+    	isMaximized = false;
+  		win.unmaximize();
 	}else{
-    isMaximized = true;
-  	win.maximize();
+    	isMaximized = true;
+  		win.maximize();
 	}
 }
 
@@ -47,8 +48,7 @@ function winClose(){
 }
 
 function winSetTitle(new_title){
-	$("#intro_window > .menu_bar > .window_title").html("<div class='filler'></div>"+new_title);
-	$("#main_window > .menu_bar > .window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
+	$(".menu_bar > .window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
 	document.title = new_title;
 }
 
@@ -86,38 +86,52 @@ $(function(){
 		$(".pj_path > span").html($(this).val());
   	});
 
+	updateRecentProjects();
+
+});
+
+function updateRecentProjects() {
 	// get the config.json
 	var config_path = nwPATH.resolve(nwPROC.cwd(),'includes','config.json');
 	if(nwFILE.existsSync(config_path)){
 		nwFILE.readFile(config_path, 'utf8', function (err,data) {
 		  if (!err) {
-		  	config_data = JSON.parse(data);
-				// update recent projects list
-				for(p in config_data["recent_projects"]){
-					var project = config_data["recent_projects"][p];
-					// show project if it actually exists
-					if(nwFILE.existsSync(nwPATH.resolve(project.path,project.name))){
-						$(".recent_projects > table").append('\
-							<tr>\
-								<td class="name" onclick="openProject(\''+encodeURI(nwPATH.resolve(project.path,project.name,project.name+'.bla'))+'\')">'+project.name+'</td>\
-								<td>'+project.path+'</td>\
-								<td>'+project.date+'</td>\
-							</tr>\
-						');
-					}
+			config_data = JSON.parse(data);
+			//reset recent projects list
+			$(".recent_projects > table").empty();
+			// update recent projects list
+			for(p in config_data["recent_projects"]){
+				var project = config_data["recent_projects"][p];
+				// show project if it actually exists
+				if(nwFILE.existsSync(nwPATH.resolve(project.path,project.name))){
+					$(".recent_projects > table").append('\
+						<tr>\
+							<td class="name" onclick="openProject(\''+encodeURI(nwPATH.resolve(project.path,project.name,project.name+'.bla'))+'\')">'+project.name+'</td>\
+							<td>'+project.path+'</td>\
+							<td>'+project.date+'</td>\
+						</tr>\
+					');
 				}
+			}
 
 			}
 		});
 	}else{
 		writeFile(config_path,config_data);
 	}
-
-});
+}
 
 function showIntroWindow() {
-	$("#intro_window").toggleClass("hidden");
+	$("#intro_window").removeClass("hidden");
+	$(".menu_bar").addClass("intro_active");
 	winToggleMenu();
+}
+
+function hideIntroWindow() {
+	$("#intro_window").addClass("hidden");
+	$(".menu_bar").removeClass("intro_active");
+	// hide project setup window
+	$("#intro_window > .project_setup").addClass("hidden");
 }
 
 function startProjectSetup() {
@@ -140,7 +154,7 @@ function submitProjectSetup(){
 
 function newProject(name,path){
 	// hide intro window
-	$("#intro_window").toggleClass("hidden");
+	hideIntroWindow();
 	// empty lobjects
 	lobjects = {
 		"objects":{},
@@ -210,7 +224,6 @@ function openProject(path){
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);
 
-
 			// update jqTree
 			tree.tree('loadData',JSON.parse(lobjects['tree']));
 
@@ -219,6 +232,9 @@ function openProject(path){
 
 			// change window title
 			winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
+
+			closeAllModals();
+			hideIntroWindow();
 		}
 		else{
 			console.log(err)
@@ -247,6 +263,7 @@ function saveProject(){
 }
 
 function importResource(category,location,callback){
+	console.log('move from' + location)
 	location = decodeURI(location);
 	var folder_path = nwPATH.resolve(project_path,category);
 
@@ -258,14 +275,22 @@ function importResource(category,location,callback){
 	})
 
 	var f_dest = nwPATH.resolve(folder_path,nwPATH.basename(location));
+	// move the file if it's not there
 	if(!nwFILE.exists(f_dest)){
-		nwFILE.createReadStream(location).pipe(nwFILE.createWriteStream(f_dest));
-	}
-	if(callback){
-		callback(f_dest);
+		nwFILE.copy(location,f_dest,function (err) {
+			if (err) return console.error(err)
+			if (callback) {
+				callback(f_dest);
+			}
+		});
 	}
 }
 
 function saveBackup(){
 
+}
+
+function closeAllModals() {
+	closeSpriteModal()
+	closeObjectModal()
 }

@@ -59,7 +59,7 @@ function showObjectModal(name){
 
         // show modal
         $("#modal_object").toggleClass("active");
-    } else {
+    } else if(!spr_modal_open) {
         // another obj was clicked while the modal was still open. show the new obj.
         obj_modal_open = false;
         $("#modal_object").toggleClass("active");
@@ -103,54 +103,34 @@ function showSpriteModal(obj,spr_name){
     // save sprites name. when changes are saved, the old values are still there and must be deleted.
     spr_modal_oldname = spr_name;
 
-    // is the picture saved in project path?
-    var spr_path = decodeURI(obj.sprites[spr_name].path);
-    //if(not in the project){
-    // move to project path
-    //}
+    var spr_path = nwPATH.resolve(decodeURI(obj.sprites[spr_name].path));
 
     // update form values
     $("#in_spr_name").val(spr_name);
 
     // first time seeing this sprite. get its dimensions
-    if(obj.sprites[spr_name].width == 0 && obj.sprites[spr_name].height == 0){
-      console.log(spr_path)
 
-      console.log(obj.sprites[spr_name].width)
-      if(!nwFILE.exists(spr_path)){
-        console.log('get the file!')
-        nwFILE.watchFile(spr_path, function(curr, prev){
-          var loader = new Phaser.Loader(game);
-          loader.image(spr_name,spr_path);
-          var onLoaded = function(){
-            var image = game.cache.getImage(spr_name)
+    if (obj.sprites[spr_name].width == 0 || obj.sprites[spr_name].height == 0) {
+      nwIMG(spr_path, function (err, dimensions) {
+          // set object's image properties
+          obj.sprites[spr_name].width = dimensions.width;
+          obj.sprites[spr_name].height = dimensions.height;
+          $("#in_spr_width").val(obj.sprites[spr_name].width);
+          $("#in_spr_height").val(obj.sprites[spr_name].height);
 
-            // set object's image properties
-            obj.sprites[spr_name].width = image.width;
-            obj.sprites[spr_name].height = image.height;
-            $("#in_spr_width").val(obj.sprites[spr_name].width);
-            $("#in_spr_height").val(obj.sprites[spr_name].height);
+          // set new path
+          obj.sprites[spr_name].path = nwPATH.resolve(project_path,'images',spr_name);
 
-            // set new path
-            obj.sprites[spr_name].path = nwPATH.resolve('images',spr_name);
+          // show the modal
+          $("#modal_sprite").toggleClass("active");
+      });
 
-            // show the modal
-            $("#modal_sprite").toggleClass("active");
-          }
-          loader.onLoadComplete.addOnce(onLoaded);
-          loader.start();
-
-        });
-      }else{
-        console.log('file exists!')
+    }else{
         $("#in_spr_width").val(obj.sprites[spr_name].width);
         $("#in_spr_height").val(obj.sprites[spr_name].height);
 
         // show the modal
         $("#modal_sprite").toggleClass("active");
-      }
-    }else{
-      console.log('dont do any of that')
     }
 
     // set the sprite form values
@@ -227,6 +207,8 @@ function addSprite(file,obj){
   // add sprite to the object's array
   var name = file.split(/(\\|\/)/g).pop();
 
+  console.log(file)
+
   // default values
   var info = {
     path: file,
@@ -259,7 +241,7 @@ function addSpriteDiv(spr_name){
       <div id="values">\
         '+spr_name+'<br>\
         '+info.width+' x '+info.height+'<br>\
-        '+info.frames+' frames\
+        '+info.frames+' frames\ (r:'+info.rows+' c:'+info.columns+')\
       </div>\
     </div>\
   ');
@@ -268,7 +250,7 @@ function addSpriteDiv(spr_name){
 }
 
 function editSprite(obj_name,spr_name){
-  showSpriteModal(lobjects.objects[obj_name],spr_name)
+    showSpriteModal(lobjects.objects[obj_name],spr_name)
 }
 
 function editCode(){

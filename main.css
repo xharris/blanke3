@@ -384,6 +384,31 @@ html {
   height: 30px;
   position: relative;
   overflow: hidden;
+  z-index: 100;
+  margin: 5px;
+  background-color: white;
+  border-radius: 2px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  transition: all ease-in-out 0.4s;
+}
+.menu_bar > .window_menu {
+  top: 0px;
+}
+.menu_bar.intro_active {
+  box-shadow: none;
+  margin: 0px;
+}
+.menu_bar.intro_active > .window_menu {
+  top: -30px;
+}
+.menu_bar.intro_active > .window_title > .icon_container {
+  opacity: 0;
 }
 .menu_bar > .window_title {
   font-size: 14px;
@@ -402,6 +427,8 @@ html {
   width: 32px;
   text-align: center;
   display: inline-block;
+  opacity: 1;
+  transition: opacity ease-in-out 0.4s;
   -webkit-app-region: no-drag;
 }
 .menu_bar > .window_title > .filler {
@@ -477,11 +504,13 @@ html {
 #intro_window {
   z-index: 30;
   background-color: white;
-  width: 100%;
-  height: 100%;
   box-sizing: border-box;
   padding: 5px;
-  position: relative;
+  position: fixed;
+  top: 30px;
+  bottom: 1px;
+  left: 1px;
+  right: 1px;
   opacity: 1;
   transition: all ease-in-out 0.2s;
 }
@@ -490,7 +519,7 @@ html {
   z-index: 0;
   pointer-events: none;
 }
-#intro_window > *:not(.menu_bar) {
+#intro_window > * {
   -webkit-app-region: no-drag;
   box-sizing: border-box;
 }
@@ -502,6 +531,7 @@ html {
   -ms-user-select: none;
   user-select: none;
   border: 1px solid #bdbdbd;
+  background-color: gray;
   padding: 10px;
   margin-top: 10px;
   width: 100%;
@@ -677,11 +707,6 @@ html {
 }
 #main_window > #toolbox:hover {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
-}
-#main_window > .menu_bar {
-  background-color: white;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
 }
 #main_window > #library,
 #main_window #extra_box {

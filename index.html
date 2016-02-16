@@ -3,7 +3,7 @@
   <head>
 
     <!-- jQuery -->
-    <script src="includes/jquery/jquery-1.11.3.min.js"></script>
+    <script src="includes/jquery/jquery-2.2.0.min.js"></script>
     <script src="includes/jquery/colResizable-1.5.min.js"></script>
 
     <!-- Font Awesome -->
@@ -24,27 +24,35 @@
     <script src="js/canvas.js"></script>
     <script src="js/tree.js"></script>
 
+    <script src="node_modules/fs-extra/lib/index.js"></script>
+
   </head>
   <title>Blanke IDE</title>
   <body>
+
+  <!-- title bar -->
+  <div class="menu_bar intro_active win-drag">
+    <div class="window_title">Blanke IDE</div>
+    <div class="window_menu">
+        <div class="btn_back" onclick="showIntroWindow()" title="return to startup page"><i class="fa fa-angle-left"></i></div>
+        <div class="btn_dev" onclick="win.showDevTools()" title="blanke ide inspector"><i class="fa fa-terminal"></i></div>
+    </div>
+
+    <div id="window_buttons" class="win-nodrag">
+
+      <div id="btn_minimize" onclick="win.minimize()"></div>
+
+      <div id="btn_maximize" onclick="winResize()"> </div>
+
+      <div id="btn_close" onclick="winClose()"></div>
+
+    </div>
+  </div>
+
     <div id="intro_window" class="win-drag">
 
-      <div class="menu_bar win-drag">
-        <div class="window_title">Blanke IDE</div>
-
-        <div id="window_buttons" class="win-nodrag">
-
-          <div id="btn_minimize" onclick="win.minimize()"></div>
-
-          <div id="btn_maximize" onclick="winResize()"> </div>
-
-          <div id="btn_close" onclick="winClose()"></div>
-
-        </div>
-      </div>
-
       <div class="splash">
-        blanke
+
       </div>
 
       <div class="actions">
@@ -82,25 +90,6 @@
     </div>
 
     <div id="main_window">
-      <!-- title bar -->
-      <div class="menu_bar win-drag">
-        <div class="window_title">Blanke IDE</div>
-        <div class="window_menu">
-            <div class="btn_back" onclick="showIntroWindow()" title="return to startup page"><i class="fa fa-angle-left"></i></div>
-            <div class="btn_dev" onclick="win.showDevTools()" title="blanke ide inspector"><i class="fa fa-terminal"></i></div>
-        </div>
-
-        <div id="window_buttons" class="win-nodrag">
-
-          <div id="btn_minimize" onclick="win.minimize()"></div>
-
-          <div id="btn_maximize" onclick="winResize()"> </div>
-
-          <div id="btn_close" onclick="winClose()"></div>
-
-        </div>
-      </div>
-
       <div id="library" class="no-select"></div>
 
       <div id="modals">
