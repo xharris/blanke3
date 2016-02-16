@@ -240,7 +240,8 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 }
 #modal_object > #sprites > .sprite > a > .preview {
   background-repeat: no-repeat !important;
-  background-size: cover !important;
+  background-size: contain !important;
+  background-position: center center !important;
   border: 1px dashed #bdbdbd;
   margin: 5px;
   width: 40px;
@@ -409,6 +410,7 @@ html {
 }
 .menu_bar.intro_active > .window_title > .icon_container {
   opacity: 0;
+  pointer-events: none;
 }
 .menu_bar > .window_title {
   font-size: 14px;
@@ -742,8 +744,10 @@ html {
   position: absolute;
   right: 5px;
   bottom: 5px;
-  height: 150px;
-  width: 150px;
+  padding: 5px;
+}
+#main_window #extra_box > .m_coordinates {
+  margin: 0px;
 }
 #main_window #canvas {
   position: absolute !important;

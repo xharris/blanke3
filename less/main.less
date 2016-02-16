@@ -55,6 +55,7 @@ html{
       }
       >.window_title > .icon_container{
           opacity:0;
+          pointer-events:none;
       }
   }
 
@@ -412,8 +413,11 @@ html{
     position:absolute;
     right:5px;
     bottom:5px;
-    height:150px;
-    width:150px;
+    padding:5px;
+
+    >.m_coordinates{
+        margin:0px;
+    }
   }
 
   #canvas{

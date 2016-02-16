@@ -27,7 +27,9 @@ var project_name;
 var config_data = {"recent_projects":[]};
 
 $(function(){
-  $(".recent_projects > table").colResizable();
+  $(".recent_projects > table").colResizable({
+	  liveDrag: true
+  });
 });
 
 function winResize(){
@@ -98,7 +100,8 @@ function updateRecentProjects() {
 		  if (!err) {
 			config_data = JSON.parse(data);
 			//reset recent projects list
-			$(".recent_projects > table").empty();
+			//$(".recent_projects > table").empty();
+			$(".recent_projects > table").colResizable({ disable : true });
 			// update recent projects list
 			for(p in config_data["recent_projects"]){
 				var project = config_data["recent_projects"][p];
@@ -107,12 +110,17 @@ function updateRecentProjects() {
 					$(".recent_projects > table").append('\
 						<tr>\
 							<td class="name" onclick="openProject(\''+encodeURI(nwPATH.resolve(project.path,project.name,project.name+'.bla'))+'\')">'+project.name+'</td>\
-							<td>'+project.path+'</td>\
+							<td title="'+project.path+'">'+project.path+'</td>\
 							<td>'+project.date+'</td>\
 						</tr>\
 					');
 				}
 			}
+
+			$(".recent_projects > table").colResizable({
+				disable: false,
+				liveDrag : true
+			});
 
 			}
 		});
@@ -170,11 +178,7 @@ function newProject(name,path){
 		}
 	}
 	// reset tree
-	tree.tree({
-    data:data,
-    dragAndDrop: true,
-    autoOpen: 0
-  });
+	tree.tree('loadData',data);
 	// set global project variables
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
@@ -243,27 +247,35 @@ function openProject(path){
 }
 
 function saveProject(){
-	// create project folder if not made
-	var file_path = getProjectPath();
-	if(!nwFILE.exists(nwPATH.dirname(file_path))){
-		nwFILE.mkdir(nwPATH.dirname(file_path));
-	}
-
 	// add tree structure to lobjects
 	lobjects['tree'] = tree.tree('toJson');
 
 	// serialize lobjects
 	var save_data = JSON.stringify(lobjects);
 
-	// create project save file
-	writeFile(file_path,save_data);
-
 	// change window title
 	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
+
+	// create project folder if not made
+	var file_path = getProjectPath();
+    nwFILE.stat(nwPATH.dirname(file_path),function(err, stats){
+		if (err) {
+			nwFILE.mkdir(nwPATH.dirname(file_path));
+
+			// create project save file
+			writeFile(file_path,save_data);
+		} else {
+			// create project save file
+			writeFile(file_path,save_data);
+		}
+	});
+
+
+
+
 }
 
 function importResource(category,location,callback){
-	console.log('move from' + location)
 	location = decodeURI(location);
 	var folder_path = nwPATH.resolve(project_path,category);
 

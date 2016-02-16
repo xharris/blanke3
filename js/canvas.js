@@ -183,6 +183,8 @@ function mouseMove(event){
   if(cam_drag){
     setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
   }
+
+  ebox_setCoords(event.x-camera.x-640, event.y-camera.y-320)
 }
 
 function update() {

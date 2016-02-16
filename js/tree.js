@@ -11,7 +11,6 @@ var data = [
 
 ];
 
-
 var tree;
 win.on('loaded', function() {
 
@@ -19,7 +18,23 @@ win.on('loaded', function() {
   tree.tree({
     data:data,
     dragAndDrop: true,
-    autoOpen: 0
+    autoOpen: 0,
+    onCanMove: function (ev_node) {
+        name = ev_node.name;
+        // moving a child
+        if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES" || name == "SOUNDS")){
+            return true;
+        } else {
+            return false;
+        }
+    },
+    onCanMoveTo: function (moved_node, target_node, position) {
+        /* work on later
+        console.log(moved_node);
+        console.log(target_node);
+        console.log(position);
+        */
+    }
   });
 
   tree.bind(
@@ -28,8 +43,12 @@ win.on('loaded', function() {
           ev_node = event.node;
           name = ev_node.name;
           // selected a child
-          if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES")){
-            showObjectModal(name);
+          if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES" || name == "SOUNDS")){
+              var parent = ev_node.parent;
+              tree.tree('selectNode', ev_node);
+              if (parent.name == 'OBJECTS') {
+                  showObjectModal(name);
+              }
           }
           // add a new child
           else{
@@ -66,10 +85,17 @@ win.on('loaded', function() {
   tree.bind(
     'tree.click',
     function(event) {
-
+        // set canvas placer
 
     }
   );
+
+  tree.bind(
+      'tree.move',
+      function (event) {
+
+      }
+  )
 });
 
 

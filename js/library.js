@@ -15,3 +15,11 @@ function getLobjNameByID(id){
     }
   }
 }
+
+function deleteLobj (category, name) {
+    var obj_node = tree.tree('getNodeById',lobjects[category][name].id);
+    tree.tree('removeNode',obj_node);
+    delete lobjects[category][name];
+
+    closeObjectModal();
+}

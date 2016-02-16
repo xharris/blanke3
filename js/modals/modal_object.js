@@ -55,7 +55,11 @@ function showObjectModal(name){
         // clear sprites box
         updateSpriteDivs(opened_obj);
 
-        // add event listener to inputs
+        // update delete button event
+        $("#modal_object > #buttons > #btn_delete").unbind('click');
+        $("#modal_object > #buttons > #btn_delete").click(function(){
+            deleteLobj('objects',name);
+        });
 
         // show modal
         $("#modal_object").toggleClass("active");
@@ -69,9 +73,12 @@ function showObjectModal(name){
 
 function closeObjectModal(){
   if(obj_modal_open){
-    obj_modal_open = false;
-    $("#modal_object").toggleClass("active");
-    saveProject();
+      if(spr_modal_open){
+          closeSpriteModal();
+      }
+      obj_modal_open = false;
+      $("#modal_object").toggleClass("active");
+      saveProject();
   }
 }
 
@@ -109,7 +116,6 @@ function showSpriteModal(obj,spr_name){
     $("#in_spr_name").val(spr_name);
 
     // first time seeing this sprite. get its dimensions
-
     if (obj.sprites[spr_name].width == 0 || obj.sprites[spr_name].height == 0) {
       nwIMG(spr_path, function (err, dimensions) {
           // set object's image properties
@@ -206,8 +212,6 @@ function chooseSprite(){
 function addSprite(file,obj){
   // add sprite to the object's array
   var name = file.split(/(\\|\/)/g).pop();
-
-  console.log(file)
 
   // default values
   var info = {
