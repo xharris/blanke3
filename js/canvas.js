@@ -1,6 +1,7 @@
 var game = new Phaser.Game(screen.width+100, screen.height+100, Phaser.CANVAS, 'canvas', { preload: preload, create: create, update: update, render: render }, antialias=false);
 
-var graphics;
+var graphics,
+    loader;
 
 // where the game square is drawn (helps determine how much margin there is at top and left)
 var g_origin = {
@@ -25,13 +26,18 @@ function preload() {
 function create() {
     // set canvas things
     game.stage.backgroundColor = '#eeeded';
+
     graphics = game.add.graphics(0,0);
+    loader = new Phaser.Loader(game);
 
     // set zoom control
     game.input.mouse.mouseWheelCallback = mouseWheel;
     game.input.mouse.mouseDownCallback = mouseDown;
     game.input.mouse.mouseUpCallback = mouseUp;
     game.input.mouse.mouseMoveCallback = mouseMove;
+
+    game.input.keyboard.onDownCallback = keyDown;
+    game.input.keyboard.onUpCallback = keyUp;
 
     var shadow_offset = 5;
 
@@ -70,6 +76,8 @@ function create() {
 
     // align top left of game square
     setCamPosition(-450,-280);
+
+    Placer.init();
 }
 
 $(window).resize(function(){
@@ -103,8 +111,22 @@ function setCamPosition(x,y){
   camera.y = y;
   game.world.pivot.setTo(-camera.x/zoomFactor,-camera.y/zoomFactor)
 }
+function startCamMove () {
+    cam_drag = true;
+    cam_drag_start.x = (game.input.mousePointer.x)-(camera.x);
+    cam_drag_start.y = (game.input.mousePointer.y)-(camera.y);
+}
+function endCamMove () {
+    cam_drag = false;
+}
 
-
+var mousemove_x, mousemove_y;
+function getCanvasMousePos() {
+    return {
+        x: mousemove_x+game.camera.x-camera.x,
+        y: mousemove_y+game.camera.y-camera.y
+    }
+}
 
 function mouseWheel(event){
   if(zoomFactor > 2 || zoomFactor < 0.5){
@@ -131,60 +153,54 @@ var cam_drag_start = {
   y:0
 }
 
-var placer_show_obj = false;
-var placer_sprite;
 function mouseDown(event){
   // left button
   if(event.which == 1){
-    if(tree_getCategorySelected() == 'OBJECTS' && tree_getSelected() != 'OBJECTS'){
-      var selected_obj = lobjects.objects[tree_getSelected()];
-      // enable placer to show object being placed
-      placer_show_obj = selected_obj;
-      // add image to phaser
-      // ...
-    }
+      Placer.mouseDown(event);
   }
 
   // middle button
   if(event.which == 2){
-    cam_drag = true;
-    cam_drag_start.x = (game.input.mousePointer.x)-(camera.x);
-    cam_drag_start.y = (game.input.mousePointer.y)-(camera.y);
+    startCamMove();
   }
 }
 
 function mouseUp(event){
   // left button
   if(event.which == 1){
-    if(tree_getCategorySelected() == 'OBJECTS' && tree_getSelected() != 'OBJECTS'){
-      var selected_obj = lobjects.objects[tree_getSelected()];
-      // disable placer sprite
-      placer_show_obj = false;
-      // place the object
-      // ...
-      // add it to state entity array
-      // ...
-    }
+      Placer.mouseUp(event);
   }
 
   // middle button
   if(event.which == 2){
-    cam_drag = false;
+    endCamMove();
   }
 }
 
 function mouseMove(event){
-  // placer is placing an object
-  if(placer_show_obj){
-    // draw object on grid at mouse
-    // ...
-  }
+    Placer.update();
 
-  if(cam_drag){
-    setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
-  }
+    if(cam_drag){
+        setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
+    }
 
-  ebox_setCoords(event.x-camera.x-640, event.y-camera.y-320)
+    mousemove_x = event.x;
+    mousemove_y = event.y;
+
+    var mouse_pos = getCanvasMousePos();
+    ebox_setCoords(mouse_pos.x, mouse_pos.y)
+}
+
+function keyDown (event) {
+    if (event.which == Phaser.KeyCode.SPACEBAR) {
+        startCamMove();
+    }
+}
+
+function keyUp (event) {
+    if (event.which == Phaser.KeyCode.SPACEBAR) {
+        endCamMove();
+    }
 }
 
 function update() {
@@ -210,4 +226,89 @@ function update() {
 
 function render() {
 
+}
+
+function canv_addSprite (name, path) {
+    game.load.image(name,path);
+    game.load.start();
+}
+
+var Placer = {
+    obj_name: '',
+    obj_category: '',
+    obj_name: '',
+
+    grid_mx: 0,
+    grid_my: 0,
+
+    sprite: 0,
+
+    init: function () {
+        this.sprite = game.add.sprite(0, 0, '');
+        this.sprite.visible = false;
+    },
+
+    isObjSelected: function () {
+        return (this.obj_name != '');
+    },
+
+    getObjCategory: function () {
+        return this.obj_category;
+    },
+
+    setObj: function (category,name) {
+        this.obj_name = name;
+        this.obj_category = category;
+        this.obj_name = name;
+
+
+        console.log(this.obj_category)
+        console.log(this.obj_name)
+        var obj = lobjects[this.obj_category][this.obj_name];
+
+
+        var img_name = ''; // change to N/A path
+
+        // does image have sprites
+        if (Object.keys(obj.sprites).length > 0) {
+            // get first image
+            img_name = Object.keys(obj.sprites)[0];
+        }
+
+        this.sprite.loadTexture(img_name);
+    },
+
+    update: function () {
+        if (game.input.activePointer.withinGame) {
+            var m_pos = getCanvasMousePos();
+
+            // calculate snap to grid
+            this.grid_mx = Math.floor(m_pos.x / grid_width) * grid_width;
+            this.grid_my = Math.floor(m_pos.y / grid_height) * grid_height;
+
+            // set sprite position
+            if (this.isObjSelected()) {
+                this.sprite.visible = true;
+                this.sprite.x = this.grid_mx;
+                this.sprite.y = this.grid_my;
+            }
+        } else {
+            if (this.isObjectSelected()) {
+                this.sprite.visible = false;
+            }
+        }
+    },
+
+    mouseUp: function (event) {
+
+    },
+
+    mouseDown: function (event) {
+        if(this.isObjSelected() && this.getObjCategory() == 'objects'){
+          // place object
+          // ...
+          // add image to phaser
+          // ...
+        }
+    }
 }

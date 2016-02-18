@@ -156,6 +156,7 @@ function showSpriteModal(obj,spr_name){
 function closeSpriteModal(){
   if(spr_modal_open){
     spr_modal_open = false;
+    updateSpriteDivs(opened_obj);
     $("#modal_sprite").toggleClass("active");
   }
 }
@@ -225,6 +226,8 @@ function addSprite(file,obj){
   }
   obj.sprites[name] = info;
   opened_obj = obj;
+
+  canv_addSprite(name,file);
 
   return name;
 }

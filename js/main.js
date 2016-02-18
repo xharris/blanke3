@@ -225,6 +225,13 @@ function openProject(path){
 			// set lobjects
 			lobjects = JSON.parse(data);
 
+			// preload all sprites for canvas
+			for (obj in lobjects.objects) {
+				for (spr in lobjects.objects[obj].sprites) {
+					canv_addSprite(spr,lobjects.objects[obj].sprites[spr].path)
+				}
+			}
+
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);
 

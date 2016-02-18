@@ -56,7 +56,14 @@ win.on('loaded', function() {
             var node_id = Math.round(Math.random()*1000000)
 
             // get name of new object
-            var obj_name = name.toLowerCase().substring(0,name.length-1)+Object.keys(lobjects[name.toLowerCase()]).length;
+            var cat_name = name.toLowerCase();
+            var obj_name;
+            var obj_name_num = 0;
+            // make sure it's not a duplicate object
+            do {
+                obj_name = cat_name.substring(0,cat_name.length-1)+(Object.keys(lobjects[cat_name]).length+obj_name_num);
+                obj_name_num += 1;
+            } while (obj_name in lobjects[cat_name])
 
             tree.tree(
                 'appendNode',
@@ -86,7 +93,8 @@ win.on('loaded', function() {
     'tree.click',
     function(event) {
         // set canvas placer
-
+        var obj_category = event.node.parent.name.toLowerCase();
+        Placer.setObj(obj_category, event.node.name);
     }
   );
 
