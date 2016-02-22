@@ -20,7 +20,7 @@ var zoomFactor = 1;
 
 
 function preload() {
-
+    game.load.image('blanke_NA','includes/images/NA.png');
 }
 
 function create() {
@@ -123,8 +123,8 @@ function endCamMove () {
 var mousemove_x, mousemove_y;
 function getCanvasMousePos() {
     return {
-        x: mousemove_x+game.camera.x-camera.x,
-        y: mousemove_y+game.camera.y-camera.y
+        x: parseInt((mousemove_x+game.camera.x-camera.x)/zoomFactor),
+        y: parseInt((mousemove_y+game.camera.y-camera.y)/zoomFactor)
     }
 }
 
@@ -144,7 +144,7 @@ function mouseWheel(event){
   var zoom_tween = game.add.tween(game.world.scale).to({x:zoomFactor,y:zoomFactor}, 200, Phaser.Easing.Sinusoidal.InOut);
   zoom_tween.start();
 
-  zoom_tween.onComplete.add(zoomFinish,this);
+  //zoom_tween.onComplete.add(zoomFinish,this);
 }
 
 var cam_drag = false;
@@ -178,8 +178,6 @@ function mouseUp(event){
 }
 
 function mouseMove(event){
-    Placer.update();
-
     if(cam_drag){
         setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
     }
@@ -204,24 +202,7 @@ function keyUp (event) {
 }
 
 function update() {
-  // move camera with mouse
-
-  //console.log(game.input.activePointer.middleButton.isDown);
-
-  /*
-  if (game.input.activePointer.isDown == Phaser.Mouse.MIDDLE_BUTTON) {
-  	if (game.origDragPoint) {
-  		// move the camera by the amount the mouse has moved since last update
-  		game.world.pivot.x += (game.origDragPoint.x/zoomFactor) - (game.input.activePointer.position.x/zoomFactor);
-  		game.world.pivot.y += (game.origDragPoint.y/zoomFactor) - (game.input.activePointer.position.y/zoomFactor);
-  	}
-  	// set new drag origin to current position
-  	game.origDragPoint = game.input.activePointer.position.clone();
-  }
-  else {
-  	game.origDragPoint = null;
-  }
-  */
+    Placer.update();
 }
 
 function render() {
@@ -267,7 +248,7 @@ var Placer = {
         var obj = lobjects[this.obj_category][this.obj_name];
 
 
-        var img_name = ''; // change to N/A path
+        var img_name = 'blanke_NA'; // change to N/A path
 
         // does image have sprites
         if (Object.keys(obj.sprites).length > 0) {
@@ -293,7 +274,7 @@ var Placer = {
                 this.sprite.y = this.grid_my;
             }
         } else {
-            if (this.isObjectSelected()) {
+            if (this.isObjSelected()) {
                 this.sprite.visible = false;
             }
         }

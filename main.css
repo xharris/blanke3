@@ -474,13 +474,12 @@ html {
   bottom: 0px;
 }
 .menu_bar > #window_buttons > div {
-  width: 21px;
-  height: 21px;
+  width: 20px;
+  height: 20px;
   display: inline-block;
   text-align: center;
-  border: 1px solid #e0e0e0;
   border-right: none;
-  margin: 4px;
+  margin: 5px;
 }
 .menu_bar > #window_buttons > div#btn_close,
 .menu_bar > #window_buttons > div#btn_maximize,

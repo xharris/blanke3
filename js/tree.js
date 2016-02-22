@@ -1,13 +1,13 @@
 var data = [
-  {label: 'OBJECTS'},
+  {label: 'OBJECTS', id: 'cat_OBJECTS'},
 
-  {label: 'TILES'},
+  {label: 'TILES', id: 'cat_TILES'},
 
-  {label: 'REGIONS'},
+  {label: 'REGIONS', id: 'cat_REGIONS'},
 
-  {label: 'SOUNDS'},
+  {label: 'SOUNDS', id: 'cat_SOUNDS'},
 
-  {label: 'STATES'}
+  {label: 'STATES', id: 'cat_STATES'}
 
 ];
 
@@ -52,39 +52,9 @@ win.on('loaded', function() {
           }
           // add a new child
           else{
-            var child = ev_node.children[ev_node.children.length-1];
-            var node_id = Math.round(Math.random()*1000000)
+            addLobj(name.toLowerCase());
 
-            // get name of new object
-            var cat_name = name.toLowerCase();
-            var obj_name;
-            var obj_name_num = 0;
-            // make sure it's not a duplicate object
-            do {
-                obj_name = cat_name.substring(0,cat_name.length-1)+(Object.keys(lobjects[cat_name]).length+obj_name_num);
-                obj_name_num += 1;
-            } while (obj_name in lobjects[cat_name])
-
-            tree.tree(
-                'appendNode',
-                {
-                    label: obj_name,
-                    id: node_id
-                },
-                ev_node
-            );
             tree.tree('openNode', ev_node);
-            // add it to the library
-            var data;
-            if(name == "OBJECTS"){
-              data = {
-                id: node_id,
-                depth: 0,
-                sprites:{}
-              }
-            }
-
-            addLobj(name.toLowerCase(),obj_name,data);
           }
       }
   );
@@ -92,9 +62,11 @@ win.on('loaded', function() {
   tree.bind(
     'tree.click',
     function(event) {
-        // set canvas placer
-        var obj_category = event.node.parent.name.toLowerCase();
-        Placer.setObj(obj_category, event.node.name);
+        if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS")){
+            // set canvas placer
+            var obj_category = event.node.parent.name.toLowerCase();
+            Placer.setObj(obj_category, event.node.name);
+        }
     }
   );
 

@@ -182,6 +182,8 @@ function newProject(name,path){
 	// set global project variables
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
+
+	addLobj('states');
 	// save everything
 	saveProject();
 	addRecentProject(name,path);
