@@ -22,14 +22,20 @@ function addLobj(category,name,info){
         if (category == "states") {
             info = {
                 entities:{
-                    objects:{},
-                    tiles:{}
+                    objects:[],
+                    tiles:[],
+                    regions:[]
                 }
             }
         }
     }
 
     lobjects[category][name] = info;
+
+    if (category == 'states') {
+        curr_state = name;
+        console.log('its '+name);
+    }
 
     console.log(lobjects[category][name]);
 

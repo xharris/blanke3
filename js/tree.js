@@ -63,9 +63,15 @@ win.on('loaded', function() {
     'tree.click',
     function(event) {
         if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS")){
-            // set canvas placer
             var obj_category = event.node.parent.name.toLowerCase();
-            Placer.setObj(obj_category, event.node.name);
+            var obj_name = event.node.name;
+            if (Placer.isObjSelected() && Placer.getObjName() == obj_name) {
+                // object is being deselected
+                Placer.reset();
+            } else {
+                // set canvas placer
+                Placer.setObj(obj_category, obj_name);
+            }
         }
     }
   );

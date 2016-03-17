@@ -123,6 +123,29 @@ ul.jqtree-tree .jqtree-element:hover {
 ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   color: black !important;
 }
+#extra_box {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  padding: 5px;
+  text-align: center;
+}
+#extra_box > .m_coordinates,
+#extra_box .m_zoom {
+  margin: 0px;
+}
+#extra_box > .m_zoom {
+  background-color: transparent;
+  border: none;
+  width: 24px;
+}
+#extra_box > .m_zoom::-webkit-outer-spin-button,
+#extra_box > .m_zoom::-webkit-inner-spin-button {
+  /* display: none; <- Crashes Chrome on hover */
+  -webkit-appearance: none;
+  margin: 0;
+  /* <-- Apparently some margin are still there even though it's hidden */
+}
 #modal_object {
   position: absolute;
   margin: 10px 0px;
@@ -502,9 +525,12 @@ html {
   font-size: 16px !important;
   margin-top: 4px !important;
 }
+#intro_window,
+#main_window {
+  background-color: #EEEDED;
+}
 #intro_window {
   z-index: 30;
-  background-color: white;
   box-sizing: border-box;
   padding: 5px;
   position: fixed;
@@ -738,15 +764,6 @@ html {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   padding: 10px;
   box-sizing: border-box;
-}
-#main_window #extra_box {
-  position: absolute;
-  right: 5px;
-  bottom: 5px;
-  padding: 5px;
-}
-#main_window #extra_box > .m_coordinates {
-  margin: 0px;
 }
 #main_window #canvas {
   position: absolute !important;

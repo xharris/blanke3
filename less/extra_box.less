@@ -1,0 +1,26 @@
+//main: main.less
+
+#extra_box{
+    position:absolute;
+    right:5px;
+    bottom:5px;
+    padding:5px;
+    text-align:center;
+
+    >.m_coordinates,.m_zoom{
+        margin:0px;
+    }
+
+    >.m_zoom{
+        background-color:transparent;
+        border:none;
+        width:24px;
+
+        &::-webkit-outer-spin-button,
+        &::-webkit-inner-spin-button {
+            /* display: none; <- Crashes Chrome on hover */
+            -webkit-appearance: none;
+            margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+        }
+    }
+}

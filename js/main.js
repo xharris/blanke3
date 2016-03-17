@@ -24,6 +24,8 @@ var lobjects = {
 var project_path;
 var project_name;
 
+var curr_state; // (state name)
+
 var config_data = {"recent_projects":[]};
 
 $(function(){

@@ -18,7 +18,6 @@ var game_border_weight = 2;
 
 var zoomFactor = 1;
 
-
 function preload() {
     game.load.image('blanke_NA','includes/images/NA.png');
 }
@@ -128,23 +127,38 @@ function getCanvasMousePos() {
     }
 }
 
-function mouseWheel(event){
-  if(zoomFactor > 2 || zoomFactor < 0.5){
-    if(zoomFactor < 0.5)zoomFactor = 0.5;
-    else if(zoomFactor > 2)zoomFactor = 2;
-    return;
-  }
-  // zoom camera
-  if(game.input.mouse.wheelDelta === Phaser.Mouse.WHEEL_UP) {
-    zoomFactor += 0.1;
-  } else {
-    zoomFactor -= 0.1;
-  }
-  // set zoom tween
-  var zoom_tween = game.add.tween(game.world.scale).to({x:zoomFactor,y:zoomFactor}, 200, Phaser.Easing.Sinusoidal.InOut);
-  zoom_tween.start();
+var prev_zoomFactor;
+function setZoom (factor) {
+    if(factor > 2 || factor < 0.5){
+        ebox_setZoom(zoomFactor*100);
+        return;
+    }
 
-  //zoom_tween.onComplete.add(zoomFinish,this);
+    prev_zoomFactor = zoomFactor;
+    zoomFactor = factor;
+
+    // set zoom tween
+    game.world.scale.setTo(zoomFactor)
+    //setCamPosition(camera.x,camera.y)
+    //var zoom_tween = game.add.tween(game.world.scale).to({x:zoomFactor,y:zoomFactor}, 200, Phaser.Easing.Sinusoidal.InOut);
+    //zoom_tween.start();
+
+    //zoom_tween.onComplete.add(zoomFinish,this);
+    ebox_setZoom(zoomFactor*100);
+}
+
+function zoomFinish () {
+    //game.world.pivot.setTo(-camera.x/zoomFactor,-camera.y/zoomFactor);
+
+}
+
+function mouseWheel(event){
+    // zoom camera
+    if(game.input.mouse.wheelDelta === Phaser.Mouse.WHEEL_UP) {
+      setZoom(zoomFactor + 0.1);
+    } else {
+      setZoom(zoomFactor - 0.1);
+    }
 }
 
 var cam_drag = false;
@@ -186,7 +200,7 @@ function mouseMove(event){
     mousemove_y = event.y;
 
     var mouse_pos = getCanvasMousePos();
-    ebox_setCoords(mouse_pos.x, mouse_pos.y)
+    ebox_setCoords(mouse_pos.x/zoomFactor, mouse_pos.y/zoomFactor)
 }
 
 function keyDown (event) {
@@ -206,7 +220,10 @@ function update() {
 }
 
 function render() {
+    game.debug.text("cam_origin", camera.x, camera.y, 0x000000 );
 
+    game.debug.pixel(game.world.pivot.x, game.world.pivot.y, 'rgba(0,0,0,1)' ) ;
+    game.debug.text("world_pivot", game.world.pivot.x, game.world.pivot.y,'rgba(0,0,0,1)' );
 }
 
 function canv_addSprite (name, path) {
@@ -217,12 +234,13 @@ function canv_addSprite (name, path) {
 var Placer = {
     obj_name: '',
     obj_category: '',
-    obj_name: '',
 
     grid_mx: 0,
     grid_my: 0,
 
     sprite: 0,
+
+    can_place: true,
 
     init: function () {
         this.sprite = game.add.sprite(0, 0, '');
@@ -237,16 +255,22 @@ var Placer = {
         return this.obj_category;
     },
 
+    getObjName: function () {
+        return this.obj_name;
+    },
+
+    // set placer to nothing
+    reset: function () {
+        this.obj_name = '';
+        this.obj_category = '';
+    },
+
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category;
         this.obj_name = name;
 
-
-        console.log(this.obj_category)
-        console.log(this.obj_name)
         var obj = lobjects[this.obj_category][this.obj_name];
-
 
         var img_name = 'blanke_NA'; // change to N/A path
 
@@ -281,15 +305,25 @@ var Placer = {
     },
 
     mouseUp: function (event) {
-
+        if(this.isObjSelected() && this.getObjCategory() == 'objects' && this.can_place){
+            var new_spr = game.add.sprite(this.sprite.x,this.sprite.y,this.sprite.key);
+            // place object
+            // ...
+            // add image to phaser
+            // ...
+            // add to library
+            library['states'][curr_state].entities.objects.push(
+                {
+                    x:new_spr.x,
+                    y:new_spr.y,
+                    obj_name:this.obj_name
+                }
+            )
+            console.log(lobjects)
+        }
     },
 
     mouseDown: function (event) {
-        if(this.isObjSelected() && this.getObjCategory() == 'objects'){
-          // place object
-          // ...
-          // add image to phaser
-          // ...
-        }
+        this.can_place = game.input.activePointer.withinGame;
     }
 }

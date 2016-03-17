@@ -3,6 +3,7 @@
 @import "classes";
 @import "scrollbar";
 @import "tree";
+@import "extra_box";
 @import "modal_object";
 @import "modal_sprite";
 
@@ -158,9 +159,12 @@ html{
   }
 }
 
+#intro_window, #main_window {
+    background-color:#EEEDED;
+}
+
 #intro_window{
   z-index:30;
-  background-color: white;
   box-sizing:border-box;
   padding:5px;
   position:fixed;
@@ -409,16 +413,6 @@ html{
     }
   }
 
-  #extra_box{
-    position:absolute;
-    right:5px;
-    bottom:5px;
-    padding:5px;
-
-    >.m_coordinates{
-        margin:0px;
-    }
-  }
 
   #canvas{
     position:absolute !important;
