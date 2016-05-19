@@ -5,6 +5,7 @@ var nwPROC = require('process');
 var nwPATH = require('path');
 var nwFILE = require('fs-extra');
 var nwIMG = require('image-size');
+var nwUTIL = require('util');
 
 var win = nwGUI.Window.get();
 
@@ -29,9 +30,15 @@ var curr_state; // (state name)
 var config_data = {"recent_projects":[]};
 
 $(function(){
-  $(".recent_projects > table").colResizable({
-	  liveDrag: true
-  });
+	$(".recent_projects > table").colResizable({
+		liveDrag: true
+	});
+
+	//startProjectSetup();
+	winSetTitle(IDE_NAME);
+
+	//newProject(nwPATH.resolve()
+
 });
 
 function winResize(){
@@ -80,20 +87,6 @@ function chooseFile(name,callback) {
   chooser.click();
 }
 
-$(function(){
-
-	//startProjectSetup();
-	winSetTitle(IDE_NAME);
-
-	// update text on folder select
-	$("#setup_path").change(function(evt) {
-		$(".pj_path > span").html($(this).val());
-  	});
-
-	updateRecentProjects();
-
-});
-
 function updateRecentProjects() {
 	// get the config.json
 	var config_path = nwPATH.resolve(nwPROC.cwd(),'includes','config.json');
@@ -132,18 +125,24 @@ function updateRecentProjects() {
 }
 
 function showIntroWindow() {
+	/*
 	$("#intro_window").removeClass("hidden");
 	$(".menu_bar").addClass("intro_active");
 	winToggleMenu();
+	*/
 }
 
 function hideIntroWindow() {
+	/*
 	$("#intro_window").addClass("hidden");
 	$(".menu_bar").removeClass("intro_active");
 	// hide project setup window
 	$("#intro_window > .project_setup").addClass("hidden");
+	*/
 }
 
+// startProjecSetup()
+// makes new project form visible
 function startProjectSetup() {
 	// set save path value
 	var proj_name = $("#setup_name").val();
@@ -155,11 +154,13 @@ function startProjectSetup() {
 	$("#intro_window > .project_setup").removeClass("hidden");
 }
 
+// submitProjectSetup()
+// submits new project form
 function submitProjectSetup(){
 	var pj_name = $("#setup_name").val();
 	var pj_path = $("#setup_path").val() || nwPATH.resolve(nwPROC.cwd(),'PROJECTS');
 
-	newProject(pj_name,pj_path)
+	newProject(pj_name,pj_path);
 }
 
 function newProject(name,path){
