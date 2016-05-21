@@ -78,6 +78,12 @@ function closeObjectModal(){
       }
       obj_modal_open = false;
       $("#modal_object").toggleClass("active");
+
+      Placer.reset();
+      tree.tree('getSelectedNodes').forEach(function(obj){
+          tree.tree('removeFromSelection', obj);
+      })
+
       autosaveProject();
   }
 }

@@ -21,11 +21,7 @@ function addLobj(category,name,info){
         }
         if (category == "states") {
             info = {
-                entities:{
-                    objects:[],
-                    tiles:[],
-                    regions:[]
-                }
+                entity_json : ""
             }
         }
     }
@@ -34,23 +30,22 @@ function addLobj(category,name,info){
 
     if (category == 'states') {
         curr_state = name;
-        console.log('its '+name);
+        canv_newState();
+        canv_saveState();
     }
 
-    console.log(lobjects[category][name]);
+    var node_id = Math.round(Math.random()*1000000);
+    lobjects[category][name].id = node_id;
 
-  var node_id = Math.round(Math.random()*1000000);
-  lobjects[category][name].id = node_id;
-
-  var category_node = tree.tree('getNodeById', 'cat_'+category.toUpperCase());
-  tree.tree(
-      'appendNode',
-      {
-          label: name,
-          id: node_id
-      },
-      category_node
-  );
+    var category_node = tree.tree('getNodeById', 'cat_' + category.toUpperCase());
+    tree.tree(
+        'appendNode',
+        {
+            label: name,
+            id: node_id
+        },
+        category_node
+    );
 }
 
 function getLobjByName(name){

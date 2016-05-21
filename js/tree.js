@@ -62,15 +62,24 @@ win.on('loaded', function() {
   tree.bind(
     'tree.click',
     function(event) {
-        if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS")){
-            var obj_category = event.node.parent.name.toLowerCase();
-            var obj_name = event.node.name;
-            if (Placer.isObjSelected() && Placer.getObjName() == obj_name) {
-                // object is being deselected
-                Placer.reset();
-            } else {
-                // set canvas placer
-                Placer.setObj(obj_category, obj_name);
+        ev_node = event.node;
+        name = ev_node.name;
+
+        if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES")){
+            var obj_category = ev_node.parent.name;
+            var obj_name = name;
+
+            if (obj_category == "OBJECTS") {
+                if (Placer.isObjSelected() && Placer.getObjName() == obj_name) {
+                    // object is being deselected
+                    Placer.reset();
+                } else {
+                    // set canvas placer
+                    Placer.setObj(obj_category, obj_name);
+                }
+            }
+            else if (obj_category == "STATES") {
+                canv_loadState(obj_name);
             }
         }
     }
@@ -109,6 +118,10 @@ function tree_getCategorySelected(){
   }
 }
 
+function tree_isCategorySelected() {
+    return (tree_getSelected() == tree_getCategorySelected());
+}
+
 function tree_getSelected(){
   var selected = tree.tree('getSelectedNode');
 
@@ -122,7 +135,6 @@ function tree_getSelected(){
 
 function tree_reset(){
 	tree.tree('loadData',data);
-    addLobj('states');
 }
 
         //save to json

@@ -33,20 +33,7 @@ var config_data = {"recent_projects":[]};
 
 
 $(function(){
-	project_path = nwPATH.resolve(nwPROC.cwd(),'PROJECTS');
-	project_name = 'project0';
-	winSetTitle(IDE_NAME);
-
-	// generate default project name
-	nwFILE.readdir(project_path, function(err, files){
-		console.log(files);
-		if (!err) {
-			project_name = 'project' + files.length;
-			newProject(project_name, project_path);
-		} else {
-			newProject(project_name, project_path);
-		}
-	})
+	btn_newProject();
 });
 
 function winResize(){
@@ -212,6 +199,23 @@ function submitProjectSetup(){
 	newProject(pj_name,pj_path);
 }
 
+// needs work. doesn't clear our previous project.
+function btn_newProject(){
+	project_path = nwPATH.resolve(nwPROC.cwd(),'PROJECTS');
+	project_name = 'project0';
+	winSetTitle(IDE_NAME);
+
+	// generate default project name
+	nwFILE.readdir(project_path, function(err, files){
+		if (!err) {
+			project_name = 'project' + files.length;
+			newProject(project_name, project_path);
+		} else {
+			newProject(project_name, project_path);
+		}
+	})
+}
+
 function newProject(name,path){
 	// empty lobjects
 	lobjects = {
@@ -228,11 +232,12 @@ function newProject(name,path){
 		}
 	}
 	// set global project variables
-	console.log(path + name)
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
 
 	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
+
+    //addLobj('states');
 
 	// save everything
 	//addRecentProject(name,path);
@@ -292,14 +297,12 @@ function openProject(path){
 			// set lobjects
 			lobjects = JSON.parse(data);
 
-			// preload all sprites for canvas
-			/*
-			for (obj in lobjects.objects) {
-				for (spr in lobjects.objects[obj].sprites) {
-					canv_addSprite(spr,lobjects.objects[obj].sprites[spr].path)
-				}
-			}
-			*/
+			tree_reset();
+			Placer.reset();
+
+			// show first state
+			curr_state = Object.keys(lobjects.states)[0];
+			canv_loadState(Object.keys(lobjects.states)[0]);
 
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);
@@ -314,7 +317,6 @@ function openProject(path){
 			winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 
 			closeAllModals();
-			hideIntroWindow();
 		}
 		else{
 			console.log(err)
@@ -373,6 +375,10 @@ function importResource(category,location,callback){
 			}
 		});
 	}
+}
+
+function getResourcePath(category,name) {
+	return nwPATH.resolve(getProjectPath(),category,name);
 }
 
 function saveBackup(){

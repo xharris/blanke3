@@ -1,7 +1,7 @@
 // where the room square is drawn (helps determine how much margin there is at top and left)
 var g_origin = {
-  x:187,
-  y:41
+  x:185,
+  y:40
 }
 
 var GAME_MARGIN = 150;
@@ -32,7 +32,29 @@ var mouse = {
 
 function initializeCanvas() {
     canvas = new fabric.Canvas('canvas');
+    canvas.setWidth(0);
+    canvas.setHeight(0);
 
+    canvas.on('mouse:down', function(options) {
+        mouse.isDown = true;
+
+        Placer.mouseUp();
+    });
+    canvas.on('mouse:up', function(options) {
+        mouse.isDown = false;
+    });
+    canvas.on('mouse:move', function(options) {
+        mouse.x = options.e.clientX;
+        mouse.y = options.e.clientY;
+        ebox_setCoords (mouse.x - g_origin.x - game_margin_lr, mouse.y - g_origin.y - game_margin_tb)
+    });
+    canvas.on('object:modified', function(options) {
+        canv_saveState();
+    });
+
+}
+
+function canv_setupRoomRect(){
     // room bounds
     room_rect = new fabric.Rect({
         left: game_margin_lr,
@@ -46,25 +68,14 @@ function initializeCanvas() {
         stroke: 'black',
         strokeWidth: game_border_weight
     });
+    room_rect.toObject = function() {
+        return;
+    };
 
     canvas.add(room_rect);
     room_rect.moveTo(0);
 
     setRoomSize();
-
-    canvas.on('mouse:down', function(options) {
-        mouse.isDown = true;
-
-        Placer.mouseUp();
-    });
-    canvas.on('mouse:up', function(options) {
-        mouse.isDown = false;
-    });
-    canvas.on('mouse:move', function(options) {
-        mouse.x = options.e.clientX;
-        mouse.y = options.e.clientY;
-    });
-
 }
 
 function setGridSize(width, height) {
@@ -122,6 +133,10 @@ function _setGridSize(width, height) {
     for (var l in grid_lines) {
         canvas.add(grid_lines[l]);
         grid_lines[l].moveTo(1);
+
+        grid_lines[l].toObject = function() {
+            return;
+        };
     }
 
 
@@ -130,10 +145,8 @@ function _setGridSize(width, height) {
 
         if (!keys.shift) {
             options.target.set({
-                left: (Math.round(options.target.left / grid_width) * grid_width) +
-                    ((GAME_MARGIN % grid_width)),
-                top: (Math.round(options.target.top / grid_height) * grid_height) +
-                    ((GAME_MARGIN % grid_width))
+                left: (Math.round(options.target.left / grid_width) * grid_width) + (GAME_MARGIN % grid_width) - grid_width,
+                top: (Math.round(options.target.top / grid_height) * grid_height) + (GAME_MARGIN % grid_width) - grid_height
             });
         }
 
@@ -169,20 +182,47 @@ function _setRoomSize(width, height) {
 $(function(){
     initializeCanvas();
 
-    var circle = new fabric.Circle({
-      radius: 20, fill: 'green', left: 0, top: 0
-    });
-    var triangle = new fabric.Triangle({
-      width: 20, height: 30, fill: 'blue', left: 0, top: 0
-    });
-
-    canvas.add(circle, triangle);
-    canvas.renderAll();
 });
+
+// canv_newState()
+// clears all objects and remakes the grid
+function canv_newState() {
+    // clear objects
+    canvas.clear();
+    canv_setupRoomRect();
+}
+
+// canv_loadState()
+// clears all objects and loads new ones from a state JSON
+function canv_loadState(state_name) {
+    //canv_newState();
+    canvas.loadFromJSON(lobjects.states[state_name].entity_json, canvas.renderAll.bind(canvas), function(o, obj) {
+        if (o.lobj_type) {
+            obj.setControlsVisibility({
+                bl: false,
+                br: false,
+                mb: false,
+                ml: false,
+                mr: false,
+                mt: false,
+                tl: false,
+                tr: false
+            });
+        }
+    });
+    canv_setupRoomRect();
+}
+
+// canv_saveState()
+// saves everything but the grid in a JSON
+function canv_saveState() {
+    lobjects.states[curr_state].entity_json = canvas.toJSON(['lobj_type','instance_id','obj_id','evented','selectable']);
+}
 
 var Placer = {
     obj_name: '',
     obj_category: '',
+    img_path: '',
 
     can_place: true,
 
@@ -210,35 +250,50 @@ var Placer = {
 
     setObj: function (category,name) {
         this.obj_name = name;
-        this.obj_category = category;
-        this.obj_name = name;
-
-        var obj = lobjects[this.obj_category][this.obj_name];
-
-        var img_name = 'blanke_NA'; // change to N/A path
-
-        // does image have sprites
-        if (Object.keys(obj.sprites).length > 0) {
-            // get first image
-            img_name = Object.keys(obj.sprites)[0];
-        }
+        this.obj_category = category.toLowerCase();
+        console.log('set ' + category + name)
     },
 
     mouseUp: function (event) {
-        if(this.isObjSelected() && this.getObjCategory() == 'objects' && this.can_place){
-            // place object
-            var new_spr =  new fabric.Triangle({
-              width: 20, height: 30, fill: 'blue', left: mouse.x, top: mouse.y
+        if(this.isObjSelected() && this.getObjCategory() == 'objects' && this.can_place && curr_state){
+
+            var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
+            // does image have sprites
+            var obj = lobjects[this.obj_category][this.obj_name];
+            if (Object.keys(obj.sprites).length > 0) {
+                // get first image
+                img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
+            }
+
+            // place object, add to state entity list
+            fabric.Image.fromURL(img_path, function(oImg) {
+                var x = (Math.round((mouse.x - g_origin.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width));
+                var y = (Math.round((mouse.y - g_origin.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width));
+                Placer.placeObj(oImg, x, y);
             });
-            // add to library
-            library['states'][curr_state].entities.objects.push(
-                {
-                    x:new_spr.x,
-                    y:new_spr.y,
-                    obj_name:this.obj_name
-                }
-            )
-            console.log(lobjects)
         }
     },
+
+    placeObj: function(obj, x, y) {
+        obj.set('left', x);
+        obj.set('top', y);
+        obj.set('lobj_type', this.obj_category);
+        obj.set('instance_id', Math.round(Math.random()*1000000));
+        obj.set('obj_id', lobjects[this.obj_category][this.obj_name].id);
+        obj.setControlsVisibility({
+            bl: false,
+            br: false,
+            mb: false,
+            ml: false,
+            mr: false,
+            mt: false,
+            tl: false,
+            tr: false
+        });
+
+        canvas.add(obj);
+
+        // serialize
+        canv_saveState();
+    }
 }
