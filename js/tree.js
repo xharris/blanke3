@@ -82,6 +82,8 @@ win.on('loaded', function() {
 
       }
   )
+
+  tree_reset();
 });
 
 
@@ -116,6 +118,11 @@ function tree_getSelected(){
   }else{
     return false;
   }
+}
+
+function tree_reset(){
+	tree.tree('loadData',data);
+    addLobj('states');
 }
 
         //save to json

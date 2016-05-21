@@ -308,8 +308,8 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   margin-top: 10px;
   top: 28px;
   left: 185px;
-  right: 5px;
-  bottom: 5px;
+  right: 15px;
+  bottom: 15px;
   opacity: 0;
   z-index: -18;
 }

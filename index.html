@@ -16,6 +16,10 @@
     <script src="includes/jqTree/tree.jquery.js"></script>
     <link rel="stylesheet" href="includes/jqTree/jqtree.css"/>
 
+    <!-- npm modules -->
+    <script src="node_modules/fs-extra/lib/index.js"></script>
+    <script src="node_modules/keystate/keystate.js"></script>
+
     <link rel="stylesheet" href="main.css"/>
 
     <script src="js/main.js"></script>
@@ -25,7 +29,6 @@
     <script src="js/extra_box.js"></script>
     <script src="js/tree.js"></script>
 
-    <script src="node_modules/fs-extra/lib/index.js"></script>
 
 </head>
 <title>Blanke IDE</title>
@@ -35,6 +38,8 @@
     <div class="menu_bar intro_active win-drag">
         <div class="window_title">Blanke IDE</div>
         <div class="window_menu">
+            <div class="btn_open" onclick="btn_openProject()" title="open"><i class="fa fa-folder-open-o"></i></div>
+            <div class="btn_save" onclick="saveProject()" title="save"><i class="fa fa-floppy-o"></i></div>
             <div class="btn_dev" onclick="win.showDevTools()" title="inspector"><i class="fa fa-terminal"></i></div>
         </div>
 
@@ -147,6 +152,8 @@
         <div class="canvas_container">
             <canvas id="canvas"></canvas>
         </div>
+
+        <input style="display:none;" id="pj_open_dialog" type="file" />
 
     </div>
 </body>

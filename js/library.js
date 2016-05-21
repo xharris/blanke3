@@ -51,8 +51,6 @@ function addLobj(category,name,info){
       },
       category_node
   );
-
-  saveProject();
 }
 
 function getLobjByName(name){

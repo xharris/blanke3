@@ -4,7 +4,7 @@ var g_origin = {
   y:41
 }
 
-var GAME_MARGIN = 200;
+var GAME_MARGIN = 150;
 var GRID_WIDTH = 32;
 var GRID_HEIGHT = 32;
 
@@ -23,6 +23,12 @@ var game_margin_lr = GAME_MARGIN;
 var game_border_weight = 1;
 
 var zoomFactor = 1;
+
+var mouse = {
+    x : 0,
+    y : 0,
+    isDown : false
+}
 
 function initializeCanvas() {
     canvas = new fabric.Canvas('canvas');
@@ -45,9 +51,36 @@ function initializeCanvas() {
     room_rect.moveTo(0);
 
     setRoomSize();
+
+    canvas.on('mouse:down', function(options) {
+        mouse.isDown = true;
+
+        Placer.mouseUp();
+    });
+    canvas.on('mouse:up', function(options) {
+        mouse.isDown = false;
+    });
+    canvas.on('mouse:move', function(options) {
+        mouse.x = options.e.clientX;
+        mouse.y = options.e.clientY;
+    });
+
 }
 
 function setGridSize(width, height) {
+    _setGridSize(width, height);
+    _setRoomSize();
+}
+
+function setRoomSize(width, height) {
+    game_width = width || game_width;
+    game_height = height || game_height;
+
+    _setGridSize();
+    _setRoomSize(width, height);
+}
+
+function _setGridSize(width, height) {
     grid_width = width || grid_width;
     grid_height = height || grid_height;
 
@@ -58,8 +91,8 @@ function setGridSize(width, height) {
     grid_lines = []
 
     // edit game_margin to be a multiple of grid size
-    game_margin_tb = GAME_MARGIN - (GAME_MARGIN % grid_height);
-    game_margin_lr = GAME_MARGIN - (GAME_MARGIN % grid_width);
+    game_margin_tb = GAME_MARGIN;//GAME_MARGIN - (GAME_MARGIN % grid_height);
+    game_margin_lr = GAME_MARGIN;//GAME_MARGIN - (GAME_MARGIN % grid_width);
 
     // draw grid
     // vertical lines
@@ -94,21 +127,21 @@ function setGridSize(width, height) {
 
     // snap to grid
     canvas.on('object:moving', function(options) {
-        options.target.set({
-            left: Math.round(options.target.left / grid_width) * grid_width,
-            top: Math.round(options.target.top / grid_height) * grid_height
-        });
+
+        if (!keys.shift) {
+            options.target.set({
+                left: (Math.round(options.target.left / grid_width) * grid_width) +
+                    ((GAME_MARGIN % grid_width)),
+                top: (Math.round(options.target.top / grid_height) * grid_height) +
+                    ((GAME_MARGIN % grid_width))
+            });
+        }
+
     });
 
 }
 
-function setRoomSize(width, height) {
-    game_width = width || game_width;
-    game_height = height || game_height;
-
-    // remake the grid
-    setGridSize();
-
+function _setRoomSize(width, height) {
     // room + margins
     var new_width = game_width+(game_margin_lr*2);
     var new_height = game_height+(game_margin_tb*2);
@@ -136,25 +169,25 @@ function setRoomSize(width, height) {
 $(function(){
     initializeCanvas();
 
+    var circle = new fabric.Circle({
+      radius: 20, fill: 'green', left: 0, top: 0
+    });
+    var triangle = new fabric.Triangle({
+      width: 20, height: 30, fill: 'blue', left: 0, top: 0
+    });
 
+    canvas.add(circle, triangle);
     canvas.renderAll();
-
 });
 
 var Placer = {
     obj_name: '',
     obj_category: '',
 
-    grid_mx: 0,
-    grid_my: 0,
-
-    sprite: 0,
-
     can_place: true,
 
     init: function () {
-        this.sprite = game.add.sprite(0, 0, '');
-        this.sprite.visible = false;
+
     },
 
     isObjSelected: function () {
@@ -189,38 +222,14 @@ var Placer = {
             // get first image
             img_name = Object.keys(obj.sprites)[0];
         }
-
-        this.sprite.loadTexture(img_name);
-    },
-
-    update: function () {
-        if (game.input.activePointer.withinGame) {
-            var m_pos = getCanvasMousePos();
-
-            // calculate snap to grid
-            this.grid_mx = Math.floor(m_pos.x / grid_width) * grid_width;
-            this.grid_my = Math.floor(m_pos.y / grid_height) * grid_height;
-
-            // set sprite position
-            if (this.isObjSelected()) {
-                this.sprite.visible = true;
-                this.sprite.x = this.grid_mx;
-                this.sprite.y = this.grid_my;
-            }
-        } else {
-            if (this.isObjSelected()) {
-                this.sprite.visible = false;
-            }
-        }
     },
 
     mouseUp: function (event) {
         if(this.isObjSelected() && this.getObjCategory() == 'objects' && this.can_place){
-            var new_spr = game.add.sprite(this.sprite.x,this.sprite.y,this.sprite.key);
             // place object
-            // ...
-            // add image to phaser
-            // ...
+            var new_spr =  new fabric.Triangle({
+              width: 20, height: 30, fill: 'blue', left: mouse.x, top: mouse.y
+            });
             // add to library
             library['states'][curr_state].entities.objects.push(
                 {
@@ -232,8 +241,4 @@ var Placer = {
             console.log(lobjects)
         }
     },
-
-    mouseDown: function (event) {
-        this.can_place = game.input.activePointer.withinGame;
-    }
 }

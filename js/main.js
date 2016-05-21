@@ -1,4 +1,6 @@
 var IDE_NAME = "BlankE";
+var PJ_EXTENSION = 'bla';
+var AUTOSAVE = true;
 
 var nwGUI = require('nw.gui');
 var nwPROC = require('process');
@@ -29,16 +31,22 @@ var curr_state; // (state name)
 
 var config_data = {"recent_projects":[]};
 
-$(function(){
-	$(".recent_projects > table").colResizable({
-		liveDrag: true
-	});
 
-	//startProjectSetup();
+$(function(){
+	project_path = nwPATH.resolve(nwPROC.cwd(),'PROJECTS');
+	project_name = 'project0';
 	winSetTitle(IDE_NAME);
 
-	//newProject(nwPATH.resolve()
-
+	// generate default project name
+	nwFILE.readdir(project_path, function(err, files){
+		console.log(files);
+		if (!err) {
+			project_name = 'project' + files.length;
+			newProject(project_name, project_path);
+		} else {
+			newProject(project_name, project_path);
+		}
+	})
 });
 
 function winResize(){
@@ -52,10 +60,9 @@ function winResize(){
 }
 
 function winClose(){
-	if(project_name)saveProject();
-	// clean the config.json
-	// ...
-  win.close();
+	closeProject(function(){
+  		win.close();
+	});
 }
 
 function winSetTitle(new_title){
@@ -71,6 +78,48 @@ function winSetMenuIcon(new_icon){
 	menu_icon = new_icon;
 	winSetTitle(document.title);
 }
+
+// http://www.geedew.com/remove-a-directory-that-is-not-empty-in-nodejs/
+function rmdirAsync (path, callback) {
+	nwFILE.readdir(path, function(err, files) {
+		if(err) {
+			// Pass the error on to callback
+			callback(err, []);
+			return;
+		}
+		var wait = files.length,
+			count = 0,
+			folderDone = function(err) {
+			count++;
+			// If we cleaned out all the files, continue
+			if( count >= wait || err) {
+				nwFILE.rmdir(path,callback);
+			}
+		};
+		// Empty directory to bail early
+		if(!wait) {
+			folderDone();
+			return;
+		}
+
+		// Remove one or more trailing slash to keep from doubling up
+		path = path.replace(/\/+$/,"");
+		files.forEach(function(file) {
+			var curPath = path + "/" + file;
+			nwFILE.lstat(curPath, function(err, stats) {
+				if( err ) {
+					callback(err, []);
+					return;
+				}
+				if( stats.isDirectory() ) {
+					rmdirAsync(curPath, folderDone);
+				} else {
+					nwFILE.unlink(curPath, folderDone);
+				}
+			});
+		});
+	});
+};
 
 function writeFile(location,text){
 	nwFILE.writeFile(location, text, function(err) {
@@ -164,8 +213,6 @@ function submitProjectSetup(){
 }
 
 function newProject(name,path){
-	// hide intro window
-	hideIntroWindow();
 	// empty lobjects
 	lobjects = {
 		"objects":{},
@@ -180,17 +227,32 @@ function newProject(name,path){
 			}
 		}
 	}
-	// reset tree
-	tree.tree('loadData',data);
 	// set global project variables
+	console.log(path + name)
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
 
-	addLobj('states');
+	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
+
 	// save everything
-	saveProject();
-	addRecentProject(name,path);
+	//addRecentProject(name,path);
 }
+
+function closeProject(callback) {
+	// if there's no .bla file, delete everything
+	try {
+		if (nwFILE.lstatSync(nwPATH.resolve(getProjectPath(),project_name)).isFile()) {
+			autosaveProject();
+			callback();
+		}
+	} catch(err) {
+		rmdirAsync(getProjectPath(), function(){
+			callback();
+		});
+	}
+}
+
+
 
 function addRecentProject(name,path){
 	var file_path = nwPATH.resolve(nwPROC.cwd(),'includes','config.json');
@@ -213,7 +275,7 @@ function addRecentProject(name,path){
 }
 
 function getProjectPath(){
-	return nwPATH.resolve(project_path,project_name);
+	return nwPATH.resolve(project_path);
 }
 
 function btn_openProject(){
@@ -231,11 +293,13 @@ function openProject(path){
 			lobjects = JSON.parse(data);
 
 			// preload all sprites for canvas
+			/*
 			for (obj in lobjects.objects) {
 				for (spr in lobjects.objects[obj].sprites) {
 					canv_addSprite(spr,lobjects.objects[obj].sprites[spr].path)
 				}
 			}
+			*/
 
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);
@@ -258,6 +322,10 @@ function openProject(path){
 	});
 }
 
+function autosaveProject(){
+	if (AUTOSAVE) saveProject();
+}
+
 function saveProject(){
 	// add tree structure to lobjects
 	lobjects['tree'] = tree.tree('toJson');
@@ -270,33 +338,30 @@ function saveProject(){
 
 	// create project folder if not made
 	var file_path = getProjectPath();
-    nwFILE.stat(nwPATH.dirname(file_path),function(err, stats){
-		if (err) {
-			nwFILE.mkdir(nwPATH.dirname(file_path));
 
+	try {
+		if (nwFILE.lstatSync(file_path).isDirectory()) {
 			// create project save file
-			writeFile(file_path,save_data);
-		} else {
-			// create project save file
-			writeFile(file_path,save_data);
+			writeFile(nwPATH.resolve(file_path,project_name),save_data);
 		}
-	});
-
-
-
-
+	} catch(err) {
+		nwFILE.mkdir(file_path, function(err){
+			// create project save file
+			writeFile(nwPATH.resolve(file_path,project_name),save_data);
+		});
+	}
 }
 
 function importResource(category,location,callback){
 	location = decodeURI(location);
-	var folder_path = nwPATH.resolve(project_path,category);
+	var folder_path = nwPATH.resolve(getProjectPath(),category);
 
 	// make the resource folder if it doesn't exist
-	nwFILE.stat(folder_path,function(err,stats){
-		if(err){
-			nwFILE.mkdir(folder_path);
-		}
-	})
+	try {
+		nwFILE.lstatSync(folder_path).isDirectory();
+	} catch(err) {
+		nwFILE.mkdir(folder_path);
+	}
 
 	var f_dest = nwPATH.resolve(folder_path,nwPATH.basename(location));
 	// move the file if it's not there

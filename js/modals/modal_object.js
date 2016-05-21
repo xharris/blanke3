@@ -78,7 +78,7 @@ function closeObjectModal(){
       }
       obj_modal_open = false;
       $("#modal_object").toggleClass("active");
-      saveProject();
+      autosaveProject();
   }
 }
 
@@ -125,7 +125,7 @@ function showSpriteModal(obj,spr_name){
           $("#in_spr_height").val(obj.sprites[spr_name].height);
 
           // set new path
-          obj.sprites[spr_name].path = nwPATH.resolve(project_path,'images',spr_name);
+          obj.sprites[spr_name].path = nwPATH.resolve(getProjectPath(),'images',spr_name);
 
           // show the modal
           $("#modal_sprite").toggleClass("active");
@@ -191,7 +191,7 @@ function saveSpriteModal(){
 
   // close the modal_sprite (yes, this is a save&close button)
   closeSpriteModal();
-  saveProject();
+  autosaveProject();
 }
 
 // show file dialog for choosing a image file
@@ -227,7 +227,7 @@ function addSprite(file,obj){
   obj.sprites[name] = info;
   opened_obj = obj;
 
-  canv_addSprite(name,file);
+  //canv_addSprite(name,file);
 
   return name;
 }
