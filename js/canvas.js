@@ -44,9 +44,10 @@ function initializeCanvas() {
         mouse.isDown = false;
     });
     canvas.on('mouse:move', function(options) {
-        mouse.x = options.e.clientX;
-        mouse.y = options.e.clientY;
-        ebox_setCoords (mouse.x - g_origin.x - game_margin_lr, mouse.y - g_origin.y - game_margin_tb)
+        mouse.x = options.e.clientX - g_origin.x;
+        mouse.y = options.e.clientY - g_origin.y;
+
+        ebox_setCoords (mouse.x - game_margin_lr, mouse.y - game_margin_tb)
     });
     canvas.on('object:modified', function(options) {
         canv_saveState();
@@ -267,8 +268,8 @@ var Placer = {
 
             // place object, add to state entity list
             fabric.Image.fromURL(img_path, function(oImg) {
-                var x = (Math.round((mouse.x - g_origin.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width));
-                var y = (Math.round((mouse.y - g_origin.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width));
+                var x = (Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
+                var y = (Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
                 Placer.placeObj(oImg, x, y);
             });
         }
