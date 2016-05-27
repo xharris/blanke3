@@ -43,17 +43,36 @@ function initializeCanvas() {
     canvas.on('mouse:up', function(options) {
         mouse.isDown = false;
     });
+
     canvas.on('mouse:move', function(options) {
         mouse.x = options.e.clientX - g_origin.x;
         mouse.y = options.e.clientY - g_origin.y;
 
         ebox_setCoords (mouse.x - game_margin_lr, mouse.y - game_margin_tb)
     });
+
     canvas.on('object:modified', function(options) {
         canv_saveState();
     });
 
+    canvas.observe('object:modified', function (e) {
+        e.target.resizeToScale();
+    });
+
 }
+
+
+$(document).keydown( function(e){
+    if (e.keyCode == 8 || e.keyCode == 46){
+        if(canvas.getActiveGroup()){
+            canvas.getActiveGroup().forEachObject(function(o){ canvas.remove(o) });
+            canvas.discardActiveGroup().renderAll();
+        } else {
+            canvas.remove(canvas.getActiveObject());
+        }
+        canv_saveState();
+    }
+})
 
 function canv_setupRoomRect(){
     // room bounds
@@ -191,14 +210,16 @@ function canv_newState() {
     // clear objects
     canvas.clear();
     canv_setupRoomRect();
+    canv_saveState();
 }
 
 // canv_loadState()
 // clears all objects and loads new ones from a state JSON
 function canv_loadState(state_name) {
-    //canv_newState();
+    curr_state = state_name;
     canvas.loadFromJSON(lobjects.states[state_name].entity_json, canvas.renderAll.bind(canvas), function(o, obj) {
-        if (o.lobj_type) {
+
+        if (o.lobj_type == 'objects') {
             obj.setControlsVisibility({
                 bl: false,
                 br: false,
@@ -217,7 +238,9 @@ function canv_loadState(state_name) {
 // canv_saveState()
 // saves everything but the grid in a JSON
 function canv_saveState() {
-    lobjects.states[curr_state].entity_json = canvas.toJSON(['lobj_type','instance_id','obj_id','evented','selectable']);
+    if (canvas.getWidth() > 0 || canvas.getHeight() > 0) {
+        lobjects.states[curr_state].entity_json = canvas.toJSON(['group','lobj_type','instance_id','obj_id','evented','selectable']);
+    }
 }
 
 var Placer = {
@@ -252,26 +275,57 @@ var Placer = {
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category.toLowerCase();
-        console.log('set ' + category + name)
     },
 
     mouseUp: function (event) {
-        if(this.isObjSelected() && this.getObjCategory() == 'objects' && this.can_place && curr_state){
+        if(this.isObjSelected() && this.can_place && curr_state){
+            var x = (Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
+            var y = (Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
 
-            var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
-            // does image have sprites
-            var obj = lobjects[this.obj_category][this.obj_name];
-            if (Object.keys(obj.sprites).length > 0) {
-                // get first image
-                img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
+            // OBJECT SELECTED
+            if (this.getObjCategory() == 'objects') {
+                var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
+                // does image have sprites
+                var obj = lobjects[this.obj_category][this.obj_name];
+                if (Object.keys(obj.sprites).length > 0) {
+                    // get first image
+                    img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
+                }
+
+                // place object, add to state entity list
+                fabric.Image.fromURL(img_path, function(oImg) {
+                    oImg.setControlsVisibility({
+                        bl: false,
+                        br: false,
+                        mb: false,
+                        ml: false,
+                        mr: false,
+                        mt: false,
+                        tl: false,
+                        tr: false
+                    });
+
+                    Placer.placeObj(oImg, x, y);
+                });
             }
 
-            // place object, add to state entity list
-            fabric.Image.fromURL(img_path, function(oImg) {
-                var x = (Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
-                var y = (Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
-                Placer.placeObj(oImg, x, y);
-            });
+            // REGION SELECTED
+            else if (this.getObjCategory() == 'regions') {
+
+                var color = hexToRgb(lobjects[this.obj_category][this.obj_name].color);
+
+                var region = new fabric.Rect({
+                    width: grid_width,
+                    height: grid_height,
+                    stroke: 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')',
+                    strokeWidth: 3,
+                    fill: 'rgba(' + color.r + ',' + color.g + ',' + color.b + ', 0.5)',
+                    hasRotatingPoint: false
+                });
+
+                Placer.placeObj(region, x, y)
+
+            }
         }
     },
 
@@ -281,20 +335,103 @@ var Placer = {
         obj.set('lobj_type', this.obj_category);
         obj.set('instance_id', Math.round(Math.random()*1000000));
         obj.set('obj_id', lobjects[this.obj_category][this.obj_name].id);
-        obj.setControlsVisibility({
-            bl: false,
-            br: false,
-            mb: false,
-            ml: false,
-            mr: false,
-            mt: false,
-            tl: false,
-            tr: false
-        });
 
         canvas.add(obj);
 
         // serialize
         canv_saveState();
+    }
+}
+
+
+// http://jsfiddle.net/GrandThriftAuto/6CDFr/15/
+// customise fabric.Object with a method to resize rather than just scale after tranformation
+fabric.Object.prototype.resizeToScale = function () {
+    // resizes an object that has been scaled (e.g. by manipulating the handles), setting scale to 1 and recalculating bounding box where necessary
+    switch (this.type) {
+        case "circle":
+            this.radius *= this.scaleX;
+            this.scaleX = 1;
+            this.scaleY = 1;
+            break;
+        case "ellipse":
+            this.rx *= this.scaleX;
+            this.ry *= this.scaleY;
+            this.width = this.rx * 2;
+            this.height = this.ry * 2;
+            this.scaleX = 1;
+            this.scaleY = 1;
+            break;
+        case "polygon":
+        case "polyline":
+            var points = this.get('points');
+            for (var i = 0; i < points.length; i++) {
+                var p = points[i];
+                p.x *= this.scaleX
+                p.y *= this.scaleY;
+            }
+            this.scaleX = 1;
+            this.scaleY = 1;
+            this.width = this.getBoundingBox().width;
+            this.height = this.getBoundingBox().height;
+            break;
+        case "triangle":
+        case "line":
+        case "rect":
+            this.width *= this.scaleX;
+            this.height *= this.scaleY;
+            this.scaleX = 1;
+            this.scaleY = 1;
+        default:
+            break;
+    }
+}
+
+// helper function to return the boundaries of a polygon/polyline
+// something similar may be built in but it seemed easier to write my own than dig through the fabric.js code.  This may make me a bad person.
+fabric.Object.prototype.getBoundingBox = function () {
+    var minX = null;
+    var minY = null;
+    var maxX = null;
+    var maxY = null;
+    switch (this.type) {
+        case "polygon":
+        case "polyline":
+            var points = this.get('points');
+
+            for (var i = 0; i < points.length; i++) {
+                if (typeof (minX) == undefined) {
+                    minX = points[i].x;
+                } else if (points[i].x < minX) {
+                    minX = points[i].x;
+                }
+                if (typeof (minY) == undefined) {
+                    minY = points[i].y;
+                } else if (points[i].y < minY) {
+                    minY = points[i].y;
+                }
+                if (typeof (maxX) == undefined) {
+                    maxX = points[i].x;
+                } else if (points[i].x > maxX) {
+                    maxX = points[i].x;
+                }
+                if (typeof (maxY) == undefined) {
+                    maxY = points[i].y;
+                } else if (points[i].y > maxY) {
+                    maxY = points[i].y;
+                }
+            }
+            break;
+        default:
+            minX = this.left;
+            minY = this.top;
+            maxX = this.left + this.width;
+            maxY = this.top + this.height;
+    }
+    return {
+        topLeft: new fabric.Point(minX, minY),
+        bottomRight: new fabric.Point(maxX, maxY),
+        width: maxX - minX,
+        height: maxY - minY
     }
 }

@@ -44,11 +44,24 @@
   width: 34px;
   border-radius: 100%;
   font-size: 18px;
-  margin: 0px 8px;
+  margin: 0px 4px;
   transition: all 0.2s ease-in-out;
 }
 .btn-circle:hover {
   color: white;
+  cursor: pointer;
+}
+.btn-modal-close {
+  position: absolute;
+  background-color: transparent;
+  top: 0px;
+  right: 0px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  width: 18px;
+  height: 18px;
+  padding: 0px;
   cursor: pointer;
 }
 ::-webkit-scrollbar {
@@ -177,7 +190,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   width: 34px;
   border-radius: 100%;
   font-size: 18px;
-  margin: 0px 8px;
+  margin: 0px 4px;
   transition: all 0.2s ease-in-out;
 }
 #modal_object > #buttons > button:hover {
@@ -335,7 +348,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   width: 34px;
   border-radius: 100%;
   font-size: 18px;
-  margin: 0px 8px;
+  margin: 0px 4px;
   transition: all 0.2s ease-in-out;
   float: right;
 }
@@ -381,6 +394,75 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   text-align: right;
   outline: none;
   border: none;
+}
+#modal_region {
+  position: absolute;
+  margin: 10px 0px;
+  width: 405px;
+  top: 28px;
+  left: 0px;
+  opacity: 0;
+  z-index: -20;
+  transition: all 0.2s ease-in-out;
+}
+#modal_region.active {
+  z-index: 10;
+  opacity: 1;
+  left: 185px;
+}
+#modal_region > * {
+  display: inline-block;
+}
+#modal_region > input {
+  vertical-align: middle;
+}
+#modal_region > input#in_region_color {
+  background-color: transparent;
+  outline: none;
+  border: none;
+  width: 30px;
+  height: 34px;
+}
+#modal_region > input#in_region_color::-webkit-color-swatch-wrapper {
+  background-color: transparent;
+  border: none;
+  border-radius: 100%;
+}
+#modal_region > input#in_region_color::-webkit-color-swatch {
+  background-color: blue;
+  border-radius: 100%;
+}
+#modal_region > .buttons > button.btn_save {
+  background-color: white;
+  color: black;
+  border: 1px solid black;
+  height: 34px;
+  width: 34px;
+  border-radius: 100%;
+  font-size: 18px;
+  margin: 0px 4px;
+  transition: all 0.2s ease-in-out;
+}
+#modal_region > .buttons > button.btn_save:hover {
+  color: white;
+  cursor: pointer;
+}
+#modal_region > .buttons > button.btn_save:hover {
+  background-color: #4caf50;
+  border: 1px solid #4caf50;
+}
+#modal_region > .buttons > button.btn_close {
+  position: absolute;
+  background-color: transparent;
+  top: 0px;
+  right: 0px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  width: 18px;
+  height: 18px;
+  padding: 0px;
+  cursor: pointer;
 }
 @font-face {
   font-family: "Roboto";
@@ -485,12 +567,14 @@ html {
   bottom: 0px;
 }
 .menu_bar > #window_buttons > div {
-  width: 20px;
-  height: 20px;
+  width: 15px;
+  height: 15px;
   display: inline-block;
   text-align: center;
   border-right: none;
-  margin: 5px;
+  margin: 8px 0px;
+  border-radius: 100%;
+  margin-right: 12px;
 }
 .menu_bar > #window_buttons > div#btn_close,
 .menu_bar > #window_buttons > div#btn_maximize,
@@ -501,12 +585,27 @@ html {
   image-rendering: -moz-crisp-edges;
 }
 .menu_bar > #window_buttons > div#btn_close {
+  background-color: #ffd5d5;
+  border: 1px solid #d50000;
+  transition: background-color ease-out 0.2s;
+}
+.menu_bar > #window_buttons > div#btn_close:hover {
   background-color: #d50000;
 }
 .menu_bar > #window_buttons > div#btn_maximize {
+  background-color: #ffffff;
+  border: 1px solid #ffab00;
+  transition: background-color ease-out 0.2s;
+}
+.menu_bar > #window_buttons > div#btn_maximize:hover {
   background-color: #ffab00;
 }
 .menu_bar > #window_buttons > div#btn_minimize {
+  background-color: #c8ffdf;
+  border: 1px solid #00c853;
+  transition: background-color ease-out 0.2s;
+}
+.menu_bar > #window_buttons > div#btn_minimize:hover {
   background-color: #00c853;
 }
 .menu_bar > #window_buttons > div > i {

@@ -17,35 +17,28 @@ function objectModalValueChange(e){
   var value = e.currentTarget.value;
 
   // get old values
-  var oldname = getLobjNameByID(opened_obj['id']);
+  var oldname = getLobjNameByID('objects', opened_obj['id']);
   var oldvals = $.extend(true,{},opened_obj);
+
+  // if the key is name, then change key
+  if(key == "name"){
+    opened_obj = changeLobjName('objects', opened_obj, value)
+  }
 
   // set values to object
   if(key != "name"){
     opened_obj[key] = value;
   }
 
-  // if the key is name, then change key
-  if(key == "name"){
-    // check if name already exists
-    // ...
 
-    // add newly named object
-    lobjects.objects[value] = oldvals;
-    opened_obj = lobjects.objects[value];
-    // delete the old object
-    delete lobjects.objects[oldname];
-    // change object name in tree
-    var tree_node = tree.tree('getNodeById',opened_obj['id'])
-    tree.tree('updateNode',tree_node,value)
-  }
 }
 
 function showObjectModal(name){
   if(!obj_modal_open){
+        closeAllModals()
         obj_modal_open = true;
         // get the object from library
-        opened_obj = getLobjByName(name);
+        opened_obj = getLobjByName('objects',name);
 
         // load in obj properties
         $("#in_obj_name").val(name);
@@ -246,7 +239,7 @@ function addSpriteDiv(spr_name){
   $('#btn_add_sprite').before('\
     <div class="sprite">\
       <button id="btn_close"><i class="fa fa-times"></i></button>\
-      <a onclick="editSprite(\''+getLobjNameByID(opened_obj.id)+'\',\''+spr_name+'\')">\
+      <a onclick="editSprite(\''+getLobjNameByID('objects', opened_obj.id)+'\',\''+spr_name+'\')">\
         <div class="'+name_noperiod+' preview"\
           style="background-image:url(\''+encodeURI(info.path)+'\')"\
         ></div>\

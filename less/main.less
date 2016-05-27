@@ -6,6 +6,7 @@
 @import "extra_box";
 @import "modal_object";
 @import "modal_sprite";
+@import "modal_region";
 
 @font-face {
     font-family: "Roboto";
@@ -111,13 +112,14 @@ html{
         bottom:0px;
 
         >div{
-            width:20px;
-            height:20px;
-            display:inline-block;
-            text-align:center;
-            //border:1px solid #e0e0e0;
-            border-right:none;
-            margin:5px;
+            width: 15px;
+            height: 15px;
+            display: inline-block;
+            text-align: center;
+            border-right: none;
+            margin: 8px 0px;
+            border-radius: 100%;
+            margin-right: 12px;
 
             &#btn_close,&#btn_maximize,&#btn_minimize{
                 background-repeat: no-repeat;
@@ -127,16 +129,31 @@ html{
             }
 
             &#btn_close{
-                background-color:#d50000;
-                //background-image:url("images/close.png");
+                background-color: lighten(#d50000, 50%);
+                border: 1px solid #d50000;
+                transition: background-color ease-out 0.2s;
+
+                &:hover{
+                    background-color: #d50000;
+                }
             }
             &#btn_maximize{
-                background-color:#ffab00;
-                //background-image:url("images/maximize.png");
+                background-color: lighten(#ffab00, 50%);
+                border: 1px solid #ffab00;
+                transition: background-color ease-out 0.2s;
+
+                &:hover{
+                    background-color: #ffab00;
+                }
             }
             &#btn_minimize{
-                background-color:#00c853;
-                //background-image:url("images/minimize.png");
+                background-color: lighten(#00c853, 50%);
+                border: 1px solid #00c853;
+                transition: background-color ease-out 0.2s;
+
+                &:hover{
+                    background-color: #00c853;
+                }
             }
 
             >i{

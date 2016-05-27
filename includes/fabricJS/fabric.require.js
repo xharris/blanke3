@@ -1886,7 +1886,7 @@ if (typeof console !== "undefined") {
             parsedDim.height = parseUnit(heightAttr);
             return parsedDim;
         }
-        minX = -parseFloat(viewBoxAttr[1]), minY = -parseFloat(viewBoxAttr[2]), viewBoxWidth = parseFloat(viewBoxAttr[3]), 
+        minX = -parseFloat(viewBoxAttr[1]), minY = -parseFloat(viewBoxAttr[2]), viewBoxWidth = parseFloat(viewBoxAttr[3]),
         viewBoxHeight = parseFloat(viewBoxAttr[4]);
         if (!missingDimAttr) {
             parsedDim.width = parseUnit(widthAttr);
@@ -4387,7 +4387,7 @@ fabric.PatternBrush = fabric.util.createClass(fabric.PencilBrush, {
             }
             var center = target.getCenterPoint(), actualMouseByCenter = target.toLocalPoint(new fabric.Point(x, y), "center", "center")[by], lastMouseByCenter = target.toLocalPoint(new fabric.Point(t.lastX, t.lastY), "center", "center")[by], actualMouseByOrigin, constraintPosition, dim = target._getTransformedDimensions();
             this._changeSkewTransformOrigin(actualMouseByCenter - lastMouseByCenter, t, by);
-            actualMouseByOrigin = target.toLocalPoint(new fabric.Point(x, y), t.originX, t.originY)[by], 
+            actualMouseByOrigin = target.toLocalPoint(new fabric.Point(x, y), t.originX, t.originY)[by],
             constraintPosition = target.translateToOriginPoint(center, t.originX, t.originY);
             skewed = this._setObjectSkew(actualMouseByOrigin, t, by, dim);
             t.lastX = x;
@@ -9821,7 +9821,7 @@ fabric.Image.filters.BaseFilter = fabric.util.createClass({
             function renderLinesAtOffset(offsets) {
                 var i, lineHeight = 0, len, j, oLen, lineWidth, lineLeftOffset, heightOfLine;
                 for (i = 0, len = _this._textLines.length; i < len; i++) {
-                    lineWidth = _this._getLineWidth(ctx, i), lineLeftOffset = _this._getLineLeftOffset(lineWidth), 
+                    lineWidth = _this._getLineWidth(ctx, i), lineLeftOffset = _this._getLineLeftOffset(lineWidth),
                     heightOfLine = _this._getHeightOfLine(ctx, i);
                     for (j = 0, oLen = offsets.length; j < oLen; j++) {
                         ctx.fillRect(_this._getLeftOffset() + lineLeftOffset, lineHeight + (_this._fontSizeMult - 1 + offsets[j]) * _this.fontSize - halfOfVerticalBox, lineWidth, _this.fontSize / 15);
