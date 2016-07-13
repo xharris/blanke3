@@ -635,15 +635,13 @@ html {
 #main_window > #toolbox:hover {
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
-#main_window > #library,
-#main_window #extra_box {
+#main_window > #library {
   background-color: rgba(255, 255, 255, 0.6);
   border-radius: 2px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
   transition: all 0.2s ease-in-out;
 }
-#main_window > #library:hover,
-#main_window #extra_box:hover {
+#main_window > #library:hover {
   background-color: white;
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
 }
@@ -676,4 +674,14 @@ html {
 #main_window > .canvas_container canvas {
   border: 1px solid #bdbdbd;
   margin-bottom: 4px;
+}
+#main_window .console {
+  position: absolute;
+  left: 185px;
+  right: 50px;
+  bottom: 10px;
+  font-size: 12px;
+}
+#main_window .console > .error {
+  color: red;
 }

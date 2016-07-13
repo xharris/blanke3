@@ -11,7 +11,7 @@ var nwUTIL = require('util');
 
 var win = nwGUI.Window.get();
 
-win.showDevTools();
+//win.showDevTools();
 
 var isMaximized = false;
 var menu_icon = "bars";
@@ -35,6 +35,16 @@ var colors = {"green":"#4caf50"}
 $(function(){
 	getColors();
 	btn_newProject();
+
+	window.onerror = function(msg, url, linenumber) {
+	    $(".errors").append('<p class="error">Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber+'</p>');
+	    return true;
+	}
+	var oldLog = console.log;
+    console.log = function (message) {
+        $(".errors").append('<p class="normal">' + message + '</p>')
+        oldLog.apply(console, arguments);
+    };
 });
 
 function winResize(){
