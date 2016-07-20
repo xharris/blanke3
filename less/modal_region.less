@@ -1,0 +1,63 @@
+//main: main.less
+
+#modal_region{
+    position: absolute;
+    margin: 10px 0px;
+    width: 405px;
+    top: 28px;
+    left:0px;
+    opacity:0;
+    z-index:-20;
+
+    transition: all 0.2s ease-in-out;
+
+    &.active{
+        z-index:10;
+        opacity:1;
+        left: 185px;
+    }
+
+    >*{
+        display: inline-block;
+    }
+
+    >input{
+        vertical-align: middle;
+    }
+
+    >input#in_region_color{
+        background-color: transparent;
+        outline: none;
+        border:none;
+        width: 30px;
+        height: 34px;
+
+        // outer layer
+        &::-webkit-color-swatch-wrapper{
+            background-color: transparent;
+            border:none;
+            border-radius: 100%;
+        }
+        // chewy delicious core
+        &::-webkit-color-swatch{
+            background-color:blue;
+            border-radius:100%;
+        }
+    }
+
+    >.buttons{
+        >button{
+            &.btn_save{
+                .btn-circle();
+
+                &:hover{
+                background-color:#4caf50;
+                border:1px solid #4caf50;
+                }
+            }
+            &.btn_close{
+                .btn-modal-close();
+            }
+        }
+    }
+}

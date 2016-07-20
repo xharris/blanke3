@@ -1,0 +1,23 @@
+{
+  "name": "keystate",
+  "main": "keys.js",
+  "version": "0.0.0",
+  "homepage": "https://github.com/code-curve/keys",
+  "authors": [
+    "Dan Prince <dan@codecurve.net>"
+  ],
+  "description": "Lightweight key state detection library",
+  "keywords": [
+    "key",
+    "keyboard",
+    "state"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ]
+}

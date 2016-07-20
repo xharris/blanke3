@@ -1,250 +1,257 @@
-var game = new Phaser.Game(screen.width+100, screen.height+100, Phaser.CANVAS, 'canvas', { preload: preload, create: create, update: update, render: render }, antialias=false);
-
-var graphics,
-    loader;
-
-// where the game square is drawn (helps determine how much margin there is at top and left)
+// where the room square is drawn (helps determine how much margin there is at top and left)
 var g_origin = {
-  x:187,
-  y:41
+  x:185,
+  y:40
 }
+
+var GAME_MARGIN = 150;
+var GRID_WIDTH = 32;
+var GRID_HEIGHT = 32;
+
+var canvas, room_rect;
+var grid_lines = [];
+
 var game_width = 800;
 var game_height = 600;
-var grid_width = 32;
-var grid_height = 32;
 
-var game_margin = 0;
-var game_border_weight = 2;
+var grid_width = GRID_WIDTH;
+var grid_height = GRID_HEIGHT;
+
+var game_margin_tb = GAME_MARGIN;
+var game_margin_lr = GAME_MARGIN;
+
+var game_border_weight = 1;
 
 var zoomFactor = 1;
 
-function preload() {
-    game.load.image('blanke_NA','includes/images/NA.png');
+var mouse = {
+    x : 0,
+    y : 0,
+    isDown : false
 }
 
-function create() {
-    // set canvas things
-    game.stage.backgroundColor = '#eeeded';
+function initializeCanvas() {
+    canvas = new fabric.Canvas('canvas');
+    canvas.setWidth(0);
+    canvas.setHeight(0);
 
-    graphics = game.add.graphics(0,0);
-    loader = new Phaser.Loader(game);
+    canvas.on('mouse:down', function(options) {
+        mouse.isDown = true;
 
-    // set zoom control
-    game.input.mouse.mouseWheelCallback = mouseWheel;
-    game.input.mouse.mouseDownCallback = mouseDown;
-    game.input.mouse.mouseUpCallback = mouseUp;
-    game.input.mouse.mouseMoveCallback = mouseMove;
+        Placer.mouseUp();
+    });
+    canvas.on('mouse:up', function(options) {
+        mouse.isDown = false;
+    });
 
-    game.input.keyboard.onDownCallback = keyDown;
-    game.input.keyboard.onUpCallback = keyUp;
+    canvas.on('mouse:move', function(options) {
+        mouse.x = options.e.clientX - g_origin.x;
+        mouse.y = options.e.clientY - g_origin.y;
 
-    var shadow_offset = 5;
+        ebox_setCoords (mouse.x - game_margin_lr, mouse.y - game_margin_tb)
+    });
 
-    // draw stage shadow
-    graphics.beginFill(0x757575);
-    graphics.drawRect(game_margin+shadow_offset, game_margin+shadow_offset, game_width+shadow_offset, game_height+shadow_offset);
-    // draw stage bounds
-    graphics.beginFill(0xFFFFFF);
-    graphics.lineStyle(game_border_weight, 0x000000, 1);
-    graphics.drawRect(game_margin, game_margin, game_width, game_height);
-    // draw vertical grid lines
-    graphics.lineStyle(1, 0xe0e0e0, 1);
-    for(var gx=grid_width+game_margin; gx < game_width+game_margin; gx+=grid_width){
-      graphics.moveTo(gx,game_margin+(game_border_weight)/2);
-      graphics.lineTo(gx,game_margin+game_height-(game_border_weight)/2);
-    }
-    // draw horizontal grid lines
-    for(var gy=grid_height+game_margin; gy < game_height+game_margin; gy+=grid_height){
-      graphics.moveTo(game_margin+(game_border_weight)/2,gy);
-      graphics.lineTo(game_margin+game_width-(game_border_weight)/2,gy);
-    }
+    canvas.on('object:modified', function(options) {
+        canv_saveState();
+    });
 
-    window.graphics = graphics;
+    canvas.observe('object:modified', function (e) {
+        e.target.resizeToScale();
+    });
 
-    game.camera.x = (game.width * -0.5);
-    game.camera.y = (game.height * -0.5);
-
-    setBounds();
-
-    // so zoom focuses towards center
-    var win = $(window);
-    game.camera.x = (win.width() * -0.5);
-    game.camera.y = (win.height() * -0.5);
-
-    game.input.mouse.capture = true;
-
-    // align top left of game square
-    setCamPosition(-450,-280);
-
-    Placer.init();
 }
 
-$(window).resize(function(){
-  var win = $(window);
-  game.camera.x = (win.width() * -0.5);
-  game.camera.y = (win.height() * -0.5);
+
+$(document).keydown( function(e){
+    if (e.keyCode == 8 || e.keyCode == 46){
+        if(canvas.getActiveGroup()){
+            canvas.getActiveGroup().forEachObject(function(o){ canvas.remove(o) });
+            canvas.discardActiveGroup().renderAll();
+        } else {
+            canvas.remove(canvas.getActiveObject());
+        }
+        canv_saveState();
+    }
+})
+
+function canv_setupRoomRect(){
+    // room bounds
+    room_rect = new fabric.Rect({
+        left: game_margin_lr,
+        top: game_margin_tb,
+        width: game_width,
+        height: game_height,
+        evented: false,
+        selectable: false,
+
+        fill: 'white',
+        stroke: 'black',
+        strokeWidth: game_border_weight
+    });
+    room_rect.toObject = function() {
+        return;
+    };
+
+    canvas.add(room_rect);
+    room_rect.moveTo(0);
+
+    setRoomSize();
+}
+
+function setGridSize(width, height) {
+    _setGridSize(width, height);
+    _setRoomSize();
+}
+
+function setRoomSize(width, height) {
+    game_width = width || game_width;
+    game_height = height || game_height;
+
+    _setGridSize();
+    _setRoomSize(width, height);
+}
+
+function _setGridSize(width, height) {
+    grid_width = width || grid_width;
+    grid_height = height || grid_height;
+
+    // clear any previous grid lines
+    for (var l in grid_lines) {
+        canvas.remove(grid_lines[l]);
+    }
+    grid_lines = []
+
+    // edit game_margin to be a multiple of grid size
+    game_margin_tb = GAME_MARGIN;//GAME_MARGIN - (GAME_MARGIN % grid_height);
+    game_margin_lr = GAME_MARGIN;//GAME_MARGIN - (GAME_MARGIN % grid_width);
+
+    // draw grid
+    // vertical lines
+    if (grid_width > 3) {
+        for (var i = 1; i < game_width / grid_width; i++) {
+            grid_lines.push(new fabric.Line([ i * grid_width + game_margin_lr, game_margin_tb + 1, i * grid_width + game_margin_lr, game_height + game_margin_tb - 1],
+                {
+                    stroke: '#ccc',
+                    selectable: false,
+                    evented: false
+                }));
+        }
+    }
+    // horizontal lines
+    if (grid_height > 3) {
+        for (var i = 1; i < (game_height / grid_height); i++) {
+            grid_lines.push(new fabric.Line([ game_margin_lr + 1, i * grid_height + game_margin_tb, game_width + game_margin_lr - 1, i * grid_height + game_margin_tb],
+                {
+                    stroke: '#ccc',
+                    selectable: false,
+                    evented: false
+                }));
+        }
+    }
+
+    // add lines to canvas
+    for (var l in grid_lines) {
+        canvas.add(grid_lines[l]);
+        grid_lines[l].moveTo(1);
+
+        grid_lines[l].toObject = function() {
+            return;
+        };
+    }
+
+
+    // snap to grid
+    canvas.on('object:moving', function(options) {
+
+        if (!keys.shift) {
+            options.target.set({
+                left: (Math.round(options.target.left / grid_width) * grid_width) + (GAME_MARGIN % grid_width) - grid_width,
+                top: (Math.round(options.target.top / grid_height) * grid_height) + (GAME_MARGIN % grid_width) - grid_height
+            });
+        }
+
+    });
+
+}
+
+function _setRoomSize(width, height) {
+    // room + margins
+    var new_width = game_width+(game_margin_lr*2);
+    var new_height = game_height+(game_margin_tb*2);
+
+    // prevent object placed in right and bottom margins from being cut off (commented out as future feature)
+    /*
+    if (new_width > canvas.getWidth()) {
+        canvas.setWidth(new_width);
+    }
+    if (new_height > canvas.getHeight()) {
+        canvas.setHeight(new_height);
+    }
+    */
+    canvas.setWidth(new_width);
+    canvas.setHeight(new_height);
+
+    room_rect.left = game_margin_lr;
+    room_rect.top = game_margin_tb;
+    room_rect.width = game_width;
+    room_rect.height = game_height;
+
+    canvas.renderAll();
+}
+
+$(function(){
+    initializeCanvas();
+
 });
 
-function setBounds(){
-  //var maxZoom = 2;
-  //game.world.setBounds(0,0,(screen.width+game_width)*maxZoom,(screen.height+game_height)*maxZoom);
-  /*
-  var bound_width = game_width+screen.width;
-  var bound_height = game_height+screen.height;
-
-  if(game_width > screen.width)
-    bound_width = game_width+game_margin;
-  if(game_height > screen.height)
-    bound_height = game_height+game_margin;
-  */
-
-  game.world.setBounds(-1000, -1000, 2000, 2000);
+// canv_newState()
+// clears all objects and remakes the grid
+function canv_newState() {
+    // clear objects
+    canvas.clear();
+    canv_setupRoomRect();
+    canv_saveState();
 }
 
-var camera = {
-  x:0,
-  y:0
-}
-function setCamPosition(x,y){
-  camera.x = x;
-  camera.y = y;
-  game.world.pivot.setTo(-camera.x/zoomFactor,-camera.y/zoomFactor)
-}
-function startCamMove () {
-    cam_drag = true;
-    cam_drag_start.x = (game.input.mousePointer.x)-(camera.x);
-    cam_drag_start.y = (game.input.mousePointer.y)-(camera.y);
-}
-function endCamMove () {
-    cam_drag = false;
+// canv_loadState()
+// clears all objects and loads new ones from a state JSON
+function canv_loadState(state_name) {
+    curr_state = state_name;
+    canvas.loadFromJSON(lobjects.states[state_name].entity_json, canvas.renderAll.bind(canvas), function(o, obj) {
+
+        if (o.lobj_type == 'objects') {
+            obj.setControlsVisibility({
+                bl: false,
+                br: false,
+                mb: false,
+                ml: false,
+                mr: false,
+                mt: false,
+                tl: false,
+                tr: false
+            });
+        }
+    });
+    canv_setupRoomRect();
 }
 
-var mousemove_x, mousemove_y;
-function getCanvasMousePos() {
-    return {
-        x: parseInt((mousemove_x+game.camera.x-camera.x)/zoomFactor),
-        y: parseInt((mousemove_y+game.camera.y-camera.y)/zoomFactor)
+// canv_saveState()
+// saves everything but the grid in a JSON
+function canv_saveState() {
+    if (canvas.getWidth() > 0 || canvas.getHeight() > 0) {
+        lobjects.states[curr_state].entity_json = canvas.toJSON(['group','lobj_type','instance_id','obj_id','evented','selectable']);
     }
-}
-
-var prev_zoomFactor;
-function setZoom (factor) {
-    if(factor > 2 || factor < 0.5){
-        ebox_setZoom(zoomFactor*100);
-        return;
-    }
-
-    prev_zoomFactor = zoomFactor;
-    zoomFactor = factor;
-
-    // set zoom tween
-    game.world.scale.setTo(zoomFactor)
-    //setCamPosition(camera.x,camera.y)
-    //var zoom_tween = game.add.tween(game.world.scale).to({x:zoomFactor,y:zoomFactor}, 200, Phaser.Easing.Sinusoidal.InOut);
-    //zoom_tween.start();
-
-    //zoom_tween.onComplete.add(zoomFinish,this);
-    ebox_setZoom(zoomFactor*100);
-}
-
-function zoomFinish () {
-    //game.world.pivot.setTo(-camera.x/zoomFactor,-camera.y/zoomFactor);
-
-}
-
-function mouseWheel(event){
-    // zoom camera
-    if(game.input.mouse.wheelDelta === Phaser.Mouse.WHEEL_UP) {
-      setZoom(zoomFactor + 0.1);
-    } else {
-      setZoom(zoomFactor - 0.1);
-    }
-}
-
-var cam_drag = false;
-var cam_drag_start = {
-  x:0,
-  y:0
-}
-
-function mouseDown(event){
-  // left button
-  if(event.which == 1){
-      Placer.mouseDown(event);
-  }
-
-  // middle button
-  if(event.which == 2){
-    startCamMove();
-  }
-}
-
-function mouseUp(event){
-  // left button
-  if(event.which == 1){
-      Placer.mouseUp(event);
-  }
-
-  // middle button
-  if(event.which == 2){
-    endCamMove();
-  }
-}
-
-function mouseMove(event){
-    if(cam_drag){
-        setCamPosition(event.x-cam_drag_start.x,event.y-cam_drag_start.y)
-    }
-
-    mousemove_x = event.x;
-    mousemove_y = event.y;
-
-    var mouse_pos = getCanvasMousePos();
-    ebox_setCoords(mouse_pos.x/zoomFactor, mouse_pos.y/zoomFactor)
-}
-
-function keyDown (event) {
-    if (event.which == Phaser.KeyCode.SPACEBAR) {
-        startCamMove();
-    }
-}
-
-function keyUp (event) {
-    if (event.which == Phaser.KeyCode.SPACEBAR) {
-        endCamMove();
-    }
-}
-
-function update() {
-    Placer.update();
-}
-
-function render() {
-    game.debug.text("cam_origin", camera.x, camera.y, 0x000000 );
-
-    game.debug.pixel(game.world.pivot.x, game.world.pivot.y, 'rgba(0,0,0,1)' ) ;
-    game.debug.text("world_pivot", game.world.pivot.x, game.world.pivot.y,'rgba(0,0,0,1)' );
-}
-
-function canv_addSprite (name, path) {
-    game.load.image(name,path);
-    game.load.start();
 }
 
 var Placer = {
     obj_name: '',
     obj_category: '',
-
-    grid_mx: 0,
-    grid_my: 0,
-
-    sprite: 0,
+    img_path: '',
 
     can_place: true,
 
     init: function () {
-        this.sprite = game.add.sprite(0, 0, '');
-        this.sprite.visible = false;
+
     },
 
     isObjSelected: function () {
@@ -267,63 +274,164 @@ var Placer = {
 
     setObj: function (category,name) {
         this.obj_name = name;
-        this.obj_category = category;
-        this.obj_name = name;
-
-        var obj = lobjects[this.obj_category][this.obj_name];
-
-        var img_name = 'blanke_NA'; // change to N/A path
-
-        // does image have sprites
-        if (Object.keys(obj.sprites).length > 0) {
-            // get first image
-            img_name = Object.keys(obj.sprites)[0];
-        }
-
-        this.sprite.loadTexture(img_name);
-    },
-
-    update: function () {
-        if (game.input.activePointer.withinGame) {
-            var m_pos = getCanvasMousePos();
-
-            // calculate snap to grid
-            this.grid_mx = Math.floor(m_pos.x / grid_width) * grid_width;
-            this.grid_my = Math.floor(m_pos.y / grid_height) * grid_height;
-
-            // set sprite position
-            if (this.isObjSelected()) {
-                this.sprite.visible = true;
-                this.sprite.x = this.grid_mx;
-                this.sprite.y = this.grid_my;
-            }
-        } else {
-            if (this.isObjSelected()) {
-                this.sprite.visible = false;
-            }
-        }
+        this.obj_category = category.toLowerCase();
     },
 
     mouseUp: function (event) {
-        if(this.isObjSelected() && this.getObjCategory() == 'objects' && this.can_place){
-            var new_spr = game.add.sprite(this.sprite.x,this.sprite.y,this.sprite.key);
-            // place object
-            // ...
-            // add image to phaser
-            // ...
-            // add to library
-            library['states'][curr_state].entities.objects.push(
-                {
-                    x:new_spr.x,
-                    y:new_spr.y,
-                    obj_name:this.obj_name
+        if(this.isObjSelected() && this.can_place && curr_state){
+            var x = (Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
+            var y = (Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
+
+            // OBJECT SELECTED
+            if (this.getObjCategory() == 'objects') {
+                var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
+                // does image have sprites
+                var obj = lobjects[this.obj_category][this.obj_name];
+                if (Object.keys(obj.sprites).length > 0) {
+                    // get first image
+                    img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
                 }
-            )
-            console.log(lobjects)
+
+                // place object, add to state entity list
+                fabric.Image.fromURL(img_path, function(oImg) {
+                    oImg.setControlsVisibility({
+                        bl: false,
+                        br: false,
+                        mb: false,
+                        ml: false,
+                        mr: false,
+                        mt: false,
+                        tl: false,
+                        tr: false
+                    });
+
+                    Placer.placeObj(oImg, x, y);
+                });
+            }
+
+            // REGION SELECTED
+            else if (this.getObjCategory() == 'regions') {
+
+                var color = hexToRgb(lobjects[this.obj_category][this.obj_name].color);
+
+                var region = new fabric.Rect({
+                    width: grid_width,
+                    height: grid_height,
+                    stroke: 'rgb(' + color.r + ',' + color.g + ',' + color.b + ')',
+                    strokeWidth: 3,
+                    fill: 'rgba(' + color.r + ',' + color.g + ',' + color.b + ', 0.5)',
+                    hasRotatingPoint: false
+                });
+
+                Placer.placeObj(region, x, y)
+
+            }
         }
     },
 
-    mouseDown: function (event) {
-        this.can_place = game.input.activePointer.withinGame;
+    placeObj: function(obj, x, y) {
+        obj.set('left', x);
+        obj.set('top', y);
+        obj.set('lobj_type', this.obj_category);
+        obj.set('instance_id', Math.round(Math.random()*1000000));
+        obj.set('obj_id', lobjects[this.obj_category][this.obj_name].id);
+
+        canvas.add(obj);
+
+        // serialize
+        canv_saveState();
+    }
+}
+
+
+// http://jsfiddle.net/GrandThriftAuto/6CDFr/15/
+// customise fabric.Object with a method to resize rather than just scale after tranformation
+fabric.Object.prototype.resizeToScale = function () {
+    // resizes an object that has been scaled (e.g. by manipulating the handles), setting scale to 1 and recalculating bounding box where necessary
+    switch (this.type) {
+        case "circle":
+            this.radius *= this.scaleX;
+            this.scaleX = 1;
+            this.scaleY = 1;
+            break;
+        case "ellipse":
+            this.rx *= this.scaleX;
+            this.ry *= this.scaleY;
+            this.width = this.rx * 2;
+            this.height = this.ry * 2;
+            this.scaleX = 1;
+            this.scaleY = 1;
+            break;
+        case "polygon":
+        case "polyline":
+            var points = this.get('points');
+            for (var i = 0; i < points.length; i++) {
+                var p = points[i];
+                p.x *= this.scaleX
+                p.y *= this.scaleY;
+            }
+            this.scaleX = 1;
+            this.scaleY = 1;
+            this.width = this.getBoundingBox().width;
+            this.height = this.getBoundingBox().height;
+            break;
+        case "triangle":
+        case "line":
+        case "rect":
+            this.width *= this.scaleX;
+            this.height *= this.scaleY;
+            this.scaleX = 1;
+            this.scaleY = 1;
+        default:
+            break;
+    }
+}
+
+// helper function to return the boundaries of a polygon/polyline
+// something similar may be built in but it seemed easier to write my own than dig through the fabric.js code.  This may make me a bad person.
+fabric.Object.prototype.getBoundingBox = function () {
+    var minX = null;
+    var minY = null;
+    var maxX = null;
+    var maxY = null;
+    switch (this.type) {
+        case "polygon":
+        case "polyline":
+            var points = this.get('points');
+
+            for (var i = 0; i < points.length; i++) {
+                if (typeof (minX) == undefined) {
+                    minX = points[i].x;
+                } else if (points[i].x < minX) {
+                    minX = points[i].x;
+                }
+                if (typeof (minY) == undefined) {
+                    minY = points[i].y;
+                } else if (points[i].y < minY) {
+                    minY = points[i].y;
+                }
+                if (typeof (maxX) == undefined) {
+                    maxX = points[i].x;
+                } else if (points[i].x > maxX) {
+                    maxX = points[i].x;
+                }
+                if (typeof (maxY) == undefined) {
+                    maxY = points[i].y;
+                } else if (points[i].y > maxY) {
+                    maxY = points[i].y;
+                }
+            }
+            break;
+        default:
+            minX = this.left;
+            minY = this.top;
+            maxX = this.left + this.width;
+            maxY = this.top + this.height;
+    }
+    return {
+        topLeft: new fabric.Point(minX, minY),
+        bottomRight: new fabric.Point(maxX, maxY),
+        width: maxX - minX,
+        height: maxY - minY
     }
 }

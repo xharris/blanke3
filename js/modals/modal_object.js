@@ -17,35 +17,28 @@ function objectModalValueChange(e){
   var value = e.currentTarget.value;
 
   // get old values
-  var oldname = getLobjNameByID(opened_obj['id']);
+  var oldname = getLobjNameByID('objects', opened_obj['id']);
   var oldvals = $.extend(true,{},opened_obj);
+
+  // if the key is name, then change key
+  if(key == "name"){
+    opened_obj = changeLobjName('objects', opened_obj, value)
+  }
 
   // set values to object
   if(key != "name"){
     opened_obj[key] = value;
   }
 
-  // if the key is name, then change key
-  if(key == "name"){
-    // check if name already exists
-    // ...
 
-    // add newly named object
-    lobjects.objects[value] = oldvals;
-    opened_obj = lobjects.objects[value];
-    // delete the old object
-    delete lobjects.objects[oldname];
-    // change object name in tree
-    var tree_node = tree.tree('getNodeById',opened_obj['id'])
-    tree.tree('updateNode',tree_node,value)
-  }
 }
 
 function showObjectModal(name){
   if(!obj_modal_open){
+        closeAllModals()
         obj_modal_open = true;
         // get the object from library
-        opened_obj = getLobjByName(name);
+        opened_obj = getLobjByName('objects',name);
 
         // load in obj properties
         $("#in_obj_name").val(name);
@@ -78,7 +71,13 @@ function closeObjectModal(){
       }
       obj_modal_open = false;
       $("#modal_object").toggleClass("active");
-      saveProject();
+
+      Placer.reset();
+      tree.tree('getSelectedNodes').forEach(function(obj){
+          tree.tree('removeFromSelection', obj);
+      })
+
+      autosaveProject();
   }
 }
 
@@ -125,7 +124,7 @@ function showSpriteModal(obj,spr_name){
           $("#in_spr_height").val(obj.sprites[spr_name].height);
 
           // set new path
-          obj.sprites[spr_name].path = nwPATH.resolve(project_path,'images',spr_name);
+          obj.sprites[spr_name].path = nwPATH.resolve(getProjectPath(),'images',spr_name);
 
           // show the modal
           $("#modal_sprite").toggleClass("active");
@@ -191,7 +190,7 @@ function saveSpriteModal(){
 
   // close the modal_sprite (yes, this is a save&close button)
   closeSpriteModal();
-  saveProject();
+  autosaveProject();
 }
 
 // show file dialog for choosing a image file
@@ -227,7 +226,7 @@ function addSprite(file,obj){
   obj.sprites[name] = info;
   opened_obj = obj;
 
-  canv_addSprite(name,file);
+  //canv_addSprite(name,file);
 
   return name;
 }
@@ -240,7 +239,7 @@ function addSpriteDiv(spr_name){
   $('#btn_add_sprite').before('\
     <div class="sprite">\
       <button id="btn_close"><i class="fa fa-times"></i></button>\
-      <a onclick="editSprite(\''+getLobjNameByID(opened_obj.id)+'\',\''+spr_name+'\')">\
+      <a onclick="editSprite(\''+getLobjNameByID('objects', opened_obj.id)+'\',\''+spr_name+'\')">\
         <div class="'+name_noperiod+' preview"\
           style="background-image:url(\''+encodeURI(info.path)+'\')"\
         ></div>\

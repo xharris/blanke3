@@ -1,14 +1,17 @@
 var IDE_NAME = "BlankE";
+var PJ_EXTENSION = 'bla';
+var AUTOSAVE = false;
 
 var nwGUI = require('nw.gui');
 var nwPROC = require('process');
 var nwPATH = require('path');
 var nwFILE = require('fs-extra');
 var nwIMG = require('image-size');
+var nwUTIL = require('util');
 
 var win = nwGUI.Window.get();
 
-win.showDevTools();
+//win.showDevTools();
 
 var isMaximized = false;
 var menu_icon = "bars";
@@ -27,11 +30,21 @@ var project_name;
 var curr_state; // (state name)
 
 var config_data = {"recent_projects":[]};
+var colors = {"green":"#4caf50"}
 
 $(function(){
-  $(".recent_projects > table").colResizable({
-	  liveDrag: true
-  });
+	getColors();
+	btn_newProject();
+
+	window.onerror = function(msg, url, linenumber) {
+	    $(".errors").append('<p class="error">Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber+'</p>');
+	    return true;
+	}
+	var oldLog = console.log;
+    console.log = function (message) {
+        $(".errors").append('<p class="normal">' + message + '</p>')
+        oldLog.apply(console, arguments);
+    };
 });
 
 function winResize(){
@@ -45,10 +58,9 @@ function winResize(){
 }
 
 function winClose(){
-	if(project_name)saveProject();
-	// clean the config.json
-	// ...
-  win.close();
+	closeProject(function(){
+  		win.close();
+	});
 }
 
 function winSetTitle(new_title){
@@ -65,6 +77,53 @@ function winSetMenuIcon(new_icon){
 	winSetTitle(document.title);
 }
 
+// min (included), max (excluded)
+function getRandomInt(min, max) {
+	return Math.floor(Math.random() * (max - min)) + min;
+}
+
+// http://www.geedew.com/remove-a-directory-that-is-not-empty-in-nodejs/
+function rmdirAsync (path, callback) {
+	nwFILE.readdir(path, function(err, files) {
+		if(err) {
+			// Pass the error on to callback
+			callback(err, []);
+			return;
+		}
+		var wait = files.length,
+			count = 0,
+			folderDone = function(err) {
+			count++;
+			// If we cleaned out all the files, continue
+			if( count >= wait || err) {
+				nwFILE.rmdir(path,callback);
+			}
+		};
+		// Empty directory to bail early
+		if(!wait) {
+			folderDone();
+			return;
+		}
+
+		// Remove one or more trailing slash to keep from doubling up
+		path = path.replace(/\/+$/,"");
+		files.forEach(function(file) {
+			var curPath = path + "/" + file;
+			nwFILE.lstat(curPath, function(err, stats) {
+				if( err ) {
+					callback(err, []);
+					return;
+				}
+				if( stats.isDirectory() ) {
+					rmdirAsync(curPath, folderDone);
+				} else {
+					nwFILE.unlink(curPath, folderDone);
+				}
+			});
+		});
+	});
+};
+
 function writeFile(location,text){
 	nwFILE.writeFile(location, text, function(err) {
 		if(err) {return console.log('error saving game: '+err);}
@@ -79,20 +138,6 @@ function chooseFile(name,callback) {
 
   chooser.click();
 }
-
-$(function(){
-
-	//startProjectSetup();
-	winSetTitle(IDE_NAME);
-
-	// update text on folder select
-	$("#setup_path").change(function(evt) {
-		$(".pj_path > span").html($(this).val());
-  	});
-
-	updateRecentProjects();
-
-});
 
 function updateRecentProjects() {
 	// get the config.json
@@ -131,19 +176,52 @@ function updateRecentProjects() {
 	}
 }
 
+function getColors() {
+	var colors_path = nwPATH.resolve(nwPROC.cwd(),'includes','colors.json');
+	if(nwFILE.existsSync(colors_path)){
+		nwFILE.readFile(colors_path, 'utf8', function (err,data) {
+			if (!err) {
+				colors = JSON.parse(data);
+			}
+		});
+	}
+}
+
+// http://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+function hexToRgb(hex) {
+    // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+    var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+    hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+        return r + r + g + g + b + b;
+    });
+
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+        r: parseInt(result[1], 16),
+        g: parseInt(result[2], 16),
+        b: parseInt(result[3], 16)
+    } : null;
+}
+
 function showIntroWindow() {
+	/*
 	$("#intro_window").removeClass("hidden");
 	$(".menu_bar").addClass("intro_active");
 	winToggleMenu();
+	*/
 }
 
 function hideIntroWindow() {
+	/*
 	$("#intro_window").addClass("hidden");
 	$(".menu_bar").removeClass("intro_active");
 	// hide project setup window
 	$("#intro_window > .project_setup").addClass("hidden");
+	*/
 }
 
+// startProjecSetup()
+// makes new project form visible
 function startProjectSetup() {
 	// set save path value
 	var proj_name = $("#setup_name").val();
@@ -155,16 +233,33 @@ function startProjectSetup() {
 	$("#intro_window > .project_setup").removeClass("hidden");
 }
 
+// submitProjectSetup()
+// submits new project form
 function submitProjectSetup(){
 	var pj_name = $("#setup_name").val();
 	var pj_path = $("#setup_path").val() || nwPATH.resolve(nwPROC.cwd(),'PROJECTS');
 
-	newProject(pj_name,pj_path)
+	newProject(pj_name,pj_path);
+}
+
+// needs work. doesn't clear our previous project.
+function btn_newProject(){
+	project_path = nwPATH.resolve(nwPROC.cwd(),'PROJECTS');
+	project_name = 'project0';
+	winSetTitle(IDE_NAME);
+
+	// generate default project name
+	nwFILE.readdir(project_path, function(err, files){
+		if (!err) {
+			project_name = 'project' + files.length;
+			newProject(project_name, project_path);
+		} else {
+			newProject(project_name, project_path);
+		}
+	})
 }
 
 function newProject(name,path){
-	// hide intro window
-	hideIntroWindow();
 	// empty lobjects
 	lobjects = {
 		"objects":{},
@@ -179,17 +274,33 @@ function newProject(name,path){
 			}
 		}
 	}
-	// reset tree
-	tree.tree('loadData',data);
 	// set global project variables
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
 
-	addLobj('states');
+	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
+
+    //addLobj('states');
+
 	// save everything
-	saveProject();
-	addRecentProject(name,path);
+	//addRecentProject(name,path);
 }
+
+function closeProject(callback) {
+	// if there's no .bla file, delete everything
+	try {
+		if (nwFILE.lstatSync(nwPATH.resolve(getProjectPath(),project_name)).isFile()) {
+			autosaveProject();
+			callback();
+		}
+	} catch(err) {
+		rmdirAsync(getProjectPath(), function(){
+			callback();
+		});
+	}
+}
+
+
 
 function addRecentProject(name,path){
 	var file_path = nwPATH.resolve(nwPROC.cwd(),'includes','config.json');
@@ -212,7 +323,7 @@ function addRecentProject(name,path){
 }
 
 function getProjectPath(){
-	return nwPATH.resolve(project_path,project_name);
+	return nwPATH.resolve(project_path);
 }
 
 function btn_openProject(){
@@ -229,12 +340,12 @@ function openProject(path){
 			// set lobjects
 			lobjects = JSON.parse(data);
 
-			// preload all sprites for canvas
-			for (obj in lobjects.objects) {
-				for (spr in lobjects.objects[obj].sprites) {
-					canv_addSprite(spr,lobjects.objects[obj].sprites[spr].path)
-				}
-			}
+			tree_reset();
+			Placer.reset();
+
+			// show first state
+			curr_state = Object.keys(lobjects.states)[0];
+			canv_loadState(Object.keys(lobjects.states)[0]);
 
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);
@@ -249,12 +360,15 @@ function openProject(path){
 			winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 
 			closeAllModals();
-			hideIntroWindow();
 		}
 		else{
 			console.log(err)
 		}
 	});
+}
+
+function autosaveProject(){
+	if (AUTOSAVE) saveProject();
 }
 
 function saveProject(){
@@ -269,33 +383,30 @@ function saveProject(){
 
 	// create project folder if not made
 	var file_path = getProjectPath();
-    nwFILE.stat(nwPATH.dirname(file_path),function(err, stats){
-		if (err) {
-			nwFILE.mkdir(nwPATH.dirname(file_path));
 
+	try {
+		if (nwFILE.lstatSync(file_path).isDirectory()) {
 			// create project save file
-			writeFile(file_path,save_data);
-		} else {
-			// create project save file
-			writeFile(file_path,save_data);
+			writeFile(nwPATH.resolve(file_path,project_name),save_data);
 		}
-	});
-
-
-
-
+	} catch(err) {
+		nwFILE.mkdir(file_path, function(err){
+			// create project save file
+			writeFile(nwPATH.resolve(file_path,project_name),save_data);
+		});
+	}
 }
 
 function importResource(category,location,callback){
 	location = decodeURI(location);
-	var folder_path = nwPATH.resolve(project_path,category);
+	var folder_path = nwPATH.resolve(getProjectPath(),category);
 
 	// make the resource folder if it doesn't exist
-	nwFILE.stat(folder_path,function(err,stats){
-		if(err){
-			nwFILE.mkdir(folder_path);
-		}
-	})
+	try {
+		nwFILE.lstatSync(folder_path).isDirectory();
+	} catch(err) {
+		nwFILE.mkdir(folder_path);
+	}
 
 	var f_dest = nwPATH.resolve(folder_path,nwPATH.basename(location));
 	// move the file if it's not there
@@ -307,6 +418,10 @@ function importResource(category,location,callback){
 			}
 		});
 	}
+}
+
+function getResourcePath(category,name) {
+	return nwPATH.resolve(getProjectPath(),category,name);
 }
 
 function saveBackup(){
