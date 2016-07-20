@@ -12,7 +12,7 @@ var data = [
 ];
 
 var tree;
-win.on('loaded', function() {
+$(function() {
 
     tree = $('#library');
     tree.tree({
@@ -52,13 +52,12 @@ win.on('loaded', function() {
 
                 } else if (parent.name == 'REGIONS') {
                     showRegionModal(name);
+                    
                 }
             }
             // add a new child
             else{
                 addLobj(name.toLowerCase());
-
-                tree.tree('openNode', ev_node);
             }
         }
     );
@@ -77,9 +76,6 @@ win.on('loaded', function() {
                     var obj_category = ev_node.parent.name;
                     var obj_name = name;
 
-                    console.log(tree_getSelected())
-                    console.log(Placer.getObjName())
-
                     if (obj_category == "OBJECTS" || obj_category == "REGIONS") {
                         // set canvas placer
                         Placer.setObj(obj_category, obj_name);
@@ -97,7 +93,6 @@ win.on('loaded', function() {
 
             // DESELECT
             else {
-                console.log(ev_node.name);
                 ev_node = event.node;
                 name = ev_node.name;
 

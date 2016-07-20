@@ -1,20 +1,17 @@
 {
-  "name": "blanke3",
-  "main": "index.html",
-  "window": {
-    "title": "Blanke IDE",
-    "toolbar": false,
-    "width": 1024,
-    "height": 640,
-    "min_width": 800,
-    "min_height": 600,
-    "frame": false
-  },
-  "webkit": {
-    "plugin": true
-  },
-  "dependencies": {
-    "fs-extra": "^0.26.5",
-    "image-size": "^0.4.0"
-  }
+    "name": "blanke3",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron ."
+    },
+    "webkit": {
+        "plugin": true
+    },
+    "dependencies": {
+        "fs-extra": "^0.26.5",
+        "image-size": "^0.4.0"
+    },
+    "devDependencies": {
+        "electron-prebuilt": "^1.2.0"
+    }
 }

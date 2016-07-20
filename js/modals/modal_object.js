@@ -195,8 +195,8 @@ function saveSpriteModal(){
 
 // show file dialog for choosing a image file
 function chooseSprite(){
-  chooseFile('#spriteFileDialog',function(file){
-
+  chooseFile(function(file){
+      console.log(file)
     // add sprite to project folder
     importResource('images',file,function(new_path){
         var name = addSprite(new_path,opened_obj);

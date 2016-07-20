@@ -2,16 +2,17 @@ var IDE_NAME = "BlankE";
 var PJ_EXTENSION = 'bla';
 var AUTOSAVE = false;
 
-var nwGUI = require('nw.gui');
+const electron = require('electron')
+// Module to control application life.
+const app = electron.app
+
 var nwPROC = require('process');
 var nwPATH = require('path');
 var nwFILE = require('fs-extra');
 var nwIMG = require('image-size');
 var nwUTIL = require('util');
 
-var win = nwGUI.Window.get();
-
-//win.showDevTools();
+var eIPC = require('electron').ipcRenderer;
 
 var isMaximized = false;
 var menu_icon = "bars";
@@ -34,6 +35,7 @@ var colors = {"green":"#4caf50"}
 
 $(function(){
 	getColors();
+	initializeCanvas();
 	btn_newProject();
 
 	window.onerror = function(msg, url, linenumber) {
@@ -45,23 +47,13 @@ $(function(){
         $(".errors").append('<p class="normal">' + message + '</p>')
         oldLog.apply(console, arguments);
     };
-});
 
-function winResize(){
-	if(isMaximized){
-    	isMaximized = false;
-  		win.unmaximize();
-	}else{
-    	isMaximized = true;
-  		win.maximize();
-	}
-}
-
-function winClose(){
-	closeProject(function(){
-  		win.close();
+	eIPC.on('window-close', function(event) {
+		closeProject(function(){
+			eIPC.send('confirm-window-close');
+		});
 	});
-}
+});
 
 function winSetTitle(new_title){
 	$(".menu_bar > .window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
@@ -130,13 +122,11 @@ function writeFile(location,text){
 	});
 }
 
-function chooseFile(name,callback) {
-  var chooser = document.querySelector(name);
-  chooser.addEventListener("change", function(evt) {
-    callback(this.value);
-  }, false);
-
-  chooser.click();
+function chooseFile(callback) {
+  eIPC.send('open-file-dialog');
+  eIPC.on('selected-directory', function (event, path) {
+	  callback(path);
+  })
 }
 
 function updateRecentProjects() {
@@ -327,7 +317,7 @@ function getProjectPath(){
 }
 
 function btn_openProject(){
-	chooseFile('#pj_open_dialog',function(file){
+	chooseFile(function(file){
 		openProject(file);
 	});
 }

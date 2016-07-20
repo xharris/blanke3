@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') {window.module = module; module = undefined;}</script>
 
     <!-- jQuery -->
     <script src="includes/jquery/jquery-2.2.0.min.js"></script>
@@ -9,8 +11,8 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="includes/font-awesome/css/font-awesome.min.css"/>
 
-    <!-- FabricJS -->
-    <script src="includes/fabricJS/fabric.require.js"></script>
+    <!-- oCanvas -->
+    <script src="includes/oCanvas/ocanvas-2.8.4.min.js"></script>
 
     <!-- jqTree -->
     <script src="includes/jqTree/tree.jquery.js"></script>
@@ -30,31 +32,12 @@
     <script src="js/extra_box.js"></script>
     <script src="js/tree.js"></script>
 
+    <!-- Insert this line after script imports -->
+    <script>if (window.module) module = window.module;</script>
 
 </head>
 <title>Blanke IDE</title>
 <body>
-
-    <!-- title bar -->
-    <div class="menu_bar intro_active win-drag">
-        <div class="window_title">Blanke IDE</div>
-        <div class="window_menu">
-            <!--div class="btn_new" onclick="btn_newProject()" title="new project"><i class="fa fa-file-o"></i></div-->
-            <div class="btn_open" onclick="btn_openProject()" title="open project"><i class="fa fa-folder-open-o"></i></div>
-            <div class="btn_save" onclick="saveProject()" title="save project"><i class="fa fa-floppy-o"></i></div>
-            <div class="btn_dev" onclick="win.showDevTools()" title="inspector"><i class="fa fa-terminal"></i></div>
-        </div>
-
-        <div id="window_buttons" class="win-nodrag">
-
-            <div id="btn_minimize" onclick="win.minimize()" title="minimize"></div>
-
-            <div id="btn_maximize" onclick="winResize()" title="maximize"> </div>
-
-            <div id="btn_close" onclick="winClose()" title="close"></div>
-
-        </div>
-    </div>
 
     <div id="main_window">
         <div id="library" class="no-select"></div>
@@ -159,7 +142,7 @@
         </div>
 
         <div class="canvas_container">
-            <canvas id="canvas"></canvas>
+            <canvas id="canvas" class="hidden"></canvas>
         </div>
 
         <input style="display:none;" id="pj_open_dialog" type="file" />

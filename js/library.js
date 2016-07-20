@@ -36,14 +36,14 @@ function addLobj(category,name,info){
     if (category == 'states') {
         curr_state = name;
         canv_newState();
-        canv_saveState();
+        //canv_saveState();
     }
 
     var node_id = Math.round(Math.random()*1000000);
     lobjects[category][name].id = node_id;
 
     var category_node = tree.tree('getNodeById', 'cat_' + category.toUpperCase());
-    tree.tree(
+    var new_node = tree.tree(
         'appendNode',
         {
             label: name,
@@ -51,6 +51,9 @@ function addLobj(category,name,info){
         },
         category_node
     );
+
+    tree.tree('openNode', category_node);
+    tree.tree('selectNode', new_node);
 }
 
 function getLobjByName(category,name){
