@@ -8,7 +8,7 @@ var GAME_MARGIN = 150;
 var GRID_WIDTH = 32;
 var GRID_HEIGHT = 32;
 
-var canvas, bounds_rect;
+var canvas, canvas_size, bounds_rect;
 var grid_lines = [];
 
 var game_width = 800;
@@ -30,27 +30,79 @@ var mouse = {
     isDown : false
 }
 
-function initializeCanvas() {
+function initializeCanvas(screen_size) {
+    canvas_size = screen_size;
+
+    $("#canvas")[0].width = screen_size.width;
+    $("#canvas")[0].height = screen_size.height;
+
     canvas = oCanvas.create({
         canvas: "#canvas",
-        //background: "#EEEDED",
+        background: "#EEEDED",
         fps: 60
     });
+}
+
+function initGrid() {
+    for (var x = 0; x < game_width / grid_width; x++) {
+        for (var y = 0; y < game_height / grid_height; y++) {
+            var gx = x * grid_width;
+            var gy = y * grid_height;
+
+            // horizontal line
+            var new_lineh = canvas.display.line({
+                start: {
+                    x: 0,
+                    y: gy
+                },
+                end: {
+                    x: screen_size.width,
+                    y: gy
+                }
+            })
+
+            // vertical line
+            var new_linev = canvas.display.line({
+                start: {
+                    x: gx,
+                    y: 0
+                },
+                end: {
+                    x: gx,
+                    y: screen_size.height
+                }
+            })
+
+            var new_lines = [new_lineh, new_linev];
+
+            for (var l = 0; l < new_lines.length; l++) {
+                var line_clone = new_lines[l].clone();
+                grid_lines.push(line_clone);
+                canvas.addChild(line_clone);
+            }
+        }
+    }
 }
 
 function canv_newState() {
     $("#canvas").removeClass("hidden");
 
     bounds_rect = canvas.display.rectangle({
-       x: canvas.width / 2,
-       y: canvas.width / 2,
-       origin: { x: "center", y: "center" },
+       x: 200,
+       y: 20,
+       origin: { x: "left", y: "top" },
        width: game_width,
        height: game_height,
-       stroke: "<1px> #00e676",
-       fill: "transparent",
+       stroke: "1px #00e676",
     });
-    canvas.addChild(button);
+
+    canvas.addChild(bounds_rect);
+
+    initGrid();
+}
+
+function canv_loadState(state_name) {
+
 }
 
 

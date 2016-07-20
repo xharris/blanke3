@@ -13,9 +13,11 @@ var nwIMG = require('image-size');
 var nwUTIL = require('util');
 
 var eIPC = require('electron').ipcRenderer;
+var eScreen = require('electron').screen;
 
 var isMaximized = false;
 var menu_icon = "bars";
+var screen_size = {width:0,height:0};
 
 var lobjects = {
 	"objects":{},
@@ -35,24 +37,27 @@ var colors = {"green":"#4caf50"}
 
 $(function(){
 	getColors();
-	initializeCanvas();
 	btn_newProject();
 
-	window.onerror = function(msg, url, linenumber) {
-	    $(".errors").append('<p class="error">Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber+'</p>');
-	    return true;
-	}
-	var oldLog = console.log;
-    console.log = function (message) {
-        $(".errors").append('<p class="normal">' + message + '</p>')
-        oldLog.apply(console, arguments);
-    };
-
+	// set events for window close
 	eIPC.on('window-close', function(event) {
 		closeProject(function(){
 			eIPC.send('confirm-window-close');
 		});
 	});
+
+	// get largest screen size for canvas element
+	var displays = eScreen.getAllDisplays();
+	for (var d = 0; d < displays.length; d++) {
+		var display = displays[d];
+		console.log(display)
+		if (display.bounds.width > screen_size.width)
+			screen_size.width = display.bounds.width;
+		if (display.bounds.height > screen_size.height)
+			screen_size.height = display.bounds.height;
+	}
+
+	initializeCanvas(screen_size);
 });
 
 function winSetTitle(new_title){

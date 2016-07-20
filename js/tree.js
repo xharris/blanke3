@@ -52,7 +52,7 @@ $(function() {
 
                 } else if (parent.name == 'REGIONS') {
                     showRegionModal(name);
-                    
+
                 }
             }
             // add a new child
