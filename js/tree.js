@@ -77,18 +77,15 @@ win.on('loaded', function() {
                     var obj_category = ev_node.parent.name;
                     var obj_name = name;
 
-                    console.log(tree_getSelected())
-                    console.log(Placer.getObjName())
-
                     if (obj_category == "OBJECTS" || obj_category == "REGIONS") {
                         // set canvas placer
                         Placer.setObj(obj_category, obj_name);
 
-                    } else if (obj_category == "STATES") {
+                    }/* else if (obj_category == "STATES") {
                         Placer.reset();
                         canv_loadState(obj_name);
 
-                    } else {
+                    }*/ else {
                         Placer.reset();
 
                     }
@@ -97,31 +94,33 @@ win.on('loaded', function() {
 
             // DESELECT
             else {
-                ev_node = event.node;
-                name = ev_node.name;
-
-                // not a category root
-                if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES")){
-                    var obj_category = ev_node.parent.name;
-                    var obj_name = name;
-
-                    console.log(tree_getSelected())
-                    console.log(Placer.getObjName())
-
-                    if (obj_category == "OBJECTS" || obj_category == "REGIONS") {
-                        // set canvas placer
-                        Placer.setObj(obj_category, obj_name);
-
-                    } else if (obj_category == "STATES") {
-                        Placer.reset();
-                        canv_loadState(obj_name);
-                    }
-                }
-
                 Placer.reset();
             }
         }
     );
+
+    tree.bind(
+        'tree.click',
+        function (event) {
+            ev_node = event.node;
+            name = ev_node.name;
+
+            // not a category root
+            if(!(name == "OBJECTS" || name == "TILES" || name == "REGIONS" || name == "STATES")){
+                var obj_category = ev_node.parent.name;
+                var obj_name = name;
+
+                if (obj_category == "OBJECTS" || obj_category == "REGIONS") {
+                    // set canvas placer
+                    Placer.setObj(obj_category, obj_name);
+
+                } else if (obj_category == "STATES") {
+                    Placer.reset();
+                    canv_loadState(obj_name);
+                }
+            }
+        }
+    )
 
     tree.bind(
         'tree.move',

@@ -157,6 +157,34 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   margin: 0;
   /* <-- Apparently some margin are still there even though it's hidden */
 }
+.canvas_container > .tile-container {
+  outline: 1px solid #bdbdbd !important;
+  width: 100%;
+  height: 100%;
+  margin: 40px 185px;
+}
+.canvas_container > .tile-container.hidden {
+  outline: none !important;
+  background-color: none;
+}
+.canvas_container > .tile-container .empty-tile,
+.canvas_container > .tile-container .slick-cell {
+  background-color: white;
+  outline: 1px solid #bdbdbd;
+  display: inline-block;
+  width: 32px;
+  height: 32px;
+}
+.canvas_container > .tile-container .slick-header {
+  display: none;
+}
+.canvas_container > .tile-container .slick-viewport {
+  width: 100% !important;
+  height: 100% !important;
+}
+.canvas_container > .tile-container .slick-viewport .grid-canvas {
+  margin: 1px;
+}
 #modal_object {
   position: absolute;
   margin: 10px 0px;
@@ -398,7 +426,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 #modal_region {
   position: absolute;
   margin: 10px 0px;
-  width: 405px;
+  width: 234px;
   top: 28px;
   left: 0px;
   opacity: 0;
@@ -669,11 +697,20 @@ html {
   overflow: auto;
   width: 100%;
   height: 100%;
-  padding-left: 185px;
-  padding-top: 40px;
   box-sizing: border-box;
 }
 #main_window > .canvas_container canvas {
   border: 1px solid #bdbdbd;
   margin-bottom: 4px;
+}
+#main_window .progress {
+  position: absolute;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  margin: 0px;
+  transition: ease-in-out 0.2s bottom;
+}
+#main_window .progress.hidden {
+  bottom: -5px;
 }

@@ -8,11 +8,11 @@ var GAME_MARGIN = 150;
 var GRID_WIDTH = 32;
 var GRID_HEIGHT = 32;
 
-var canvas, room_rect;
+var canvas, clean_canvas, tile_container;
 var grid_lines = [];
 
 var game_width = 800;
-var game_height = 600;
+var game_height = 100;
 
 var grid_width = GRID_WIDTH;
 var grid_height = GRID_HEIGHT;
@@ -30,18 +30,129 @@ var mouse = {
     isDown : false
 }
 
+
+$(function(){
+    initializeCanvas();
+});
+
 function initializeCanvas() {
-    canvas = new fabric.Canvas('canvas');
-    canvas.setWidth(0);
-    canvas.setHeight(0);
+    canvas = document.querySelector('.canvas_container');
+    clean_canvas = canvas.cloneNode(true);
+
+    canvas.addEventListener("keydown", function(e) {
+        // space, page up, page down and arrow keys:
+        if([32, 33, 34, 37, 38, 39, 40].indexOf(e.keyCode) > -1) {
+            e.preventDefault();
+        }
+    }, false);
+}
+
+function canv_loadState(json) {
+    canv_setRoomSize({
+        width: game_width,
+        height: game_height,
+        grid_width: grid_width,
+        grid_height: grid_height
+    });
+}
+
+// new_settings = {width, height, grid_width, grid_height}
+function canv_setRoomSize(new_settings) {
+    game_width = new_settings.width || game_width;
+    game_height = new_settings.height || game_height;
+    grid_width = new_settings.grid_width || grid_width;
+    grid_height = new_settings.grid_height || grid_height;
+
+    tile_container = document.querySelector(".canvas_container > .tile-container");
+    var tile_width = (grid_width > 5) ? grid_width : game_width;
+    var tile_height = (grid_height > 5) ? grid_height : game_height;
+
+    /*
+    tile_container.style.width = game_width + "px";
+    tile_container.style.height = game_height + "px";
+    */
+
+    var columns = [];
+    var rows = [];
+    var row = {};
+    for (var x = 0; x <= game_width / tile_width; x++) {
+        columns.push({id: "col" + x, name: "", field: "col" + x});
+        row = {};
+
+        for (var y = 0; y <= game_height / tile_height; y++) {
+            row["col" + x] = "";
+        }
+        rows[x] = row;
+    }
+
+    var slickgrid = new Slick.Grid(tile_container, rows, columns, {
+        autoHeight: true,
+        rowHeight: grid_height,
+        defaultColumnWidth: grid_width,
+        enableCellNavigation: true,
+        enableColumnReorder: false,
+        showHeaderRow: false
+    });
+    slickgrid.setTopPanelVisibility(false);
+
+    var css_style = {0:{"col":"empty-tile"}};
+    for (var x = 0; x <= game_width / tile_width + 1; x++) {
+        css_style[x] = {};
+        for (var y = 0; y <= game_height / tile_height + 1; y++) {
+            css_style[x]["col" + y] = "empty-tile"
+        }
+    }
+    console.log(css_style);
+
+    slickgrid.setCellCssStyles("cellstyle", css_style);
+    /*
+    showProgress();
+
+    game_width = new_settings.width || game_width;
+    game_height = new_settings.height || game_height;
+    grid_width = new_settings.grid_width || grid_width;
+    grid_height = new_settings.grid_height || grid_height;
+
+    // clear canvas
+    canvas.innerHTML = clean_canvas.innerHTML;
+
+    tile_container = document.querySelector(".canvas_container > .tile-container");
+    tile_container.classList.remove('hidden');
+
+    tile_container.style.width = (game_width - 1) + "px";
+    tile_container.style.height = (game_height - 1) + "px";
+
+    var tile_width = (grid_width > 5) ? grid_width : game_width;
+    var tile_height = (grid_height > 5) ? grid_height : game_height;
+
+    // create tile square template
+    var tile_div = document.createElement("div");
+    tile_div.className = "empty-tile";
+    tile_div.style.width = tile_width + "px";
+    tile_div.style.height = tile_height + "px";
+
+    // add tile squares
+    for (var x = 0; x <= game_width / tile_width + 1; x++) {
+        for (var y = 0; y <= game_height / tile_height + 1; y++) {
+            var new_tile = tile_div.cloneNode(true);
+            tile_div.style.left = x * tile_width + "px";
+            tile_div.style.top = y * tile_height + "px";
+            tile_container.appendChild(new_tile);
+        }
+    }
+
+    hideProgress();
+    */
+}
+    /*
 
     canvas.on('mouse:down', function(options) {
         mouse.isDown = true;
-
-        Placer.mouseUp();
     });
     canvas.on('mouse:up', function(options) {
         mouse.isDown = false;
+
+        Placer.mouseUp();
     });
 
     canvas.on('mouse:move', function(options) {
@@ -56,19 +167,21 @@ function initializeCanvas() {
     });
 
     canvas.observe('object:modified', function (e) {
-        e.target.resizeToScale();
+        //e.target.resizeToScale();
     });
+    */
 
-}
-
-
+/*
 $(document).keydown( function(e){
     if (e.keyCode == 8 || e.keyCode == 46){
         if(canvas.getActiveGroup()){
-            canvas.getActiveGroup().forEachObject(function(o){ canvas.remove(o) });
+            canvas.getActiveGroup().forEachObject(function(o){
+                canvas.remove(o)
+            });
             canvas.discardActiveGroup().renderAll();
         } else {
             canvas.remove(canvas.getActiveObject());
+            canvas.renderAll();
         }
         canv_saveState();
     }
@@ -180,14 +293,7 @@ function _setRoomSize(width, height) {
     var new_height = game_height+(game_margin_tb*2);
 
     // prevent object placed in right and bottom margins from being cut off (commented out as future feature)
-    /*
-    if (new_width > canvas.getWidth()) {
-        canvas.setWidth(new_width);
-    }
-    if (new_height > canvas.getHeight()) {
-        canvas.setHeight(new_height);
-    }
-    */
+
     canvas.setWidth(new_width);
     canvas.setHeight(new_height);
 
@@ -199,10 +305,6 @@ function _setRoomSize(width, height) {
     canvas.renderAll();
 }
 
-$(function(){
-    initializeCanvas();
-
-});
 
 // canv_newState()
 // clears all objects and remakes the grid
@@ -218,8 +320,7 @@ function canv_newState() {
 function canv_loadState(state_name) {
     curr_state = state_name;
     canvas.loadFromJSON(lobjects.states[state_name].entity_json, canvas.renderAll.bind(canvas), function(o, obj) {
-
-        if (o.lobj_type == 'objects') {
+        if (o.lobj_type == "objects") {
             obj.setControlsVisibility({
                 bl: false,
                 br: false,
@@ -238,10 +339,12 @@ function canv_loadState(state_name) {
 // canv_saveState()
 // saves everything but the grid in a JSON
 function canv_saveState() {
+    //canvas.renderAll();
     if (canvas.getWidth() > 0 || canvas.getHeight() > 0) {
-        lobjects.states[curr_state].entity_json = canvas.toJSON(['group','lobj_type','instance_id','obj_id','evented','selectable']);
+        lobjects.states[curr_state].entity_json = canvas.toJSON(['hasRotatingPoint','lobj_type','instance_id','obj_id']);
     }
 }
+*/
 
 var Placer = {
     obj_name: '',
@@ -330,6 +433,7 @@ var Placer = {
     },
 
     placeObj: function(obj, x, y) {
+
         obj.set('left', x);
         obj.set('top', y);
         obj.set('lobj_type', this.obj_category);
@@ -340,98 +444,5 @@ var Placer = {
 
         // serialize
         canv_saveState();
-    }
-}
-
-
-// http://jsfiddle.net/GrandThriftAuto/6CDFr/15/
-// customise fabric.Object with a method to resize rather than just scale after tranformation
-fabric.Object.prototype.resizeToScale = function () {
-    // resizes an object that has been scaled (e.g. by manipulating the handles), setting scale to 1 and recalculating bounding box where necessary
-    switch (this.type) {
-        case "circle":
-            this.radius *= this.scaleX;
-            this.scaleX = 1;
-            this.scaleY = 1;
-            break;
-        case "ellipse":
-            this.rx *= this.scaleX;
-            this.ry *= this.scaleY;
-            this.width = this.rx * 2;
-            this.height = this.ry * 2;
-            this.scaleX = 1;
-            this.scaleY = 1;
-            break;
-        case "polygon":
-        case "polyline":
-            var points = this.get('points');
-            for (var i = 0; i < points.length; i++) {
-                var p = points[i];
-                p.x *= this.scaleX
-                p.y *= this.scaleY;
-            }
-            this.scaleX = 1;
-            this.scaleY = 1;
-            this.width = this.getBoundingBox().width;
-            this.height = this.getBoundingBox().height;
-            break;
-        case "triangle":
-        case "line":
-        case "rect":
-            this.width *= this.scaleX;
-            this.height *= this.scaleY;
-            this.scaleX = 1;
-            this.scaleY = 1;
-        default:
-            break;
-    }
-}
-
-// helper function to return the boundaries of a polygon/polyline
-// something similar may be built in but it seemed easier to write my own than dig through the fabric.js code.  This may make me a bad person.
-fabric.Object.prototype.getBoundingBox = function () {
-    var minX = null;
-    var minY = null;
-    var maxX = null;
-    var maxY = null;
-    switch (this.type) {
-        case "polygon":
-        case "polyline":
-            var points = this.get('points');
-
-            for (var i = 0; i < points.length; i++) {
-                if (typeof (minX) == undefined) {
-                    minX = points[i].x;
-                } else if (points[i].x < minX) {
-                    minX = points[i].x;
-                }
-                if (typeof (minY) == undefined) {
-                    minY = points[i].y;
-                } else if (points[i].y < minY) {
-                    minY = points[i].y;
-                }
-                if (typeof (maxX) == undefined) {
-                    maxX = points[i].x;
-                } else if (points[i].x > maxX) {
-                    maxX = points[i].x;
-                }
-                if (typeof (maxY) == undefined) {
-                    maxY = points[i].y;
-                } else if (points[i].y > maxY) {
-                    maxY = points[i].y;
-                }
-            }
-            break;
-        default:
-            minX = this.left;
-            minY = this.top;
-            maxX = this.left + this.width;
-            maxY = this.top + this.height;
-    }
-    return {
-        topLeft: new fabric.Point(minX, minY),
-        bottomRight: new fabric.Point(maxX, maxY),
-        width: maxX - minX,
-        height: maxY - minY
     }
 }

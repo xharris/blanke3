@@ -14,8 +14,6 @@ function regionModalValueChange(e){
     var key = e.currentTarget.id.replace('in_region_', '');
     var value = e.currentTarget.value;
 
-    console.log(key)
-    console.log(value);
     // get old values
     var oldname = getLobjNameByID('regions', opened_region['id']);
     var oldcolor = opened_region['color'];
@@ -27,7 +25,6 @@ function regionModalValueChange(e){
 
     // if the key is name, then change key
     if(key == "color"){
-        console.log(value);
         opened_region[key] = value.toString();
     }
 }
@@ -38,9 +35,6 @@ function showRegionModal(name){
         region_modal_open = true;
         // get the object from library
         opened_region = getLobjByName('regions',name);
-
-        console.log(opened_region);
-        console.log(name);
 
         // load in obj properties
         $("#in_region_name").val(name);

@@ -21,7 +21,7 @@ function addLobj(category,name,info){
         }
         if (category == "states") {
             info = {
-                entity_json : ""
+                entity_json : {}
             }
         }
         if (category == "regions") {
@@ -35,8 +35,7 @@ function addLobj(category,name,info){
 
     if (category == 'states') {
         curr_state = name;
-        canv_newState();
-        canv_saveState();
+        canv_loadState(info.entity_json);
     }
 
     var node_id = Math.round(Math.random()*1000000);

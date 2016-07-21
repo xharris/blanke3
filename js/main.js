@@ -193,21 +193,14 @@ function hexToRgb(hex) {
     } : null;
 }
 
-function showIntroWindow() {
-	/*
-	$("#intro_window").removeClass("hidden");
-	$(".menu_bar").addClass("intro_active");
-	winToggleMenu();
-	*/
+function showProgress() {
+	var progress = document.querySelector(".progress");
+	progress.classList.remove("hidden");
 }
 
-function hideIntroWindow() {
-	/*
-	$("#intro_window").addClass("hidden");
-	$(".menu_bar").removeClass("intro_active");
-	// hide project setup window
-	$("#intro_window > .project_setup").addClass("hidden");
-	*/
+function hideProgress() {
+	var progress = document.querySelector(".progress");
+	progress.classList.add("hidden");
 }
 
 // startProjecSetup()
@@ -335,7 +328,7 @@ function openProject(path){
 
 			// show first state
 			curr_state = Object.keys(lobjects.states)[0];
-			canv_loadState(Object.keys(lobjects.states)[0]);
+			canv_loadState(curr_state);
 
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);

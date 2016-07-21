@@ -6,11 +6,21 @@
     <script src="includes/jquery/jquery-2.2.0.min.js"></script>
     <script src="includes/jquery/colResizable-1.5.min.js"></script>
 
+    <!-- Materialize -->
+    <link rel="stylesheet" href="includes/materialize/css/materialize.min.css" type="text/css">
+    <script type="text/javascript" src="includes/materialize/js/materialize.min.js"></script>
+
+    <!-- Slickgrid -->
+    <link rel="stylesheet" href="includes/slickgrid/slick.grid.css" type="text/css">
+    <link rel="stylesheet" href="includes/slickgrid/css/smoothness/jquery-ui-1.8.16.custom.css" type="text/css">
+    <script src="includes/slickgrid/lib/jquery-ui-1.8.16.custom.min.js"></script>
+    <script src="includes/slickgrid/lib/jquery-1.7.min.js"></script>
+    <script src="includes/slickgrid/lib/jquery.event.drag-2.2.js"></script>
+    <script src="includes/slickgrid/slick.core.js"></script>
+    <script src="includes/slickgrid/slick.grid.js"></script>
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="includes/font-awesome/css/font-awesome.min.css"/>
-
-    <!-- FabricJS -->
-    <script src="includes/fabricJS/fabric.require.js"></script>
 
     <!-- jqTree -->
     <script src="includes/jqTree/tree.jquery.js"></script>
@@ -159,9 +169,13 @@
         </div>
 
         <div class="canvas_container">
-            <canvas id="canvas"></canvas>
+            <div class="tile-container hidden"></div>
+            <!--canvas id="canvas"></canvas-->
         </div>
 
+        <div class="progress hidden">
+            <div class="indeterminate"></div>
+        </div>
         <input style="display:none;" id="pj_open_dialog" type="file" />
 
     </div>
