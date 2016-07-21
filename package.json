@@ -12,6 +12,7 @@
         "image-size": "^0.4.0"
     },
     "devDependencies": {
-        "electron-prebuilt": "^1.2.0"
+        "electron-prebuilt": "^1.2.0",
+        "keystate": "^0.0.1"
     }
 }
