@@ -50,14 +50,12 @@ $(function(){
 	var displays = eScreen.getAllDisplays();
 	for (var d = 0; d < displays.length; d++) {
 		var display = displays[d];
-		console.log(display)
+
 		if (display.bounds.width > screen_size.width)
 			screen_size.width = display.bounds.width;
 		if (display.bounds.height > screen_size.height)
 			screen_size.height = display.bounds.height;
 	}
-
-	initializeCanvas(screen_size);
 });
 
 function winSetTitle(new_title){
@@ -254,6 +252,7 @@ function btn_newProject(){
 	})
 }
 
+
 function newProject(name,path){
 	// empty lobjects
 	lobjects = {
@@ -263,15 +262,23 @@ function newProject(name,path){
 		"sounds":{},
 		"states":{},
 		"settings":{
-			"ide":{},
+			"ide":{
+				"color": {
+					"background": "#EEEDED",
+					"grid": "#000",
+					"bounds": "#00e676"
+				}
+			},
 			"game":{
-				"project_name":name
+				"project_name": name
 			}
 		}
 	}
 	// set global project variables
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
+
+	initializeCanvas(screen_size);
 
 	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 

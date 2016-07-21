@@ -8,103 +8,243 @@ var GAME_MARGIN = 150;
 var GRID_WIDTH = 32;
 var GRID_HEIGHT = 32;
 
+// zIndexes
+var z_grid = -20;
+var z_origin = -10;
+var z_bounds = 0;
+
 var canvas, canvas_size, bounds_rect;
+var origin_lines = {};
 var grid_lines = [];
+var camera = {
+    x: 0,
+    y: 0
+}
+var camera_start = camera;
 
 var game_width = 800;
 var game_height = 600;
 
 var grid_width = GRID_WIDTH;
 var grid_height = GRID_HEIGHT;
+var grid_opacity = 0.2;
 
 var game_margin_tb = GAME_MARGIN;
 var game_margin_lr = GAME_MARGIN;
+
+var c_settings;
 
 var game_border_weight = 1;
 
 var zoomFactor = 1;
 
-var mouse = {
-    x : 0,
-    y : 0,
-    isDown : false
+var mouse_down_start = {
+    x: 0,
+    y: 0,
+}
+var mouse_button = -1;
+
+function snapToGrid(x,y) {
+    var new_pos = {x:0,y:0};
+    new_pos.x = Math.floor(x / grid_width) * grid_width;
+    new_pos.y = Math.floor(y / grid_height) * grid_height;
+    return new_pos;
 }
 
 function initializeCanvas(screen_size) {
     canvas_size = screen_size;
+    c_settings = lobjects['settings']['ide']['color'];
 
     $("#canvas")[0].width = screen_size.width;
     $("#canvas")[0].height = screen_size.height;
 
     canvas = oCanvas.create({
         canvas: "#canvas",
-        background: "#EEEDED",
+        background: c_settings.background,
         fps: 60
     });
+
+    document.onmousedown = function(ev) {
+        mouse_button = ev.which;
+        mouse_down_start = {
+            x: canvas.mouse.x,
+            y: canvas.mouse.y
+        }
+        camera_start = camera;
+    }
+    document.onmouseup = function(ev) {
+        mouse_button = -1;
+    }
+    canvas.setLoop(function () {
+        // MIDDLE mouse button
+        if (mouse_button == 2) {
+            camera = {
+                x: camera_start.x - (canvas.mouse.x - mouse_down_start.x),
+                y: camera_start.y - (canvas.mouse.y - mouse_down_start.y)
+            }
+            canv_cameraMove();
+        }
+    }).start();
 }
 
-function initGrid() {
-    for (var x = 0; x < game_width / grid_width; x++) {
-        for (var y = 0; y < game_height / grid_height; y++) {
-            var gx = x * grid_width;
-            var gy = y * grid_height;
+function canv_initGrid() {
+    var line_clone;
+    // origin lines
+    origin_lines["h"] =
+        canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: 0,
+                y: 0,
+            },
+            end: {
+                x: screen_size.width,
+                y: 0
+            },
+            zIndex: z_origin
+        });
 
-            // horizontal line
-            var new_lineh = canvas.display.line({
-                start: {
-                    x: 0,
-                    y: gy
-                },
-                end: {
-                    x: screen_size.width,
-                    y: gy
-                }
-            })
+    origin_lines["v"] =
+        canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: 0,
+                y: 0,
+            },
+            end: {
+                x: 0,
+                y: screen_size.height,
+            },
+            zIndex: z_origin
+        });
 
-            // vertical line
-            var new_linev = canvas.display.line({
-                start: {
-                    x: gx,
-                    y: 0
-                },
-                end: {
-                    x: gx,
-                    y: screen_size.height
-                }
-            })
+    origin_lines["h"].start_y = origin_lines["h"].y;
+    origin_lines["v"].start_x = origin_lines["v"].x;
 
-            var new_lines = [new_lineh, new_linev];
+    canvas.addChild(origin_lines["h"]);
+    canvas.addChild(origin_lines["v"]);
 
-            for (var l = 0; l < new_lines.length; l++) {
-                var line_clone = new_lines[l].clone();
-                grid_lines.push(line_clone);
-                canvas.addChild(line_clone);
-            }
-        }
+    origin_lines["h"].zIndex = z_origin;
+    origin_lines["v"].zIndex = z_origin;
+
+    // horizontal lines
+    for (var x = 1; x < screen_size.width / grid_width; x++) {
+        var gx = Math.floor(x * grid_width);
+
+        var new_linev = canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: gx,
+                y: 0
+            },
+            end: {
+                x: gx,
+                y: screen_size.height
+            },
+            opacity: grid_opacity,
+            zIndex: z_grid
+        });
+
+        line_clone = new_linev.clone();
+        line_clone.orientation = "v";
+        line_clone.start_x = line_clone.x;
+        line_clone.start_y = line_clone.y;
+        grid_lines.push(line_clone);
+        canvas.addChild(line_clone);
+
+        line_clone.zIndex = z_grid;
+    }
+
+    // vertical lines
+    for (var y = 1; y < screen_size.height / grid_height; y++) {
+        var gy = Math.floor(y * grid_height);
+
+        var new_lineh = canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: 0,
+                y: gy
+            },
+            end: {
+                x: screen_size.width,
+                y: gy
+            },
+            opacity: grid_opacity,
+            zIndex: z_grid
+        })
+
+        line_clone = new_lineh.clone();
+        line_clone.orientation = "h";
+        line_clone.start_x = line_clone.x;
+        line_clone.start_y = line_clone.y;
+        grid_lines.push(line_clone);
+        canvas.addChild(line_clone);
+
+        line_clone.zIndex = z_grid;
     }
 }
 
-function canv_newState() {
-    $("#canvas").removeClass("hidden");
-
+function canv_initBoundsRect() {
     bounds_rect = canvas.display.rectangle({
        x: 200,
        y: 20,
        origin: { x: "left", y: "top" },
        width: game_width,
        height: game_height,
-       stroke: "1px #00e676",
+       stroke: "1px " + c_settings.bounds,
+       zIndex: z_bounds
     });
 
     canvas.addChild(bounds_rect);
+    bounds_rect.zIndex = z_bounds;
+}
 
-    initGrid();
+function canv_cameraMove() {
+    // move origin lines
+    origin_lines["h"].y = origin_lines["h"].start_y - camera.y;
+    origin_lines["v"].x = origin_lines["v"].start_x - camera.x;
+
+    // move grid lines
+    for (var g = 0; g < grid_lines.length; g++) {
+        var g_line = grid_lines[g];
+
+        if (g_line.orientation == "v") {
+            g_line.x = g_line.start_x - camera.x;
+
+            // out of bounds (wrapping)
+            if (g_line.x < 0) {
+
+                g_line.start_x = screen_size.width + camera.x;
+            }
+            else if (g_line.x > screen_size.width - camera.x) {
+                g_line.start_x = 0 + camera.x;
+            }
+        }
+        else if (g_line.orientation == "h") {
+            g_line.y = g_line.start_y - camera.y;
+
+            // out of bounds (wrapping)
+            if (g_line.y < 0) {
+                g_line.start_y = screen_size.height + camera.y;
+            }
+            else if (g_line.y > screen_size.height - camera.y) {
+                g_line.start_y = 0 + camera.y;
+            }
+        }
+
+    }
+}
+
+function canv_newState() {
+    $("#canvas").removeClass("hidden");
+
+    canv_initBoundsRect();
+    canv_initGrid();
 }
 
 function canv_loadState(state_name) {
 
 }
-
 
 $(document).keydown( function(e){
     if (e.keyCode == 8 || e.keyCode == 46){

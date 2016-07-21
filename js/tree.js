@@ -93,6 +93,7 @@ $(function() {
 
             // DESELECT
             else {
+                /*
                 ev_node = event.node;
                 name = ev_node.name;
 
@@ -115,6 +116,7 @@ $(function() {
                 }
 
                 Placer.reset();
+                */
             }
         }
     );
