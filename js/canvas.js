@@ -17,6 +17,7 @@ var canvas, canvas_size, container, bounds_rect;
 var is_canvas_ready = false;
 var origin_lines = {};
 var grid_lines = [];
+var state_objects = [];
 var camera = {
     x: 0,
     y: 0
@@ -77,6 +78,10 @@ function initializeCanvas(screen_size) {
     }
     document.onmouseup = function(ev) {
         mouse_button = -1;
+
+        if (ev.which === 1) {
+            Placer.mouseUp(ev);
+        }
     }
     $("#canvas").mousemove(function(evt){
         if (is_canvas_ready) {
@@ -250,6 +255,15 @@ function canv_cameraMove() {
         }
 
     }
+
+    // move state objects
+    // TODO - should not worry about objects that are not in view
+    for (var o = 0; o < state_objects.length; o++) {
+        var s_obj = state_objects[o];
+
+        s_obj.x = s_obj.start_x - camera.x;
+        s_obj.y = s_obj.start_y - camera.y;
+    }
 }
 
 function canv_newState() {
@@ -305,6 +319,7 @@ var Placer = {
     reset: function () {
         this.obj_name = '';
         this.obj_category = '';
+        this.can_place = false;
     },
 
     setObj: function (category,name) {
@@ -314,8 +329,8 @@ var Placer = {
 
     mouseUp: function (event) {
         if(this.isObjSelected() && this.can_place && curr_state){
-            var x = (Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
-            var y = (Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
+            var place_x = snapToGrid(mouse.x, mouse.y).x;//(Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
+            var place_y = snapToGrid(mouse.x, mouse.y).y;//(Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
 
             // OBJECT SELECTED
             if (this.getObjCategory() == 'objects') {
@@ -327,7 +342,20 @@ var Placer = {
                     img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
                 }
 
-                Placer.placeObj(oImg, x, y);
+                var oImg = canvas.display.image({
+                    x: place_x,
+                    y: place_y,
+                    origin: {x:"left", y:"top"},
+                    image: img_path
+                }).dragAndDrop({
+                    end: function(ev) {
+                        console.log(ev);
+                    }
+                });
+                oImg.start_x = place_x;
+                oImg.start_y = place_y;
+
+                Placer.placeObj(oImg);
             }
 
             // REGION SELECTED
@@ -344,13 +372,14 @@ var Placer = {
                     hasRotatingPoint: false
                 });
 
-                Placer.placeObj(region, x, y)
+                Placer.placeObj(region)
 
             }
         }
     },
 
-    placeObj: function(obj, x, y) {
-
+    placeObj: function(obj) {
+        state_objects.push(obj);
+        container.addChild(obj);
     }
 }
