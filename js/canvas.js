@@ -58,24 +58,21 @@ function initializeCanvas(screen_size) {
     $("#canvas")[0].width = screen_size.width;
     $("#canvas")[0].height = screen_size.height;
 
-    canvas = oCanvas.create({
-        canvas: "#canvas",
-        background: c_settings.background,
-        fps: 60
-    });
+    var canvas = new createjs.Stage("canvas");
 
     document.onmousedown = function(ev) {
         mouse_button = ev.which;
+        /*
         mouse_down_start = {
             x: canvas.mouse.x,
             y: canvas.mouse.y
-        }
+        }*/
         camera_start = camera;
     }
     document.onmouseup = function(ev) {
         mouse_button = -1;
     }
-    canvas.setLoop(function () {
+    /*canvas.setLoop(function () {
         // MIDDLE mouse button
         if (mouse_button == 2) {
             camera = {
@@ -84,14 +81,13 @@ function initializeCanvas(screen_size) {
             }
             canv_cameraMove();
         }
-    }).start();
+    }).start();*/
 }
 
 function canv_initGrid() {
     var line_clone;
     // origin lines
-    origin_lines["h"] =
-        canvas.display.line({
+    origin_lines["h"] = canvas.display.line({
             stroke: "1px " + c_settings.grid,
             start: {
                 x: 0,
@@ -104,8 +100,7 @@ function canv_initGrid() {
             zIndex: z_origin
         });
 
-    origin_lines["v"] =
-        canvas.display.line({
+    origin_lines["v"] = canvas.display.line({
             stroke: "1px " + c_settings.grid,
             start: {
                 x: 0,
@@ -185,15 +180,11 @@ function canv_initGrid() {
 }
 
 function canv_initBoundsRect() {
-    bounds_rect = canvas.display.rectangle({
-       x: 200,
-       y: 20,
-       origin: { x: "left", y: "top" },
-       width: game_width,
-       height: game_height,
-       stroke: "1px " + c_settings.bounds,
-       zIndex: z_bounds
-    });
+    bounds_rect = new createjs.Shape();
+    bounds_rect.graphics
+    .setStrokeStyle(1)
+    .beginStroke(c_settings.bounds)
+    .drawRect(200, 20, game_width, game_height);
 
     canvas.addChild(bounds_rect);
     bounds_rect.zIndex = z_bounds;
@@ -239,7 +230,9 @@ function canv_newState() {
     $("#canvas").removeClass("hidden");
 
     canv_initBoundsRect();
-    canv_initGrid();
+    //canv_initGrid();
+
+    canvas.update();
 }
 
 function canv_loadState(state_name) {
