@@ -38,10 +38,11 @@ var game_border_weight = 1;
 
 var zoomFactor = 1;
 
-var mouse_down_start = {
+var mouse = {
     x: 0,
     y: 0,
 }
+var mouse_down_start = mouse;
 var mouse_button = -1;
 
 function snapToGrid(x,y) {
@@ -67,20 +68,27 @@ function initializeCanvas(screen_size) {
     document.onmousedown = function(ev) {
         mouse_button = ev.which;
         mouse_down_start = {
-            x: canvas.mouse.x,
-            y: canvas.mouse.y
+            x: mouse.x,
+            y: mouse.y
         }
         camera_start = camera;
     }
     document.onmouseup = function(ev) {
         mouse_button = -1;
     }
+    $("#canvas").mousemove(function(evt){
+        mouse = {
+            x: evt.pageX,
+            y: evt.pageY
+        }
+    })
     canvas.setLoop(function () {
+        console.log(mouse.x + " " + mouse.y);
         // MIDDLE mouse button
         if (mouse_button == 2) {
             camera = {
-                x: camera_start.x - (canvas.mouse.x - mouse_down_start.x),
-                y: camera_start.y - (canvas.mouse.y - mouse_down_start.y)
+                x: camera_start.x - (mouse.x - mouse_down_start.x),
+                y: camera_start.y - (mouse.y - mouse_down_start.y)
             }
             canv_cameraMove();
         }
