@@ -13,7 +13,8 @@ var z_grid = -20;
 var z_origin = -10;
 var z_bounds = 0;
 
-var canvas, canvas_size, bounds_rect;
+var canvas, canvas_size, container, bounds_rect;
+var is_canvas_ready = false;
 var origin_lines = {};
 var grid_lines = [];
 var camera = {
@@ -21,6 +22,7 @@ var camera = {
     y: 0
 }
 var camera_start = camera;
+var grid_offset = camera;
 
 var game_width = 800;
 var game_height = 600;
@@ -77,22 +79,37 @@ function initializeCanvas(screen_size) {
         mouse_button = -1;
     }
     $("#canvas").mousemove(function(evt){
-        mouse = {
-            x: evt.pageX,
-            y: evt.pageY
+        if (is_canvas_ready) {
+            mouse = {
+                x: evt.pageX,
+                y: evt.pageY
+            }
+            ebox_setCoords (mouse.x + camera.x, mouse.y + camera.y);
         }
     })
     canvas.setLoop(function () {
-        console.log(mouse.x + " " + mouse.y);
-        // MIDDLE mouse button
-        if (mouse_button == 2) {
-            camera = {
-                x: camera_start.x - (mouse.x - mouse_down_start.x),
-                y: camera_start.y - (mouse.y - mouse_down_start.y)
+        if (is_canvas_ready) {
+            // MIDDLE mouse button
+            if (mouse_button == 2) {
+                camera = {
+                    x: camera_start.x - (mouse.x - mouse_down_start.x),
+                    y: camera_start.y - (mouse.y - mouse_down_start.y)
+                }
+                canv_cameraMove();
             }
-            canv_cameraMove();
         }
     }).start();
+
+    container = canvas.display.rectangle({
+        x: 0,
+        y: 0,
+        origin: {x: "left", y: "top"},
+        width: 1,
+        height: 1,
+        stroke: "transparent",
+    });
+
+    canvas.addChild(container);
 }
 
 function canv_initGrid() {
@@ -129,8 +146,8 @@ function canv_initGrid() {
     origin_lines["h"].start_y = origin_lines["h"].y;
     origin_lines["v"].start_x = origin_lines["v"].x;
 
-    canvas.addChild(origin_lines["h"]);
-    canvas.addChild(origin_lines["v"]);
+    container.addChild(origin_lines["h"]);
+    container.addChild(origin_lines["v"]);
 
     origin_lines["h"].zIndex = z_origin;
     origin_lines["v"].zIndex = z_origin;
@@ -158,7 +175,7 @@ function canv_initGrid() {
         line_clone.start_x = line_clone.x;
         line_clone.start_y = line_clone.y;
         grid_lines.push(line_clone);
-        canvas.addChild(line_clone);
+        container.addChild(line_clone);
 
         line_clone.zIndex = z_grid;
     }
@@ -186,7 +203,7 @@ function canv_initGrid() {
         line_clone.start_x = line_clone.x;
         line_clone.start_y = line_clone.y;
         grid_lines.push(line_clone);
-        canvas.addChild(line_clone);
+        container.addChild(line_clone);
 
         line_clone.zIndex = z_grid;
     }
@@ -200,14 +217,22 @@ function canv_initBoundsRect() {
        width: game_width,
        height: game_height,
        stroke: "1px " + c_settings.bounds,
+       opacity: 0.75,
        zIndex: z_bounds
     });
 
-    canvas.addChild(bounds_rect);
+    container.addChild(bounds_rect);
     bounds_rect.zIndex = z_bounds;
 }
 
 function canv_cameraMove() {
+    var cam_snap = snapToGrid(camera.x, camera.y);
+    grid_offset = {
+        x: camera.x - cam_snap.x,
+        y: camera.y - cam_snap.y
+    }
+    console.log(grid_offset);
+
     // move origin lines
     origin_lines["h"].y = origin_lines["h"].start_y - camera.y;
     origin_lines["v"].x = origin_lines["v"].start_x - camera.x;
@@ -217,27 +242,11 @@ function canv_cameraMove() {
         var g_line = grid_lines[g];
 
         if (g_line.orientation == "v") {
-            g_line.x = g_line.start_x - camera.x;
-
-            // out of bounds (wrapping)
-            if (g_line.x < 0) {
-
-                g_line.start_x = screen_size.width + camera.x;
-            }
-            else if (g_line.x > screen_size.width - camera.x) {
-                g_line.start_x = 0 + camera.x;
-            }
+            g_line.x = g_line.start_x - grid_offset.x;
         }
-        else if (g_line.orientation == "h") {
-            g_line.y = g_line.start_y - camera.y;
 
-            // out of bounds (wrapping)
-            if (g_line.y < 0) {
-                g_line.start_y = screen_size.height + camera.y;
-            }
-            else if (g_line.y > screen_size.height - camera.y) {
-                g_line.start_y = 0 + camera.y;
-            }
+        else if (g_line.orientation == "h") {
+            g_line.y = g_line.start_y - grid_offset.y;
         }
 
     }
@@ -248,6 +257,8 @@ function canv_newState() {
 
     canv_initBoundsRect();
     canv_initGrid();
+
+    is_canvas_ready = true;
 }
 
 function canv_loadState(state_name) {
