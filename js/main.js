@@ -1,6 +1,6 @@
 var IDE_NAME = "BlankE";
 var PJ_EXTENSION = 'bla';
-var AUTOSAVE = false;
+var AUTOSAVE = true;
 
 const electron = require('electron')
 // Module to control application life.
@@ -449,6 +449,13 @@ function saveProject(){
 function importResource(category,location,callback){
 	location = decodeURI(location);
 	var folder_path = nwPATH.resolve(getProjectPath(),category);
+
+	// make the project folder if it doesn't exist
+	try {
+		nwFILE.lstatSync(project_path).isDirectory();
+	} catch(err) {
+		nwFILE.mkdir(project_path);
+	}
 
 	// make the resource folder if it doesn't exist
 	try {
