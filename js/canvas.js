@@ -110,6 +110,7 @@ function initializeCanvas(screen_size) {
     });
 
     canvas.addChild(container);
+
 }
 
 function canv_initGrid() {
@@ -231,7 +232,6 @@ function canv_cameraMove() {
         x: camera.x - cam_snap.x,
         y: camera.y - cam_snap.y
     }
-    console.log(grid_offset);
 
     // move origin lines
     origin_lines["h"].y = origin_lines["h"].start_y - camera.y;

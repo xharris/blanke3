@@ -12,6 +12,8 @@ var nwFILE = require('fs-extra');
 var nwIMG = require('image-size');
 var nwUTIL = require('util');
 
+var eRemote = require('electron').remote;
+var eMenu = eRemote.Menu;
 var eIPC = require('electron').ipcRenderer;
 var eScreen = require('electron').screen;
 
@@ -35,6 +37,48 @@ var curr_state; // (state name)
 var config_data = {"recent_projects":[]};
 var colors = {"green":"#4caf50"}
 
+var app_menu = eMenu.buildFromTemplate([
+{
+	label: 'BlankE',
+	submenu: [
+	  {
+		label: 'Go to website',
+		click: function(){
+		  alert('hello menu');
+		}
+	  }
+	]
+},
+{
+	label: 'File',
+	submenu: [
+		{
+			label: 'New',
+			click: function() {
+				btn_newProject();
+			}
+		},
+		{
+			label: 'Open',
+			click: function() {
+				btn_openProject();
+			}
+		}
+	]
+},
+{
+	label: 'Tools',
+	submenu: [
+		{
+			label: 'Show Developer Tools',
+			click: function() {
+				eIPC.send('show-dev-tools');
+			}
+		}
+	]
+}
+]);
+
 $(function(){
 	getColors();
 	btn_newProject();
@@ -56,6 +100,9 @@ $(function(){
 		if (display.bounds.height > screen_size.height)
 			screen_size.height = display.bounds.height;
 	}
+
+
+	eMenu.setApplicationMenu(app_menu);
 });
 
 function winSetTitle(new_title){
