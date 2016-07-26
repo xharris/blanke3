@@ -7,6 +7,7 @@ var g_origin = {
 var GAME_MARGIN = 150;
 var GRID_WIDTH = 32;
 var GRID_HEIGHT = 32;
+var FPS = 120;
 
 // zIndexes
 var z_grid = -20;
@@ -65,7 +66,7 @@ function initializeCanvas(screen_size) {
     canvas = oCanvas.create({
         canvas: "#canvas",
         background: c_settings.background,
-        fps: 120
+        fps: FPS
     });
 
     document.onmousedown = function(ev) {
@@ -75,13 +76,13 @@ function initializeCanvas(screen_size) {
             y: mouse.y
         }
         camera_start = camera;
+
+        Placer.mouseDown(ev);
     }
     document.onmouseup = function(ev) {
         mouse_button = -1;
 
-        if (ev.which === 1) {
-            Placer.mouseUp(ev);
-        }
+        Placer.mouseUp(ev);
     }
     $("#canvas").mousemove(function(evt){
         if (is_canvas_ready) {
@@ -92,6 +93,15 @@ function initializeCanvas(screen_size) {
             ebox_setCoords (mouse.x + camera.x, mouse.y + camera.y);
         }
     })
+
+    $("#canvas").mouseenter(function(evt){
+        Placer.enable();
+    })
+
+    $("#canvas").mouseleave(function(evt){
+        Placer.disable();
+    })
+
     canvas.setLoop(function () {
         if (is_canvas_ready) {
             // MIDDLE mouse button
@@ -266,17 +276,78 @@ function canv_cameraMove() {
     }
 }
 
-function canv_newState() {
-    $("#canvas").removeClass("hidden");
+function canv_reset() {
+    if (is_canvas_ready) {
+        canvas.reset();
+        state_objects = [];
+        origin_lines = {};
+        grid_lines = [];
+        camera = {
+            x: 0,
+            y: 0
+        }
+        is_canvas_ready = false;
+    }
+}
+
+function canv_clear() {
+    // remove grid lines
+    for (var g = 0; g < grid_lines.length; g++) {
+        grid_lines[g].remove(false);
+    }
+    grid_lines = [];
+
+    // remove origin lines
+    console.log(origin_lines.length)
+    if (origin_lines != null && Object.keys(origin_lines).length > 0) {
+        origin_lines["h"].remove(false);
+        origin_lines["v"].remove(false);
+    }
+
+    // remove bounds rect
+    if (bounds_rect != null) {
+        bounds_rect.remove(false);
+    }
 
     canv_initBoundsRect();
     canv_initGrid();
+
+    canvas.redraw();
+}
+
+function canv_newState() {
+    $("#canvas").removeClass("hidden");
+
+    canv_clear();
 
     is_canvas_ready = true;
 }
 
 function canv_loadState(state_name) {
+    canv_clear();
+    canv_newState();
+    // TODO add option for resetting the camera on state load
+    canv_cameraMove();
+}
 
+function canv_saveState() {
+    var save_json = {};
+    for (var o = 0; o < state_objects.length; o++) {
+        var obj = state_objects[o];
+
+        if (save_json[obj.obj_type] === null) {
+            save_json[obj.obj_type] = [];
+        }
+
+        save_json[obj.obj_type].push({
+            x: obj.x,
+            y: obj.y,
+            obj_id: obj.obj_id
+        });
+    }
+
+    console.log(save_json);
+    return save_json;
 }
 
 $(document).keydown( function(e){
@@ -322,18 +393,31 @@ var Placer = {
         this.can_place = false;
     },
 
+    enable: function() {
+        this.can_place = false;
+    },
+
+    disable: function() {
+        this.can_place = true;
+    },
+
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category.toLowerCase();
+        this.can_place = true;
     },
 
-    mouseUp: function (event) {
-        if(this.isObjSelected() && this.can_place && curr_state){
-            var place_x = snapToGrid(mouse.x, mouse.y).x;//(Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
-            var place_y = snapToGrid(mouse.x, mouse.y).y;//(Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
+    mouseDown: function (ev) {
+
+    },
+
+    mouseUp: function (ev) {
+        if(this.isObjSelected() && this.can_place && curr_state && ev.which === 1){
+            var place_x = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).x;
+            var place_y = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).y;
 
             // OBJECT SELECTED
-            if (this.getObjCategory() == 'objects') {
+            if (this.getObjCategory() === 'objects') {
                 var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
                 // does image have sprites
                 var obj = lobjects[this.obj_category][this.obj_name];
@@ -346,7 +430,7 @@ var Placer = {
                     x: place_x,
                     y: place_y,
                     origin: {x:"left", y:"top"},
-                    image: img_path
+                    image: img_path,
                 }).dragAndDrop({
                     end: function(ev) {
                         console.log(ev);
@@ -359,7 +443,7 @@ var Placer = {
             }
 
             // REGION SELECTED
-            else if (this.getObjCategory() == 'regions') {
+            else if (this.getObjCategory() === 'regions') {
 
                 var color = hexToRgb(lobjects[this.obj_category][this.obj_name].color);
 
@@ -379,6 +463,9 @@ var Placer = {
     },
 
     placeObj: function(obj) {
+        obj.obj_type = this.getObjCategory();
+        obj.obj_id = getLobjByName(this.getObjCategory(), this.getObjName()).id;
+
         state_objects.push(obj);
         container.addChild(obj);
     }

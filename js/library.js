@@ -36,7 +36,7 @@ function addLobj(category,name,info){
     if (category == 'states') {
         curr_state = name;
         canv_newState();
-        //canv_saveState();
+        canv_saveState();
     }
 
     var node_id = Math.round(Math.random()*1000000);
