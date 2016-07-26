@@ -394,11 +394,11 @@ var Placer = {
     },
 
     enable: function() {
-        this.can_place = false;
+        this.can_place = true;
     },
 
     disable: function() {
-        this.can_place = true;
+        this.can_place = false;
     },
 
     setObj: function (category,name) {
