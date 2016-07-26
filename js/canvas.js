@@ -65,7 +65,7 @@ function initializeCanvas(screen_size) {
     canvas = oCanvas.create({
         canvas: "#canvas",
         background: c_settings.background,
-        fps: 60
+        fps: 120
     });
 
     document.onmousedown = function(ev) {
