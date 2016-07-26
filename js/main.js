@@ -1,20 +1,25 @@
 var IDE_NAME = "BlankE";
 var PJ_EXTENSION = 'bla';
-var AUTOSAVE = false;
+var AUTOSAVE = true;
 
-var nwGUI = require('nw.gui');
+const electron = require('electron')
+// Module to control application life.
+const app = electron.app
+
 var nwPROC = require('process');
 var nwPATH = require('path');
 var nwFILE = require('fs-extra');
 var nwIMG = require('image-size');
 var nwUTIL = require('util');
 
-var win = nwGUI.Window.get();
-
-//win.showDevTools();
+var eRemote = require('electron').remote;
+var eMenu = eRemote.Menu;
+var eIPC = require('electron').ipcRenderer;
+var eScreen = require('electron').screen;
 
 var isMaximized = false;
 var menu_icon = "bars";
+var screen_size = {width:0,height:0};
 
 var lobjects = {
 	"objects":{},
@@ -32,36 +37,73 @@ var curr_state; // (state name)
 var config_data = {"recent_projects":[]};
 var colors = {"green":"#4caf50"}
 
+var app_menu = eMenu.buildFromTemplate([
+{
+	label: 'BlankE',
+	submenu: [
+	  {
+		label: 'Go to website',
+		click: function(){
+		  alert('hello menu');
+		}
+	  }
+	]
+},
+{
+	label: 'File',
+	submenu: [
+		{
+			label: 'New',
+			click: function() {
+				btn_newProject();
+			}
+		},
+		{
+			label: 'Open',
+			click: function() {
+				btn_openProject();
+			}
+		}
+	]
+},
+{
+	label: 'Tools',
+	submenu: [
+		{
+			label: 'Show Developer Tools',
+			click: function() {
+				eIPC.send('show-dev-tools');
+			}
+		}
+	]
+}
+]);
+
 $(function(){
 	getColors();
 	btn_newProject();
 
-	window.onerror = function(msg, url, linenumber) {
-	    $(".errors").append('<p class="error">Error message: '+msg+'\nURL: '+url+'\nLine Number: '+linenumber+'</p>');
-	    return true;
-	}
-	var oldLog = console.log;
-    console.log = function (message) {
-        $(".errors").append('<p class="normal">' + message + '</p>')
-        oldLog.apply(console, arguments);
-    };
-});
-
-function winResize(){
-	if(isMaximized){
-    	isMaximized = false;
-  		win.unmaximize();
-	}else{
-    	isMaximized = true;
-  		win.maximize();
-	}
-}
-
-function winClose(){
-	closeProject(function(){
-  		win.close();
+	// set events for window close
+	eIPC.on('window-close', function(event) {
+		closeProject(function(){
+			eIPC.send('confirm-window-close');
+		});
 	});
-}
+
+	// get largest screen size for canvas element
+	var displays = eScreen.getAllDisplays();
+	for (var d = 0; d < displays.length; d++) {
+		var display = displays[d];
+
+		if (display.bounds.width > screen_size.width)
+			screen_size.width = display.bounds.width;
+		if (display.bounds.height > screen_size.height)
+			screen_size.height = display.bounds.height;
+	}
+
+
+	eMenu.setApplicationMenu(app_menu);
+});
 
 function winSetTitle(new_title){
 	$(".menu_bar > .window_title").html("<div class='icon_container' onclick='winToggleMenu()'><i class='fa fa-"+menu_icon+"'></i></div>"+new_title);
@@ -130,13 +172,11 @@ function writeFile(location,text){
 	});
 }
 
-function chooseFile(name,callback) {
-  var chooser = document.querySelector(name);
-  chooser.addEventListener("change", function(evt) {
-    callback(this.value);
-  }, false);
-
-  chooser.click();
+function chooseFile(callback) {
+  eIPC.send('open-file-dialog');
+  eIPC.on('selected-directory', function (event, path) {
+	  callback(path);
+  })
 }
 
 function updateRecentProjects() {
@@ -259,6 +299,7 @@ function btn_newProject(){
 	})
 }
 
+
 function newProject(name,path){
 	// empty lobjects
 	lobjects = {
@@ -268,15 +309,23 @@ function newProject(name,path){
 		"sounds":{},
 		"states":{},
 		"settings":{
-			"ide":{},
+			"ide":{
+				"color": {
+					"background": "#EEEDED",
+					"grid": "#000",
+					"bounds": "#00e676"
+				}
+			},
 			"game":{
-				"project_name":name
+				"project_name": name
 			}
 		}
 	}
 	// set global project variables
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
+
+	initializeCanvas(screen_size);
 
 	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 
@@ -327,7 +376,7 @@ function getProjectPath(){
 }
 
 function btn_openProject(){
-	chooseFile('#pj_open_dialog',function(file){
+	chooseFile(function(file){
 		openProject(file);
 	});
 }
@@ -400,6 +449,13 @@ function saveProject(){
 function importResource(category,location,callback){
 	location = decodeURI(location);
 	var folder_path = nwPATH.resolve(getProjectPath(),category);
+
+	// make the project folder if it doesn't exist
+	try {
+		nwFILE.lstatSync(project_path).isDirectory();
+	} catch(err) {
+		nwFILE.mkdir(project_path);
+	}
 
 	// make the resource folder if it doesn't exist
 	try {

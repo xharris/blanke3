@@ -43,7 +43,7 @@ function addLobj(category,name,info){
     lobjects[category][name].id = node_id;
 
     var category_node = tree.tree('getNodeById', 'cat_' + category.toUpperCase());
-    tree.tree(
+    var new_node = tree.tree(
         'appendNode',
         {
             label: name,
@@ -51,6 +51,9 @@ function addLobj(category,name,info){
         },
         category_node
     );
+
+    tree.tree('openNode', category_node);
+    tree.tree('selectNode', new_node);
 }
 
 function getLobjByName(category,name){

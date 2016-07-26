@@ -7,60 +7,348 @@ var g_origin = {
 var GAME_MARGIN = 150;
 var GRID_WIDTH = 32;
 var GRID_HEIGHT = 32;
+var FPS = 120;
 
-var canvas, room_rect;
+// zIndexes
+var z_grid = -20;
+var z_origin = -10;
+var z_bounds = 0;
+
+var canvas, canvas_size, container, bounds_rect;
+var is_canvas_ready = false;
+var origin_lines = {};
 var grid_lines = [];
+var state_objects = [];
+var camera = {
+    x: 0,
+    y: 0
+}
+var camera_start = camera;
+var grid_offset = camera;
 
 var game_width = 800;
 var game_height = 600;
 
 var grid_width = GRID_WIDTH;
 var grid_height = GRID_HEIGHT;
+var grid_opacity = 0.2;
 
 var game_margin_tb = GAME_MARGIN;
 var game_margin_lr = GAME_MARGIN;
+
+var c_settings;
 
 var game_border_weight = 1;
 
 var zoomFactor = 1;
 
 var mouse = {
-    x : 0,
-    y : 0,
-    isDown : false
+    x: 0,
+    y: 0,
+}
+var mouse_down_start = mouse;
+var mouse_button = -1;
+
+function snapToGrid(x,y) {
+    var new_pos = {x:0,y:0};
+    new_pos.x = Math.floor(x / grid_width) * grid_width;
+    new_pos.y = Math.floor(y / grid_height) * grid_height;
+    return new_pos;
 }
 
-function initializeCanvas() {
-    canvas = new fabric.Canvas('canvas');
-    canvas.setWidth(0);
-    canvas.setHeight(0);
+function initializeCanvas(screen_size) {
+    canvas_size = screen_size;
+    c_settings = lobjects['settings']['ide']['color'];
 
-    canvas.on('mouse:down', function(options) {
-        mouse.isDown = true;
+    $("#canvas")[0].width = screen_size.width;
+    $("#canvas")[0].height = screen_size.height;
 
-        Placer.mouseUp();
-    });
-    canvas.on('mouse:up', function(options) {
-        mouse.isDown = false;
-    });
-
-    canvas.on('mouse:move', function(options) {
-        mouse.x = options.e.clientX - g_origin.x;
-        mouse.y = options.e.clientY - g_origin.y;
-
-        ebox_setCoords (mouse.x - game_margin_lr, mouse.y - game_margin_tb)
+    canvas = oCanvas.create({
+        canvas: "#canvas",
+        background: c_settings.background,
+        fps: FPS
     });
 
-    canvas.on('object:modified', function(options) {
-        canv_saveState();
+    document.onmousedown = function(ev) {
+        mouse_button = ev.which;
+        mouse_down_start = {
+            x: mouse.x,
+            y: mouse.y
+        }
+        camera_start = camera;
+
+        Placer.mouseDown(ev);
+    }
+    document.onmouseup = function(ev) {
+        mouse_button = -1;
+
+        Placer.mouseUp(ev);
+    }
+    $("#canvas").mousemove(function(evt){
+        if (is_canvas_ready) {
+            mouse = {
+                x: evt.pageX,
+                y: evt.pageY
+            }
+            ebox_setCoords (mouse.x + camera.x, mouse.y + camera.y);
+        }
+    })
+
+    $("#canvas").mouseenter(function(evt){
+        Placer.enable();
+    })
+
+    $("#canvas").mouseleave(function(evt){
+        Placer.disable();
+    })
+
+    canvas.setLoop(function () {
+        if (is_canvas_ready) {
+            // MIDDLE mouse button
+            if (mouse_button == 2) {
+                camera = {
+                    x: camera_start.x - (mouse.x - mouse_down_start.x),
+                    y: camera_start.y - (mouse.y - mouse_down_start.y)
+                }
+                canv_cameraMove();
+            }
+        }
+    }).start();
+
+    container = canvas.display.rectangle({
+        x: 0,
+        y: 0,
+        origin: {x: "left", y: "top"},
+        width: 1,
+        height: 1,
+        stroke: "transparent",
     });
 
-    canvas.observe('object:modified', function (e) {
-        e.target.resizeToScale();
-    });
+    canvas.addChild(container);
 
 }
 
+function canv_initGrid() {
+    var line_clone;
+    // origin lines
+    origin_lines["h"] =
+        canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: 0,
+                y: 0,
+            },
+            end: {
+                x: screen_size.width,
+                y: 0
+            },
+            zIndex: z_origin
+        });
+
+    origin_lines["v"] =
+        canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: 0,
+                y: 0,
+            },
+            end: {
+                x: 0,
+                y: screen_size.height,
+            },
+            zIndex: z_origin
+        });
+
+    origin_lines["h"].start_y = origin_lines["h"].y;
+    origin_lines["v"].start_x = origin_lines["v"].x;
+
+    container.addChild(origin_lines["h"]);
+    container.addChild(origin_lines["v"]);
+
+    origin_lines["h"].zIndex = z_origin;
+    origin_lines["v"].zIndex = z_origin;
+
+    // horizontal lines
+    for (var x = 1; x < screen_size.width / grid_width; x++) {
+        var gx = Math.floor(x * grid_width);
+
+        var new_linev = canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: gx,
+                y: 0
+            },
+            end: {
+                x: gx,
+                y: screen_size.height
+            },
+            opacity: grid_opacity,
+            zIndex: z_grid
+        });
+
+        line_clone = new_linev.clone();
+        line_clone.orientation = "v";
+        line_clone.start_x = line_clone.x;
+        line_clone.start_y = line_clone.y;
+        grid_lines.push(line_clone);
+        container.addChild(line_clone);
+
+        line_clone.zIndex = z_grid;
+    }
+
+    // vertical lines
+    for (var y = 1; y < screen_size.height / grid_height; y++) {
+        var gy = Math.floor(y * grid_height);
+
+        var new_lineh = canvas.display.line({
+            stroke: "1px " + c_settings.grid,
+            start: {
+                x: 0,
+                y: gy
+            },
+            end: {
+                x: screen_size.width,
+                y: gy
+            },
+            opacity: grid_opacity,
+            zIndex: z_grid
+        })
+
+        line_clone = new_lineh.clone();
+        line_clone.orientation = "h";
+        line_clone.start_x = line_clone.x;
+        line_clone.start_y = line_clone.y;
+        grid_lines.push(line_clone);
+        container.addChild(line_clone);
+
+        line_clone.zIndex = z_grid;
+    }
+}
+
+function canv_initBoundsRect() {
+    bounds_rect = canvas.display.rectangle({
+       x: 200,
+       y: 20,
+       origin: { x: "left", y: "top" },
+       width: game_width,
+       height: game_height,
+       stroke: "1px " + c_settings.bounds,
+       opacity: 0.75,
+       zIndex: z_bounds
+    });
+
+    container.addChild(bounds_rect);
+    bounds_rect.zIndex = z_bounds;
+}
+
+function canv_cameraMove() {
+    var cam_snap = snapToGrid(camera.x, camera.y);
+    grid_offset = {
+        x: camera.x - cam_snap.x,
+        y: camera.y - cam_snap.y
+    }
+
+    // move origin lines
+    origin_lines["h"].y = origin_lines["h"].start_y - camera.y;
+    origin_lines["v"].x = origin_lines["v"].start_x - camera.x;
+
+    // move grid lines
+    for (var g = 0; g < grid_lines.length; g++) {
+        var g_line = grid_lines[g];
+
+        if (g_line.orientation == "v") {
+            g_line.x = g_line.start_x - grid_offset.x;
+        }
+
+        else if (g_line.orientation == "h") {
+            g_line.y = g_line.start_y - grid_offset.y;
+        }
+
+    }
+
+    // move state objects
+    // TODO - should not worry about objects that are not in view
+    for (var o = 0; o < state_objects.length; o++) {
+        var s_obj = state_objects[o];
+
+        s_obj.x = s_obj.start_x - camera.x;
+        s_obj.y = s_obj.start_y - camera.y;
+    }
+}
+
+function canv_reset() {
+    if (is_canvas_ready) {
+        canvas.reset();
+        state_objects = [];
+        origin_lines = {};
+        grid_lines = [];
+        camera = {
+            x: 0,
+            y: 0
+        }
+        is_canvas_ready = false;
+    }
+}
+
+function canv_clear() {
+    // remove grid lines
+    for (var g = 0; g < grid_lines.length; g++) {
+        grid_lines[g].remove(false);
+    }
+    grid_lines = [];
+
+    // remove origin lines
+    console.log(origin_lines.length)
+    if (origin_lines != null && Object.keys(origin_lines).length > 0) {
+        origin_lines["h"].remove(false);
+        origin_lines["v"].remove(false);
+    }
+
+    // remove bounds rect
+    if (bounds_rect != null) {
+        bounds_rect.remove(false);
+    }
+
+    canv_initBoundsRect();
+    canv_initGrid();
+
+    canvas.redraw();
+}
+
+function canv_newState() {
+    $("#canvas").removeClass("hidden");
+
+    canv_clear();
+
+    is_canvas_ready = true;
+}
+
+function canv_loadState(state_name) {
+    canv_clear();
+    canv_newState();
+    // TODO add option for resetting the camera on state load
+    canv_cameraMove();
+}
+
+function canv_saveState() {
+    var save_json = {};
+    for (var o = 0; o < state_objects.length; o++) {
+        var obj = state_objects[o];
+
+        if (save_json[obj.obj_type] === null) {
+            save_json[obj.obj_type] = [];
+        }
+
+        save_json[obj.obj_type].push({
+            x: obj.x,
+            y: obj.y,
+            obj_id: obj.obj_id
+        });
+    }
+
+    console.log(save_json);
+    return save_json;
+}
 
 $(document).keydown( function(e){
     if (e.keyCode == 8 || e.keyCode == 46){
@@ -74,174 +362,6 @@ $(document).keydown( function(e){
     }
 })
 
-function canv_setupRoomRect(){
-    // room bounds
-    room_rect = new fabric.Rect({
-        left: game_margin_lr,
-        top: game_margin_tb,
-        width: game_width,
-        height: game_height,
-        evented: false,
-        selectable: false,
-
-        fill: 'white',
-        stroke: 'black',
-        strokeWidth: game_border_weight
-    });
-    room_rect.toObject = function() {
-        return;
-    };
-
-    canvas.add(room_rect);
-    room_rect.moveTo(0);
-
-    setRoomSize();
-}
-
-function setGridSize(width, height) {
-    _setGridSize(width, height);
-    _setRoomSize();
-}
-
-function setRoomSize(width, height) {
-    game_width = width || game_width;
-    game_height = height || game_height;
-
-    _setGridSize();
-    _setRoomSize(width, height);
-}
-
-function _setGridSize(width, height) {
-    grid_width = width || grid_width;
-    grid_height = height || grid_height;
-
-    // clear any previous grid lines
-    for (var l in grid_lines) {
-        canvas.remove(grid_lines[l]);
-    }
-    grid_lines = []
-
-    // edit game_margin to be a multiple of grid size
-    game_margin_tb = GAME_MARGIN;//GAME_MARGIN - (GAME_MARGIN % grid_height);
-    game_margin_lr = GAME_MARGIN;//GAME_MARGIN - (GAME_MARGIN % grid_width);
-
-    // draw grid
-    // vertical lines
-    if (grid_width > 3) {
-        for (var i = 1; i < game_width / grid_width; i++) {
-            grid_lines.push(new fabric.Line([ i * grid_width + game_margin_lr, game_margin_tb + 1, i * grid_width + game_margin_lr, game_height + game_margin_tb - 1],
-                {
-                    stroke: '#ccc',
-                    selectable: false,
-                    evented: false
-                }));
-        }
-    }
-    // horizontal lines
-    if (grid_height > 3) {
-        for (var i = 1; i < (game_height / grid_height); i++) {
-            grid_lines.push(new fabric.Line([ game_margin_lr + 1, i * grid_height + game_margin_tb, game_width + game_margin_lr - 1, i * grid_height + game_margin_tb],
-                {
-                    stroke: '#ccc',
-                    selectable: false,
-                    evented: false
-                }));
-        }
-    }
-
-    // add lines to canvas
-    for (var l in grid_lines) {
-        canvas.add(grid_lines[l]);
-        grid_lines[l].moveTo(1);
-
-        grid_lines[l].toObject = function() {
-            return;
-        };
-    }
-
-
-    // snap to grid
-    canvas.on('object:moving', function(options) {
-
-        if (!keys.shift) {
-            options.target.set({
-                left: (Math.round(options.target.left / grid_width) * grid_width) + (GAME_MARGIN % grid_width) - grid_width,
-                top: (Math.round(options.target.top / grid_height) * grid_height) + (GAME_MARGIN % grid_width) - grid_height
-            });
-        }
-
-    });
-
-}
-
-function _setRoomSize(width, height) {
-    // room + margins
-    var new_width = game_width+(game_margin_lr*2);
-    var new_height = game_height+(game_margin_tb*2);
-
-    // prevent object placed in right and bottom margins from being cut off (commented out as future feature)
-    /*
-    if (new_width > canvas.getWidth()) {
-        canvas.setWidth(new_width);
-    }
-    if (new_height > canvas.getHeight()) {
-        canvas.setHeight(new_height);
-    }
-    */
-    canvas.setWidth(new_width);
-    canvas.setHeight(new_height);
-
-    room_rect.left = game_margin_lr;
-    room_rect.top = game_margin_tb;
-    room_rect.width = game_width;
-    room_rect.height = game_height;
-
-    canvas.renderAll();
-}
-
-$(function(){
-    initializeCanvas();
-
-});
-
-// canv_newState()
-// clears all objects and remakes the grid
-function canv_newState() {
-    // clear objects
-    canvas.clear();
-    canv_setupRoomRect();
-    canv_saveState();
-}
-
-// canv_loadState()
-// clears all objects and loads new ones from a state JSON
-function canv_loadState(state_name) {
-    curr_state = state_name;
-    canvas.loadFromJSON(lobjects.states[state_name].entity_json, canvas.renderAll.bind(canvas), function(o, obj) {
-
-        if (o.lobj_type == 'objects') {
-            obj.setControlsVisibility({
-                bl: false,
-                br: false,
-                mb: false,
-                ml: false,
-                mr: false,
-                mt: false,
-                tl: false,
-                tr: false
-            });
-        }
-    });
-    canv_setupRoomRect();
-}
-
-// canv_saveState()
-// saves everything but the grid in a JSON
-function canv_saveState() {
-    if (canvas.getWidth() > 0 || canvas.getHeight() > 0) {
-        lobjects.states[curr_state].entity_json = canvas.toJSON(['group','lobj_type','instance_id','obj_id','evented','selectable']);
-    }
-}
 
 var Placer = {
     obj_name: '',
@@ -270,20 +390,34 @@ var Placer = {
     reset: function () {
         this.obj_name = '';
         this.obj_category = '';
+        this.can_place = false;
+    },
+
+    enable: function() {
+        this.can_place = false;
+    },
+
+    disable: function() {
+        this.can_place = true;
     },
 
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category.toLowerCase();
+        this.can_place = true;
     },
 
-    mouseUp: function (event) {
-        if(this.isObjSelected() && this.can_place && curr_state){
-            var x = (Math.round((mouse.x) / grid_width) * grid_width) + ((GAME_MARGIN % grid_width)) - grid_width;
-            var y = (Math.round((mouse.y) / grid_height) * grid_height) + ((GAME_MARGIN % grid_width)) - grid_height;
+    mouseDown: function (ev) {
+
+    },
+
+    mouseUp: function (ev) {
+        if(this.isObjSelected() && this.can_place && curr_state && ev.which === 1){
+            var place_x = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).x;
+            var place_y = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).y;
 
             // OBJECT SELECTED
-            if (this.getObjCategory() == 'objects') {
+            if (this.getObjCategory() === 'objects') {
                 var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
                 // does image have sprites
                 var obj = lobjects[this.obj_category][this.obj_name];
@@ -292,25 +426,24 @@ var Placer = {
                     img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
                 }
 
-                // place object, add to state entity list
-                fabric.Image.fromURL(img_path, function(oImg) {
-                    oImg.setControlsVisibility({
-                        bl: false,
-                        br: false,
-                        mb: false,
-                        ml: false,
-                        mr: false,
-                        mt: false,
-                        tl: false,
-                        tr: false
-                    });
-
-                    Placer.placeObj(oImg, x, y);
+                var oImg = canvas.display.image({
+                    x: place_x,
+                    y: place_y,
+                    origin: {x:"left", y:"top"},
+                    image: img_path,
+                }).dragAndDrop({
+                    end: function(ev) {
+                        console.log(ev);
+                    }
                 });
+                oImg.start_x = place_x;
+                oImg.start_y = place_y;
+
+                Placer.placeObj(oImg);
             }
 
             // REGION SELECTED
-            else if (this.getObjCategory() == 'regions') {
+            else if (this.getObjCategory() === 'regions') {
 
                 var color = hexToRgb(lobjects[this.obj_category][this.obj_name].color);
 
@@ -323,115 +456,17 @@ var Placer = {
                     hasRotatingPoint: false
                 });
 
-                Placer.placeObj(region, x, y)
+                Placer.placeObj(region)
 
             }
         }
     },
 
-    placeObj: function(obj, x, y) {
-        obj.set('left', x);
-        obj.set('top', y);
-        obj.set('lobj_type', this.obj_category);
-        obj.set('instance_id', Math.round(Math.random()*1000000));
-        obj.set('obj_id', lobjects[this.obj_category][this.obj_name].id);
+    placeObj: function(obj) {
+        obj.obj_type = this.getObjCategory();
+        obj.obj_id = getLobjByName(this.getObjCategory(), this.getObjName()).id;
 
-        canvas.add(obj);
-
-        // serialize
-        canv_saveState();
-    }
-}
-
-
-// http://jsfiddle.net/GrandThriftAuto/6CDFr/15/
-// customise fabric.Object with a method to resize rather than just scale after tranformation
-fabric.Object.prototype.resizeToScale = function () {
-    // resizes an object that has been scaled (e.g. by manipulating the handles), setting scale to 1 and recalculating bounding box where necessary
-    switch (this.type) {
-        case "circle":
-            this.radius *= this.scaleX;
-            this.scaleX = 1;
-            this.scaleY = 1;
-            break;
-        case "ellipse":
-            this.rx *= this.scaleX;
-            this.ry *= this.scaleY;
-            this.width = this.rx * 2;
-            this.height = this.ry * 2;
-            this.scaleX = 1;
-            this.scaleY = 1;
-            break;
-        case "polygon":
-        case "polyline":
-            var points = this.get('points');
-            for (var i = 0; i < points.length; i++) {
-                var p = points[i];
-                p.x *= this.scaleX
-                p.y *= this.scaleY;
-            }
-            this.scaleX = 1;
-            this.scaleY = 1;
-            this.width = this.getBoundingBox().width;
-            this.height = this.getBoundingBox().height;
-            break;
-        case "triangle":
-        case "line":
-        case "rect":
-            this.width *= this.scaleX;
-            this.height *= this.scaleY;
-            this.scaleX = 1;
-            this.scaleY = 1;
-        default:
-            break;
-    }
-}
-
-// helper function to return the boundaries of a polygon/polyline
-// something similar may be built in but it seemed easier to write my own than dig through the fabric.js code.  This may make me a bad person.
-fabric.Object.prototype.getBoundingBox = function () {
-    var minX = null;
-    var minY = null;
-    var maxX = null;
-    var maxY = null;
-    switch (this.type) {
-        case "polygon":
-        case "polyline":
-            var points = this.get('points');
-
-            for (var i = 0; i < points.length; i++) {
-                if (typeof (minX) == undefined) {
-                    minX = points[i].x;
-                } else if (points[i].x < minX) {
-                    minX = points[i].x;
-                }
-                if (typeof (minY) == undefined) {
-                    minY = points[i].y;
-                } else if (points[i].y < minY) {
-                    minY = points[i].y;
-                }
-                if (typeof (maxX) == undefined) {
-                    maxX = points[i].x;
-                } else if (points[i].x > maxX) {
-                    maxX = points[i].x;
-                }
-                if (typeof (maxY) == undefined) {
-                    maxY = points[i].y;
-                } else if (points[i].y > maxY) {
-                    maxY = points[i].y;
-                }
-            }
-            break;
-        default:
-            minX = this.left;
-            minY = this.top;
-            maxX = this.left + this.width;
-            maxY = this.top + this.height;
-    }
-    return {
-        topLeft: new fabric.Point(minX, minY),
-        bottomRight: new fabric.Point(maxX, maxY),
-        width: maxX - minX,
-        height: maxY - minY
+        state_objects.push(obj);
+        container.addChild(obj);
     }
 }

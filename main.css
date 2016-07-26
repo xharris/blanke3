@@ -1,3 +1,6 @@
+.hidden {
+  display: none;
+}
 .no-select {
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -159,10 +162,9 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 }
 #modal_object {
   position: absolute;
-  margin: 10px 0px;
   width: 400px;
   height: 420px;
-  top: 28px;
+  top: 5px;
   left: 0px;
   opacity: 0;
   z-index: -20;
@@ -318,8 +320,7 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 }
 #modal_sprite {
   position: absolute;
-  margin-top: 10px;
-  top: 28px;
+  top: 5px;
   left: 185px;
   right: 15px;
   bottom: 15px;
@@ -397,9 +398,8 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
 }
 #modal_region {
   position: absolute;
-  margin: 10px 0px;
   width: 405px;
-  top: 28px;
+  top: 5px;
   left: 0px;
   opacity: 0;
   z-index: -20;
@@ -481,7 +481,6 @@ body {
 }
 html {
   box-sizing: border-box;
-  border: 1px solid black;
 }
 .menu_bar {
   box-sizing: border-box;
@@ -617,10 +616,10 @@ html {
   z-index: 0;
   box-sizing: border-box;
   position: fixed;
-  top: 1px;
-  bottom: 1px;
-  left: 1px;
-  right: 1px;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
   overflow: hidden;
 }
 #main_window > *:not(.canvas-container) {
@@ -647,8 +646,7 @@ html {
 }
 #main_window #library {
   width: 175px;
-  margin: 10px 0px;
-  top: 28px;
+  top: 5px;
   bottom: 5px;
   left: 5px;
   position: absolute;
@@ -664,16 +662,10 @@ html {
   box-sizing: border-box;
 }
 #main_window > .canvas_container {
-  overflow: auto;
   width: 100%;
   height: 100%;
-  padding-left: 185px;
-  padding-top: 40px;
   box-sizing: border-box;
-}
-#main_window > .canvas_container canvas {
-  border: 1px solid #bdbdbd;
-  margin-bottom: 4px;
+  overflow: hidden;
 }
 #main_window .console {
   position: absolute;
