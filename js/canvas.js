@@ -404,7 +404,6 @@ var Placer = {
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category.toLowerCase();
-        this.can_place = true;
     },
 
     mouseDown: function (ev) {
@@ -412,6 +411,7 @@ var Placer = {
     },
 
     mouseUp: function (ev) {
+        console.log('can place? ' + this.can_place);
         if(this.isObjSelected() && this.can_place && curr_state && ev.which === 1){
             var place_x = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).x;
             var place_y = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).y;
@@ -432,7 +432,12 @@ var Placer = {
                     origin: {x:"left", y:"top"},
                     image: img_path,
                 }).dragAndDrop({
+                    move: function(ev) {
+                        console.log('movin');
+                        console.log(ev);
+                    },
                     end: function(ev) {
+                        console.log('end');
                         console.log(ev);
                     }
                 });
