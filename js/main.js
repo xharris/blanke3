@@ -107,8 +107,52 @@ $(function(){
 			screen_size.height = display.bounds.height;
 	}
 
-
 	eMenu.setApplicationMenu(app_menu);
+
+	var re_file_ext = /(?:\.([^.]+))?$/;
+	// dragNdrop project file
+	var drop_mainwin = document.getElementById("main_window");
+	drop_mainwin.ondragover = () => {
+		if ($(".filedrop-overlay").hasClass("inactive")) {
+			$("#file-drop-options").empty();
+
+			// figure out user's drop options
+			var options = ["Project file (.bla)"];
+			if (obj_modal_open) options.push("Image files");
+
+			// show possible drop options
+			for (var o = 0; o < options.length; o++) {
+				var new_li = document.createElement("li");
+				new_li.appendChild(document.createTextNode(options[o]));
+				$("#file-drop-options")[0].appendChild(new_li);
+			}
+
+			$(".filedrop-overlay").removeClass("inactive");
+		}
+		return false;
+	}
+	drop_mainwin.ondragleave = drop_mainwin.ondragend = () => {
+		$(".filedrop-overlay").addClass("inactive");
+		return false;
+	}
+	drop_mainwin.ondrop = (e) => {
+		e.preventDefault();
+
+		for (var f of e.dataTransfer.files) {
+			var in_path = f.path;
+			var ext = re_file_ext.exec(in_path)[1];
+
+			if (ext === 'bla') {
+				openProject(in_path);
+			}
+			if (['gif', 'jpeg', 'bmp', 'png', 'tiff'].includes(ext) && obj_modal_open) {
+		        var name = addSprite(in_path, opened_obj);
+				updateSpriteDivs(opened_obj);
+			}
+		}
+		$(".filedrop-overlay").addClass("inactive");
+		return false;
+	}
 });
 
 function winSetTitle(new_title){

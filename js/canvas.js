@@ -367,10 +367,10 @@ function canv_saveState() {
     for (var o = 0; o < state_objects.length; o++) {
         var obj = state_objects[o];
 
-        if (save_json[obj.obj_type] === null) {
+        if (save_json[obj.obj_type] === "undefined") {
             save_json[obj.obj_type] = [];
         }
-        console.log(obj.obj_type);
+        console.log(save_json);
 
         save_json[obj.obj_type].push({
             x: obj.x,

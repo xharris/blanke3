@@ -1,5 +1,12 @@
 {
   "name": "blanke3",
+  "description": "Attempt at simple game development software",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/xharris/blanke3.git"
+  },
+  "author": "Xavier Harris <xhh950@gmail.com> (http://xhhstuff.me)",
+  "license": "CC BY-NC-SA",
   "main": "main.js",
   "scripts": {
     "start": "grunt && electron ."

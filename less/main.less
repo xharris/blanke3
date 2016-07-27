@@ -4,6 +4,7 @@
 @import "scrollbar";
 @import "tree";
 @import "extra_box";
+@import "filedrop_overlay";
 @import "modal_object";
 @import "modal_sprite";
 @import "modal_region";
@@ -27,140 +28,6 @@ html, body{
 
 html{
     box-sizing:border-box;
-}
-
-.menu_bar{
-    box-sizing:border-box;
-    background-color:white;
-    height:30px;
-    position:relative;
-    overflow:hidden;
-    z-index:100;
-    margin:5px;
-    margin-right:15px;
-
-    .card-nohover();
-    .no-select();
-
-    transition: all ease-in-out 0.4s;
-
-    >.window_menu{
-        top:0px;
-    }
-
-    >.window_title{
-        font-size:14px;
-        display:inline-block;
-        line-height:30px;
-        cursor:default;
-
-        .no-select();
-
-        >.icon_container{
-            cursor:pointer;
-            width:32px;
-            text-align:center;
-            display:inline-block;
-            opacity:1;
-
-            transition: opacity ease-in-out 0.4s;
-
-            .win-nodrag();
-        }
-        >.filler{
-            width:32px;
-            display:inline-block;
-        }
-    }
-    >.window_menu{
-        background-color:white;
-        border-radius:2px;
-        position:absolute;
-        top:-30px;
-        left:30px;
-        right:95px;
-        height:30px;
-
-        transition: top ease-in-out 0.2s;
-
-        .no-select();
-
-        &.active{
-            top:0px;
-        }
-
-        >div{
-            cursor:pointer;
-            display:inline-block;
-            width:32px;
-            text-align:center;
-
-            .win-nodrag();
-
-            >.fa{
-                line-height:30px;
-            }
-        }
-    }
-
-    >#window_buttons{
-        float:right;
-        font-size:0;
-        position:absolute;
-        right:0px;
-        bottom:0px;
-
-        >div{
-            width: 15px;
-            height: 15px;
-            display: inline-block;
-            text-align: center;
-            border-right: none;
-            margin: 8px 0px;
-            border-radius: 100%;
-            margin-right: 12px;
-
-            &#btn_close,&#btn_maximize,&#btn_minimize{
-                background-repeat: no-repeat;
-                background-size: 10px 10px;
-                background-position: center center;
-                image-rendering: -moz-crisp-edges;
-            }
-
-            &#btn_close{
-                background-color: lighten(#d50000, 50%);
-                border: 1px solid #d50000;
-                transition: background-color ease-out 0.2s;
-
-                &:hover{
-                    background-color: #d50000;
-                }
-            }
-            &#btn_maximize{
-                background-color: lighten(#ffab00, 50%);
-                border: 1px solid #ffab00;
-                transition: background-color ease-out 0.2s;
-
-                &:hover{
-                    background-color: #ffab00;
-                }
-            }
-            &#btn_minimize{
-                background-color: lighten(#00c853, 50%);
-                border: 1px solid #00c853;
-                transition: background-color ease-out 0.2s;
-
-                &:hover{
-                    background-color: #00c853;
-                }
-            }
-
-            >i{
-                font-size:16px !important;
-                margin-top:4px !important;
-            }
-        }
-    }
 }
 
 #main_window {

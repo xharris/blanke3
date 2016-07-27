@@ -160,6 +160,47 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   margin: 0;
   /* <-- Apparently some margin are still there even though it's hidden */
 }
+.filedrop-overlay {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  background-color: rgba(0, 0, 0, 0.75);
+  pointer-events: none;
+  transition: all 0.2s ease-in-out;
+}
+.filedrop-overlay.inactive {
+  background-color: rgba(0, 0, 0, 0);
+}
+.filedrop-overlay.inactive * {
+  display: none !important;
+}
+.filedrop-overlay > .inner-border {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  right: 0px;
+  bottom: 0px;
+  margin: 10px;
+  border: 5px dashed white;
+  border-radius: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.filedrop-overlay > .inner-border > .text-container {
+  margin: 0;
+}
+.filedrop-overlay > .inner-border > .text-container > * {
+  margin: 0px;
+  color: white;
+}
+.filedrop-overlay > .inner-border > .text-container > .title {
+  font-weight: 900;
+  font-size: 35px;
+  margin-bottom: 10px;
+}
 #modal_object {
   position: absolute;
   width: 400px;
@@ -481,135 +522,6 @@ body {
 }
 html {
   box-sizing: border-box;
-}
-.menu_bar {
-  box-sizing: border-box;
-  height: 30px;
-  position: relative;
-  overflow: hidden;
-  z-index: 100;
-  margin: 5px;
-  margin-right: 15px;
-  background-color: white;
-  border-radius: 2px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-  transition: all ease-in-out 0.4s;
-}
-.menu_bar > .window_menu {
-  top: 0px;
-}
-.menu_bar > .window_title {
-  font-size: 14px;
-  display: inline-block;
-  line-height: 30px;
-  cursor: default;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-.menu_bar > .window_title > .icon_container {
-  cursor: pointer;
-  width: 32px;
-  text-align: center;
-  display: inline-block;
-  opacity: 1;
-  transition: opacity ease-in-out 0.4s;
-  -webkit-app-region: no-drag;
-}
-.menu_bar > .window_title > .filler {
-  width: 32px;
-  display: inline-block;
-}
-.menu_bar > .window_menu {
-  background-color: white;
-  border-radius: 2px;
-  position: absolute;
-  top: -30px;
-  left: 30px;
-  right: 95px;
-  height: 30px;
-  transition: top ease-in-out 0.2s;
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-}
-.menu_bar > .window_menu.active {
-  top: 0px;
-}
-.menu_bar > .window_menu > div {
-  cursor: pointer;
-  display: inline-block;
-  width: 32px;
-  text-align: center;
-  -webkit-app-region: no-drag;
-}
-.menu_bar > .window_menu > div > .fa {
-  line-height: 30px;
-}
-.menu_bar > #window_buttons {
-  float: right;
-  font-size: 0;
-  position: absolute;
-  right: 0px;
-  bottom: 0px;
-}
-.menu_bar > #window_buttons > div {
-  width: 15px;
-  height: 15px;
-  display: inline-block;
-  text-align: center;
-  border-right: none;
-  margin: 8px 0px;
-  border-radius: 100%;
-  margin-right: 12px;
-}
-.menu_bar > #window_buttons > div#btn_close,
-.menu_bar > #window_buttons > div#btn_maximize,
-.menu_bar > #window_buttons > div#btn_minimize {
-  background-repeat: no-repeat;
-  background-size: 10px 10px;
-  background-position: center center;
-  image-rendering: -moz-crisp-edges;
-}
-.menu_bar > #window_buttons > div#btn_close {
-  background-color: #ffd5d5;
-  border: 1px solid #d50000;
-  transition: background-color ease-out 0.2s;
-}
-.menu_bar > #window_buttons > div#btn_close:hover {
-  background-color: #d50000;
-}
-.menu_bar > #window_buttons > div#btn_maximize {
-  background-color: #ffffff;
-  border: 1px solid #ffab00;
-  transition: background-color ease-out 0.2s;
-}
-.menu_bar > #window_buttons > div#btn_maximize:hover {
-  background-color: #ffab00;
-}
-.menu_bar > #window_buttons > div#btn_minimize {
-  background-color: #c8ffdf;
-  border: 1px solid #00c853;
-  transition: background-color ease-out 0.2s;
-}
-.menu_bar > #window_buttons > div#btn_minimize:hover {
-  background-color: #00c853;
-}
-.menu_bar > #window_buttons > div > i {
-  font-size: 16px !important;
-  margin-top: 4px !important;
 }
 #main_window {
   background-color: #EEEDED;

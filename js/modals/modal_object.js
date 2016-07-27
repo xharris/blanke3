@@ -227,7 +227,7 @@ function addSprite(file,obj){
   opened_obj = obj;
 
   //canv_addSprite(name,file);
-
+  console.log('added ' + file);
   return name;
 }
 

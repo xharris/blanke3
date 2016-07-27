@@ -145,7 +145,15 @@
             <canvas id="canvas" class="hidden"></canvas>
         </div>
 
-        <input style="display:none;" id="pj_open_dialog" type="file" />
+        <div class="filedrop-overlay inactive">
+            <div class="inner-border">
+                <div class="text-container">
+                    <p class="title">You're dropping a file!</p>
+                    <p class="descr">What you can drop right now:</p>
+                    <ul id="file-drop-options"></ul>
+                </div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
