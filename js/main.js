@@ -243,6 +243,10 @@ function hexToRgb(hex) {
     } : null;
 }
 
+function toDeg(rad) {
+	return rad * (Math.PI / 180);
+}
+
 function showIntroWindow() {
 	/*
 	$("#intro_window").removeClass("hidden");

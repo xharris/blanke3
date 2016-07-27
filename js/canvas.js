@@ -26,6 +26,11 @@ var camera = {
 var camera_start = camera;
 var grid_offset = camera;
 
+// when dragging an object, at what point will the camera move
+var drag_obj_margin = 100;
+var drag_obj_cam_fric = 0.5;
+var drag_obj_cam_limit = 2;
+
 var game_width = 800;
 var game_height = 600;
 
@@ -51,9 +56,17 @@ var mouse_button = -1;
 
 function snapToGrid(x,y) {
     var new_pos = {x:0,y:0};
-    new_pos.x = Math.floor(x / grid_width) * grid_width;
-    new_pos.y = Math.floor(y / grid_height) * grid_height;
+    new_pos.x = snapToGridX(x);
+    new_pos.y = snapToGridY(y);
     return new_pos;
+}
+
+function snapToGridX(x) {
+    return Math.floor(x / grid_width) * grid_width;
+}
+
+function snapToGridY(y) {
+    return Math.floor(y / grid_height) * grid_height;
 }
 
 function initializeCanvas(screen_size) {
@@ -92,6 +105,7 @@ function initializeCanvas(screen_size) {
             }
             ebox_setCoords (mouse.x + camera.x, mouse.y + camera.y);
         }
+
     })
 
     $("#canvas").mouseenter(function(evt){
@@ -106,10 +120,7 @@ function initializeCanvas(screen_size) {
         if (is_canvas_ready) {
             // MIDDLE mouse button
             if (mouse_button == 2) {
-                camera = {
-                    x: camera_start.x - (mouse.x - mouse_down_start.x),
-                    y: camera_start.y - (mouse.y - mouse_down_start.y)
-                }
+                canv_handlingCamera();
                 canv_cameraMove();
             }
         }
@@ -241,6 +252,21 @@ function canv_initBoundsRect() {
     bounds_rect.zIndex = z_bounds;
 }
 
+// called when mouse is pressed or spacebar
+// camera will follow the mouse until function is stopped being called
+function canv_handlingCamera() {
+    camera = {
+        x: camera_start.x - (mouse.x - mouse_down_start.x),
+        y: camera_start.y - (mouse.y - mouse_down_start.y)
+    }
+}
+
+function canv_pushCamera(x=0, y=0) {
+    camera.x += x;
+    camera.y += y;
+}
+
+// moves and redraws all objects that are affected by the camera
 function canv_cameraMove() {
     var cam_snap = snapToGrid(camera.x, camera.y);
     grid_offset = {
@@ -351,6 +377,7 @@ function canv_saveState() {
 }
 
 $(document).keydown( function(e){
+    // backspace and delete
     if (e.keyCode == 8 || e.keyCode == 46){
         if(canvas.getActiveGroup()){
             canvas.getActiveGroup().forEachObject(function(o){ canvas.remove(o) });
@@ -360,6 +387,7 @@ $(document).keydown( function(e){
         }
         canv_saveState();
     }
+
 })
 
 
@@ -411,7 +439,6 @@ var Placer = {
     },
 
     mouseUp: function (ev) {
-        console.log('can place? ' + this.can_place);
         if(this.isObjSelected() && this.can_place && curr_state && ev.which === 1){
             var place_x = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).x;
             var place_y = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).y;
@@ -427,18 +454,59 @@ var Placer = {
                 }
 
                 var oImg = canvas.display.image({
-                    x: place_x,
-                    y: place_y,
+                    x: place_x - camera.x,
+                    y: place_y - camera.y,
                     origin: {x:"left", y:"top"},
                     image: img_path,
                 }).dragAndDrop({
-                    move: function(ev) {
-                        console.log('movin');
-                        console.log(ev);
+                    start: function() {
+                        if (mouse_button != 1) return false;
                     },
-                    end: function(ev) {
-                        console.log('end');
-                        console.log(ev);
+                    move: function() {
+                        if (mouse_button != 1) return false;
+                        var cam_offx = camera.x - snapToGridX(camera.x);
+                        var cam_offy = camera.y - snapToGridY(camera.y);
+
+                        var snap_pos = snapToGrid(this.x, this.y);
+                        this.moveTo(snap_pos.x - Math.abs(cam_offx), snap_pos.y - Math.abs(cam_offy));
+
+                        // moving camera while dragging
+                        var win_width = window.innerWidth;
+                        var win_height = window.innerHeight;
+                        var xdiff = 0, ydiff = 0;
+                        var xmove = 0, ymove = 0;
+                        var can_move = false;
+
+                        // calculate camera velocity
+                        if ((mouse.x > win_width - drag_obj_margin) ||
+                            (mouse.x < drag_obj_margin + 175) || // 175 because of the library element
+                            (mouse.y < drag_obj_margin) ||
+                            (mouse.y > (win_height - drag_obj_margin)))
+                        {
+                            xdiff = mouse.x - win_width / 2;
+                            ydiff = mouse.y - win_height / 2;
+                            var angle = toDeg(Math.atan2(ydiff, xdiff));
+                            var dist = Math.sqrt(xdiff*xdiff + ydiff*ydiff);
+
+                            xmove = dist * Math.cos(angle);
+                            ymove = dist * Math.sin(angle);
+                        }
+
+                        // reduce push amount
+                        xmove *= drag_obj_cam_fric;
+                        ymove *= drag_obj_cam_fric;
+
+                        // limit camera pushing
+                        if (xmove > drag_obj_cam_limit) xmove = drag_obj_cam_limit;
+                        if (ymove > drag_obj_cam_limit) ymove = drag_obj_cam_limit;
+
+                        canv_pushCamera(xmove, ymove);
+                        canv_cameraMove();
+                    },
+                    end: function() {
+                        if (mouse_button != 1) return false;
+                        this.start_x = this.x + camera.x;
+                        this.start_y = this.y + camera.y;
                     }
                 });
                 oImg.start_x = place_x;

@@ -647,7 +647,6 @@ html {
 #main_window #library {
   width: 175px;
   top: 5px;
-  bottom: 5px;
   left: 5px;
   position: absolute;
 }
