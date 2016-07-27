@@ -2,7 +2,7 @@
   "name": "blanke3",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "grunt && electron ."
   },
   "webkit": {
     "plugin": true

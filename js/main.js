@@ -59,6 +59,12 @@ var app_menu = eMenu.buildFromTemplate([
 			}
 		},
 		{
+			label: "Save",
+			click: function() {
+				saveProject();
+			}
+		},
+		{
 			label: 'Open',
 			click: function() {
 				btn_openProject();
@@ -317,7 +323,8 @@ function newProject(name,path){
 				"color": {
 					"background": "#EEEDED",
 					"grid": "#000",
-					"bounds": "#00e676"
+					"bounds": "#00e676",
+					"object_hover": "#00bcd4"
 				}
 			},
 			"game":{
@@ -427,6 +434,8 @@ function autosaveProject(){
 function saveProject(){
 	// add tree structure to lobjects
 	lobjects['tree'] = tree.tree('toJson');
+
+	//canv_saveState();
 
 	// serialize lobjects
 	var save_data = JSON.stringify(lobjects);
