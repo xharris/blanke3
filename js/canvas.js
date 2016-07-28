@@ -26,6 +26,7 @@ var camera = {
 var camera_start = camera;
 var grid_offset = camera;
 
+var ctrl_down = false;
 // when dragging an object, at what point will the camera move
 var drag_obj_margin = 100;
 var drag_obj_cam_fric = 0.5;
@@ -361,17 +362,17 @@ function canv_loadState(state_name) {
     // load state
     var load_json = JSON.parse(lobjects['states'][state_name].entity_json);
     var obj_types = Object.keys(load_json);
-    console.log(load_json);
+
     for (var t = 0; t < obj_types.length; t++) {
         var type = obj_types[t];
         for (var o = 0; o < load_json[type].length; o++) {
-            console.log(type + load_json[type][o])
             Placer.loadObj(type, load_json[type][o]);
         }
     }
 
     // TODO add option for resetting the camera on state load
     canv_cameraMove();
+    Placer.reset();
 }
 
 function canv_saveState() {
@@ -404,8 +405,21 @@ $(document).keydown( function(e){
         }
         canv_saveState();
     }
+    // ctrl
+    if (e.keyCode == 17) {
+        ctrl_down = true;
+        console.log("ctrl is " + ctrl_down);
+    }
 
-})
+});
+
+$(document).keyup( function(e){
+    // ctrl
+    if (e.keyCode == 17) {
+        ctrl_down = false;
+        console.log("ctrl is " + ctrl_down);
+    }
+});
 
 
 var Placer = {
@@ -462,6 +476,7 @@ var Placer = {
             var object = canv_Object(info.x, info.y, img_path);
             object.start_x = info.x;
             object.start_y = info.y;
+            object.zIndex = lobjects['objects'][obj_name]['depth'];
 
             this.placeObj(object);
         }
@@ -491,6 +506,7 @@ var Placer = {
                 var object = canv_Object(place_x - camera.x, place_y - camera.y, img_path);
                 object.start_x = place_x;
                 object.start_y = place_y;
+                object.zIndex = obj['depth'];
 
                 Placer.placeObj(object);
             }
@@ -564,10 +580,22 @@ function canv_Object(x, y, image_path) {
         },
         move: function() {
             if (mouse_button != 1) return false;
-            var cam_offx = camera.x - snapToGridX(camera.x);
-            var cam_offy = camera.y - snapToGridY(camera.y);
 
-            var snap_pos = snapToGrid(this.x, this.y);
+            var cam_offx, cam_offy, snap_pos;
+            // move freely
+            if (ctrl_down) {
+                cam_offx = 0;
+                cam_offy = 0;
+
+                snap_pos = {x:this.x, y:this.y};
+            }
+            // snap to grid
+            else {
+                cam_offx = camera.x - snapToGridX(camera.x);
+                cam_offy = camera.y - snapToGridY(camera.y);
+
+                snap_pos = snapToGrid(this.x, this.y);
+            }
             this.moveTo(snap_pos.x - Math.abs(cam_offx), snap_pos.y - Math.abs(cam_offy));
             this.obj_outline.moveTo(this.x, this.y);
 

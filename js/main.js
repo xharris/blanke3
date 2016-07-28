@@ -472,6 +472,7 @@ function openProject(path){
 			winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 
 			closeAllModals();
+			Placer.reset();
 		}
 		else{
 			console.log(err)
