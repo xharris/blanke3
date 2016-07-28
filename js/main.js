@@ -145,9 +145,17 @@ $(function(){
 			if (ext === 'bla') {
 				openProject(in_path);
 			}
-			if (['gif', 'jpeg', 'bmp', 'png', 'tiff'].includes(ext) && obj_modal_open) {
+			if (['gif', 'jpeg', 'jpg', 'bmp', 'png', 'tiff'].includes(ext) && obj_modal_open) {
 		        var name = addSprite(in_path, opened_obj);
 				updateSpriteDivs(opened_obj);
+
+				importResource('images',in_path,function(new_path){
+					var name = addSprite(new_path,opened_obj);
+
+					setupNewSprite(opened_obj, name, new_path, function(){
+						updateSpriteDivs(opened_obj);
+					});
+				});
 			}
 		}
 		$(".filedrop-overlay").addClass("inactive");

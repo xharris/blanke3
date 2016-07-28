@@ -116,19 +116,13 @@ function showSpriteModal(obj,spr_name){
 
     // first time seeing this sprite. get its dimensions
     if (obj.sprites[spr_name].width == 0 || obj.sprites[spr_name].height == 0) {
-      nwIMG(spr_path, function (err, dimensions) {
-          // set object's image properties
-          obj.sprites[spr_name].width = dimensions.width;
-          obj.sprites[spr_name].height = dimensions.height;
-          $("#in_spr_width").val(obj.sprites[spr_name].width);
-          $("#in_spr_height").val(obj.sprites[spr_name].height);
+        setupNewSprite(obj, spr_name, spr_path, function(){
+            $("#in_spr_width").val(obj.sprites[spr_name].width);
+            $("#in_spr_height").val(obj.sprites[spr_name].height);
 
-          // set new path
-          obj.sprites[spr_name].path = nwPATH.resolve(getProjectPath(),'images',spr_name);
-
-          // show the modal
-          $("#modal_sprite").toggleClass("active");
-      });
+            // show the modal
+            $("#modal_sprite").toggleClass("active");
+        });
 
     }else{
         $("#in_spr_width").val(obj.sprites[spr_name].width);
@@ -191,6 +185,19 @@ function saveSpriteModal(){
   // close the modal_sprite (yes, this is a save&close button)
   closeSpriteModal();
   autosaveProject();
+}
+
+function setupNewSprite(obj, spr_name, spr_path, callback) {
+    nwIMG(spr_path, function (err, dimensions) {
+        // set object's image properties
+        obj.sprites[spr_name].width = dimensions.width;
+        obj.sprites[spr_name].height = dimensions.height;
+
+        // set new path
+        obj.sprites[spr_name].path = nwPATH.resolve(getProjectPath(),'images',spr_name);
+
+        if (callback) callback();
+    });
 }
 
 // show file dialog for choosing a image file
