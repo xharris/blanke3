@@ -480,14 +480,17 @@ function openProject(path){
 }
 
 function autosaveProject(){
-	if (AUTOSAVE) saveProject();
+	if (AUTOSAVE) {
+		flashAutoSaveIcon();
+		saveProject();
+	}
 }
 
 function saveProject(){
 	// add tree structure to lobjects
 	lobjects['tree'] = tree.tree('toJson');
 
-	//canv_saveState();
+	canv_saveState();
 
 	// serialize lobjects
 	var save_data = JSON.stringify(lobjects);
@@ -552,4 +555,12 @@ function saveBackup(){
 function closeAllModals() {
 	closeSpriteModal()
 	closeObjectModal()
+}
+
+function flashAutoSaveIcon() {
+	console.log('flashin');
+	$("#auto-save-icon").removeClass("inactive");
+	setTimeout(function () {
+        $("#auto-save-icon").addClass("inactive");
+    }, 2000);
 }

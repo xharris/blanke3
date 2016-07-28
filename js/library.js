@@ -60,6 +60,14 @@ function getLobjByName(category,name){
     return lobjects[category.toLowerCase()][name];
 }
 
+function getLobjByID(category, id) {
+    for(key in lobjects[category.toLowerCase()]){
+        if(lobjects[category.toLowerCase()][key].id == id){
+            return lobjects[category.toLowerCase()][key];
+        }
+    }
+}
+
 function getLobjNameByID(category, id){
     for(key in lobjects[category.toLowerCase()]){
         if(lobjects[category.toLowerCase()][key].id == id){
@@ -93,4 +101,15 @@ function changeLobjName(category, obj, new_name) {
     tree.tree('updateNode',tree_node,new_name)
 
     return lobjects[category.toLowerCase()][new_name];
+}
+
+function obj_getPrimaryImgPath(obj_name) {
+    var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
+    // does image have sprites
+    var obj = lobjects['objects'][obj_name];
+    if (Object.keys(obj.sprites).length > 0) {
+        // get first image
+        img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
+    }
+    return img_path;
 }

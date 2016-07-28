@@ -330,7 +330,6 @@ function canv_clear() {
     grid_lines = [];
 
     // remove origin lines
-    console.log(origin_lines.length)
     if (origin_lines != null && Object.keys(origin_lines).length > 0) {
         origin_lines["h"].remove(false);
         origin_lines["v"].remove(false);
@@ -358,6 +357,19 @@ function canv_newState() {
 function canv_loadState(state_name) {
     canv_clear();
     canv_newState();
+
+    // load state
+    var load_json = JSON.parse(lobjects['states'][state_name].entity_json);
+    var obj_types = Object.keys(load_json);
+    console.log(load_json);
+    for (var t = 0; t < obj_types.length; t++) {
+        var type = obj_types[t];
+        for (var o = 0; o < load_json[type].length; o++) {
+            console.log(type + load_json[type][o])
+            Placer.loadObj(type, load_json[type][o]);
+        }
+    }
+
     // TODO add option for resetting the camera on state load
     canv_cameraMove();
 }
@@ -367,20 +379,18 @@ function canv_saveState() {
     for (var o = 0; o < state_objects.length; o++) {
         var obj = state_objects[o];
 
-        if (save_json[obj.obj_type] === "undefined") {
+        if (save_json[obj.obj_type] === undefined) {
             save_json[obj.obj_type] = [];
         }
-        console.log(save_json);
 
         save_json[obj.obj_type].push({
-            x: obj.x,
-            y: obj.y,
+            x: obj.start_x,
+            y: obj.start_y,
             obj_id: obj.obj_id
         });
     }
 
-    console.log(save_json);
-    return save_json;
+    lobjects['states'][curr_state].entity_json = JSON.stringify(save_json);
 }
 
 $(document).keydown( function(e){
@@ -439,6 +449,24 @@ var Placer = {
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category.toLowerCase();
+    },
+
+    loadObj: function (type, info) {
+        if (type === 'objects') {
+            var obj_name = getLobjNameByID(type, info.obj_id);
+            var img_path = obj_getPrimaryImgPath(obj_name);
+
+            this.setObj(type, obj_name);
+
+
+            var object = canv_Object(info.x, info.y, img_path);
+            object.start_x = info.x;
+            object.start_y = info.y;
+
+            this.placeObj(object);
+        }
+
+        this.reset();
     },
 
     mouseDown: function (ev) {

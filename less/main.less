@@ -8,6 +8,7 @@
 @import "modal_object";
 @import "modal_sprite";
 @import "modal_region";
+@import "sk_circle";
 
 @font-face {
     font-family: "Roboto";
@@ -77,15 +78,16 @@ html{
         overflow: hidden;
     }
 
-    .console {
+    .sk-circle {
         position: absolute;
-        left: 185px;
-        right: 50px;
-        bottom: 10px;
-        font-size: 12px;
+        bottom: -90px;
+        left: 10px;
+        opacity: 1;
 
-        >.error {
-            color: red;
+        transition: opacity 0.2s ease-in-out;
+
+        &.inactive {
+            opacity: 0;
         }
     }
 }
