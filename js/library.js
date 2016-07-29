@@ -113,3 +113,8 @@ function obj_getPrimaryImgPath(obj_name) {
     }
     return img_path;
 }
+
+function isStateActive() {
+    console.log(curr_state);
+    return (curr_state !== undefined);
+}

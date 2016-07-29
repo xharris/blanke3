@@ -129,7 +129,7 @@ function initializeCanvas(screen_size) {
     canvas.setLoop(function () {
         if (is_canvas_ready && curr_state != undefined && curr_state != '') {
             // MIDDLE mouse button
-            if (mouse_button == 1) {
+            if (mouse_button == 2) {
                 canv_handlingCamera();
                 canv_cameraMove();
             }
@@ -277,6 +277,7 @@ function canv_pushCamera(x=0, y=0) {
 
 // moves and redraws all objects that are affected by the camera
 function canv_cameraMove() {
+
     var cam_snap = snapToGrid(camera.x, camera.y);
     grid_offset = {
         x: camera.x - cam_snap.x,
@@ -328,31 +329,41 @@ function canv_reset() {
     }
 }
 
+function canv_clearObjects() {
+    // remove state objects
+    for (var o = 0; o < state_objects.length; o++) {
+        state_objects[o].obj_outline.remove();
+        state_objects[o].remove(false);
+    }
+
+    canvas.redraw();
+
+    state_objects = [];
+}
+
 function canv_clear() {
     if (!is_canvas_ready) {
         return;
     }
+    canv_clearObjects();
+
     // remove grid lines
     for (var g = 0; g < grid_lines.length; g++) {
-        grid_lines[g].remove();
+        grid_lines[g].remove(false);
     }
 
     // remove origin lines
     if (origin_lines != null && Object.keys(origin_lines).length > 0) {
-        origin_lines["h"].remove();
-        origin_lines["v"].remove();
+        origin_lines["h"].remove(false);
+        origin_lines["v"].remove(false);
     }
 
     // remove bounds rect
     if (bounds_rect != null) {
-        bounds_rect.remove();
+        bounds_rect.remove(false);
     }
 
-    //canvas.redraw();
-
-
-    //canvas.redraw();
-
+    canvas.redraw();
 }
 
 function canv_setupBlankState() {
@@ -370,8 +381,11 @@ function canv_newState() {
 }
 
 function canv_loadState(state_name) {
-    canv_clear();
-    canv_newState();
+    if (!isStateActive()) {
+        canv_newState();
+    } else {
+        canv_clearObjects();
+    }
 
     // load state
     var load_json = JSON.parse(lobjects['states'][state_name].entity_json);
@@ -387,13 +401,21 @@ function canv_loadState(state_name) {
     // TODO add option for resetting the camera on state load
     canv_cameraMove();
     Placer.reset();
+
+    curr_state = state_name;
+    ebox_setState(curr_state);
 }
 
 function canv_saveState() {
-    if (is_canvas_ready) {
+    if (is_canvas_ready && isStateActive()) {
+        // made a copy here to prevent saving to incorrect state if curr_state were to somehow change during this function
+        var save_state = curr_state;
+
         var save_json = {};
         for (var o = 0; o < state_objects.length; o++) {
             var obj = state_objects[o];
+
+            console.log('saving ' + obj);
 
             if (save_json[obj.obj_type] === undefined) {
                 save_json[obj.obj_type] = [];
@@ -406,7 +428,7 @@ function canv_saveState() {
             });
         }
 
-        lobjects['states'][curr_state].entity_json = JSON.stringify(save_json);
+        lobjects['states'][save_state].entity_json = JSON.stringify(save_json);
     }
 }
 
@@ -488,8 +510,7 @@ var Placer = {
 
             this.setObj(type, obj_name);
 
-
-            var object = canv_Object(info.x, info.y, img_path);
+            var object = canv_Object(info.x + camera.x, info.y + camera.y, img_path);
             object.start_x = info.x;
             object.start_y = info.y;
             object.zIndex = lobjects['objects'][obj_name]['depth'];

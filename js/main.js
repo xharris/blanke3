@@ -456,9 +456,8 @@ function openProject(path){
 			tree_reset();
 			Placer.reset();
 
-			// show first state
-			curr_state = Object.keys(lobjects.states)[0];
-			canv_loadState(Object.keys(lobjects.states)[0]);
+			// TODO load last open state
+			// ...
 
 			project_path = nwPATH.dirname(path);
 			project_name = nwPATH.basename(path);
@@ -555,12 +554,12 @@ function saveBackup(){
 }
 
 function closeAllModals() {
-	closeSpriteModal()
-	closeObjectModal()
+	closeSpriteModal();
+	closeObjectModal();
+	closeRegionModal();
 }
 
 function flashAutoSaveIcon() {
-	console.log('flashin');
 	$("#auto-save-icon").removeClass("inactive");
 	setTimeout(function () {
         $("#auto-save-icon").addClass("inactive");

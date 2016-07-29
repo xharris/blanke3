@@ -144,9 +144,11 @@ ul.jqtree-tree .jqtree-element:hover span.jqtree-title {
   padding: 5px;
   text-align: center;
 }
-#extra_box > .m_coordinates,
-#extra_box .m_zoom {
+#extra_box > * {
   margin: 0px;
+}
+#extra_box > .m_state {
+  text-align: right;
 }
 #extra_box > .m_zoom {
   background-color: transparent;

@@ -81,6 +81,10 @@ $(function() {
                         Placer.setObj(obj_category, obj_name);
 
                     } else if (obj_category == "STATES") {
+                        if (isStateActive()) {
+                            canv_saveState();
+                        }
+                        tree.tree('selectNode', ev_node);
                         Placer.reset();
                         canv_loadState(obj_name);
 
@@ -101,21 +105,19 @@ $(function() {
                     var obj_category = ev_node.parent.name;
                     var obj_name = name;
 
-                    console.log(tree_getSelected())
-                    console.log(Placer.getObjName())
-
                     if (obj_category == "OBJECTS" || obj_category == "REGIONS") {
                         // set canvas placer
                         Placer.setObj(obj_category, obj_name);
 
                     } else if (obj_category == "STATES") {
-                        Placer.reset();
-                        canv_loadState(obj_name);
+                        if (name === curr_state) {
+                            tree.tree('selectNode', ev_node);
+                        }
                     }
                 }
 
                 Placer.reset();
-                
+
             }
         }
     );
