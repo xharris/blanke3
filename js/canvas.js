@@ -648,12 +648,12 @@ function canv_Object(x, y, image_path) {
             start_y: 0
         })
     });
-    obj.bind("mouseleave", function() {
+    obj.bind("mouseleave touchleave", function() {
         // remove hover outline
         this.obj_outline.opacity = 0;
 
     });
-    obj.bind("mouseenter", function() {
+    obj.bind("mouseenter touchenter", function() {
         // show outline around object when mouse is hovering over it
         this.obj_outline.x = this.x;
         this.obj_outline.y = this.y;
