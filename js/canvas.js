@@ -114,6 +114,8 @@ function initializeCanvas(screen_size) {
                 y: evt.pageY
             }
             ebox_setCoords (mouse.x + camera.x, mouse.y + camera.y);
+
+            Placer.mouseMove();
         }
 
     })
@@ -146,6 +148,8 @@ function initializeCanvas(screen_size) {
     });
 
     canvas.addChild(container);
+
+    Placer.init();
 }
 
 function canv_initGrid() {
@@ -332,7 +336,7 @@ function canv_reset() {
 function canv_clearObjects() {
     // remove state objects
     for (var o = 0; o < state_objects.length; o++) {
-        state_objects[o].obj_outline.remove();
+        state_objects[o].obj_outline.remove(false);
         state_objects[o].remove(false);
     }
 
@@ -464,11 +468,16 @@ var Placer = {
     obj_name: '',
     obj_category: '',
     img_path: '',
+    hover_obj: '',
 
     can_place: true,
 
     init: function () {
-
+        this.hover_obj = canvas.display.image({
+            x: 0,
+            y: 0,
+            image: ''
+        });
     },
 
     isObjSelected: function () {
@@ -488,19 +497,47 @@ var Placer = {
         this.obj_name = '';
         this.obj_category = '';
         this.can_place = false;
+        this.img_path = '';
     },
 
     enable: function() {
         this.can_place = true;
+        if (this.isObjSelected()) {
+            this.hover_obj.opacity = 0.5;
+            console.log('raisin opacity');
+        }
     },
 
     disable: function() {
         this.can_place = false;
+        if (this.isObjSelected()) {
+            this.hover_obj.opacity = 0;
+        }
     },
 
     setObj: function (category,name) {
         this.obj_name = name;
         this.obj_category = category.toLowerCase();
+
+        if (this.getObjCategory() === 'objects') {
+            this.img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
+            // does image have sprites
+            var obj = lobjects[this.obj_category][this.obj_name];
+            if (Object.keys(obj.sprites).length > 0) {
+                // get first image
+                this.img_path = getResourcePath('images', obj.sprites[Object.keys(obj.sprites)[0]].path);
+            }
+
+            this.hover_obj.remove();
+            this.hover_obj = canvas.display.image({
+                x: 0,
+                y: 0,
+                image: this.img_path,
+                opacity: 0,
+                origin: {x: "left", y: "top"}
+            });
+            container.addChild(this.hover_obj);
+        }
     },
 
     loadObj: function (type, info) {
@@ -521,28 +558,44 @@ var Placer = {
         this.reset();
     },
 
-    mouseDown: function (ev) {
+    mouseMove: function () {
+        if (this.isObjSelected()) {
+            if (this.getObjCategory() === 'objects') {
+                var cam_offx, cam_offy, snap_pos;
+                // move freely
+                if (ctrl_down) {
+                    cam_offx = 0;
+                    cam_offy = 0;
 
+                    snap_pos = {x:mouse.x, y:mouse.y};
+                }
+                // snap to grid
+                else {
+                    cam_offx = camera.x - snapToGridX(camera.x);
+                    cam_offy = camera.y - snapToGridY(camera.y);
+
+                    snap_pos = snapToGrid(mouse.x, mouse.y);
+                }
+
+                this.hover_obj.moveTo(snap_pos.x - Math.abs(cam_offx), snap_pos.y - Math.abs(cam_offy));
+            }
+        }
     },
+
+    mouseDown: function (ev) {},
 
     mouseUp: function (ev) {
         if(this.isObjSelected() && this.can_place && curr_state && ev.which === 1 && !dragging_obj){
             var place_x = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).x;
             var place_y = snapToGrid(mouse.x + camera.x, mouse.y + camera.y).y;
 
+            var obj = lobjects[this.getObjCategory()][this.getObjName()];
+
             // OBJECT SELECTED
             if (this.getObjCategory() === 'objects') {
-                var img_path = nwPATH.resolve(nwPROC.cwd(),'includes','images','NA.png');
-                // does image have sprites
-                var obj = lobjects[this.obj_category][this.obj_name];
-                if (Object.keys(obj.sprites).length > 0) {
-                    // get first image
-                    img_path = getResourcePath('images',obj.sprites[Object.keys(obj.sprites)[0]].path);
-                }
-
-                var object = canv_Object(place_x - camera.x, place_y - camera.y, img_path);
-                object.start_x = place_x;
-                object.start_y = place_y;
+                var object = canv_Object(place_x - camera.x, place_y - camera.y, this.img_path);
+                object.start_x = this.hover_obj.x + camera.x;
+                object.start_y = this.hover_obj.y + camera.y;
                 object.zIndex = obj['depth'];
 
                 Placer.placeObj(object);
