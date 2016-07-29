@@ -141,7 +141,7 @@ function showSpriteModal(obj,spr_name){
 
     // add sprite preview stuff
     $("#modal_sprite .preview").css({
-      "background":"url('"+encodeURI(spr_path)+"')"
+      "background":"url('"+cleanImagePath(spr_path)+"')"
     });
   }
 }
@@ -203,7 +203,7 @@ function setupNewSprite(obj, spr_name, spr_path, callback) {
 // show file dialog for choosing a image file
 function chooseSprite(){
   chooseFile(function(file){
-      console.log(file)
+
     // add sprite to project folder
     importResource('images',file,function(new_path){
         var name = addSprite(new_path,opened_obj);
@@ -222,7 +222,7 @@ function addSprite(file,obj){
 
   // default values
   var info = {
-    path: file,
+    path: cleanImagePath(file),
     width: 0,
     height: 0,
     rows: 1,
@@ -234,7 +234,6 @@ function addSprite(file,obj){
   opened_obj = obj;
 
   //canv_addSprite(name,file);
-  console.log('added ' + file);
   return name;
 }
 
@@ -248,7 +247,7 @@ function addSpriteDiv(spr_name){
       <button id="btn_close"><i class="fa fa-times"></i></button>\
       <a onclick="editSprite(\''+getLobjNameByID('objects', opened_obj.id)+'\',\''+spr_name+'\')">\
         <div class="'+name_noperiod+' preview"\
-          style="background-image:url(\''+encodeURI(info.path)+'\')"\
+          style="background-image:url(\''+cleanImagePath(info.path)+'\')"\
         ></div>\
       </a>\
       <div id="values">\

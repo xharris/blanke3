@@ -75,6 +75,11 @@ function snapToGridY(y) {
 }
 
 function initializeCanvas(screen_size) {
+    if (is_canvas_ready) {
+        return;
+    }
+    is_canvas_ready = true;
+
     canvas_size = screen_size;
     c_settings = lobjects['settings']['ide']['color'];
 
@@ -122,9 +127,9 @@ function initializeCanvas(screen_size) {
     })
 
     canvas.setLoop(function () {
-        if (is_canvas_ready) {
+        if (is_canvas_ready && curr_state != undefined && curr_state != '') {
             // MIDDLE mouse button
-            if (mouse_button == 2) {
+            if (mouse_button == 1) {
                 canv_handlingCamera();
                 canv_cameraMove();
             }
@@ -311,7 +316,7 @@ function canv_cameraMove() {
 
 function canv_reset() {
     if (is_canvas_ready) {
-        canvas.reset();
+        canvas.clear();
         state_objects = [];
         origin_lines = {};
         grid_lines = [];
@@ -324,35 +329,44 @@ function canv_reset() {
 }
 
 function canv_clear() {
+    if (!is_canvas_ready) {
+        return;
+    }
     // remove grid lines
     for (var g = 0; g < grid_lines.length; g++) {
-        grid_lines[g].remove(false);
+        grid_lines[g].remove();
     }
-    grid_lines = [];
 
     // remove origin lines
     if (origin_lines != null && Object.keys(origin_lines).length > 0) {
-        origin_lines["h"].remove(false);
-        origin_lines["v"].remove(false);
+        origin_lines["h"].remove();
+        origin_lines["v"].remove();
     }
 
     // remove bounds rect
     if (bounds_rect != null) {
-        bounds_rect.remove(false);
+        bounds_rect.remove();
     }
 
+    //canvas.redraw();
+
+
+    //canvas.redraw();
+
+}
+
+function canv_setupBlankState() {
+    canv_clear();
     canv_initBoundsRect();
     canv_initGrid();
-
-    canvas.redraw();
+    camera = {x:0, y:0};
+    canv_cameraMove();
 }
 
 function canv_newState() {
     $("#canvas").removeClass("hidden");
 
-    canv_clear();
-
-    is_canvas_ready = true;
+    canv_setupBlankState();
 }
 
 function canv_loadState(state_name) {
@@ -376,22 +390,24 @@ function canv_loadState(state_name) {
 }
 
 function canv_saveState() {
-    var save_json = {};
-    for (var o = 0; o < state_objects.length; o++) {
-        var obj = state_objects[o];
+    if (is_canvas_ready) {
+        var save_json = {};
+        for (var o = 0; o < state_objects.length; o++) {
+            var obj = state_objects[o];
 
-        if (save_json[obj.obj_type] === undefined) {
-            save_json[obj.obj_type] = [];
+            if (save_json[obj.obj_type] === undefined) {
+                save_json[obj.obj_type] = [];
+            }
+
+            save_json[obj.obj_type].push({
+                x: obj.start_x,
+                y: obj.start_y,
+                obj_id: obj.obj_id
+            });
         }
 
-        save_json[obj.obj_type].push({
-            x: obj.start_x,
-            y: obj.start_y,
-            obj_id: obj.obj_id
-        });
+        lobjects['states'][curr_state].entity_json = JSON.stringify(save_json);
     }
-
-    lobjects['states'][curr_state].entity_json = JSON.stringify(save_json);
 }
 
 $(document).keydown( function(e){
@@ -557,11 +573,13 @@ function canv_Object(x, y, image_path) {
             start_x: 0,
             start_y: 0
         })
-    }).bind("mouseleave", function() {
+    });
+    obj.bind("mouseleave", function() {
         // remove hover outline
         this.obj_outline.opacity = 0;
 
-    }).bind("mouseenter", function() {
+    });
+    obj.bind("mouseenter", function() {
         // show outline around object when mouse is hovering over it
         this.obj_outline.x = this.x;
         this.obj_outline.y = this.y;
@@ -569,7 +587,8 @@ function canv_Object(x, y, image_path) {
         this.obj_outline.height = this.height;
         this.obj_outline.opacity = 1;
 
-    }).dragAndDrop({
+    });
+    obj.dragAndDrop({
         start: function() {
             if (mouse_button != 1) return false;
         },

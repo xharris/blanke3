@@ -21,14 +21,28 @@ var isMaximized = false;
 var menu_icon = "bars";
 var screen_size = {width:0,height:0};
 
-var lobjects = {
+var blank_lobj = {
 	"objects":{},
 	"tiles":{},
 	"regions":{},
 	"sounds":{},
 	"states":{},
-	"settings":{}
+	"settings":{
+		"ide":{
+			"color": {
+				"background": "#EEEDED",
+				"grid": "#000",
+				"bounds": "#00e676",
+				"object_hover": "#00bcd4"
+			}
+		},
+		"game":{
+			"project_name": ''
+		}
+	}
 }
+var lobjects = blank_lobj;
+
 var project_path;
 var project_name;
 
@@ -87,7 +101,6 @@ var app_menu = eMenu.buildFromTemplate([
 
 $(function(){
 	getColors();
-	btn_newProject();
 
 	// set events for window close
 	eIPC.on('window-close', function(event) {
@@ -106,6 +119,8 @@ $(function(){
 		if (display.bounds.height > screen_size.height)
 			screen_size.height = display.bounds.height;
 	}
+
+	initializeCanvas(screen_size);
 
 	eMenu.setApplicationMenu(app_menu);
 
@@ -161,6 +176,8 @@ $(function(){
 		$(".filedrop-overlay").addClass("inactive");
 		return false;
 	}
+
+	btn_newProject();
 });
 
 function winSetTitle(new_title){
@@ -364,31 +381,15 @@ function btn_newProject(){
 
 function newProject(name,path){
 	// empty lobjects
-	lobjects = {
-		"objects":{},
-		"tiles":{},
-		"regions":{},
-		"sounds":{},
-		"states":{},
-		"settings":{
-			"ide":{
-				"color": {
-					"background": "#EEEDED",
-					"grid": "#000",
-					"bounds": "#00e676",
-					"object_hover": "#00bcd4"
-				}
-			},
-			"game":{
-				"project_name": name
-			}
-		}
-	}
+	lobjects = blank_lobj;
+	lobjects['settings']['game']['project_name'] = name;
+
 	// set global project variables
 	project_path = nwPATH.resolve(path,name);
 	project_name = name+'.bla';
 
-	initializeCanvas(screen_size);
+	canv_clear();
+	tree_reset();
 
 	winSetTitle(nwPATH.basename(project_name)+' - '+IDE_NAME);
 
@@ -564,4 +565,8 @@ function flashAutoSaveIcon() {
 	setTimeout(function () {
         $("#auto-save-icon").addClass("inactive");
     }, 2000);
+}
+
+function cleanImagePath(str) {
+	return decodeURI(str).replace(/\\/g,"/");
 }
